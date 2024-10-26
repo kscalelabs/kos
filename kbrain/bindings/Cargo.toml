@@ -2,12 +2,12 @@
 
 name = "bindings"
 version.workspace = true
-edition.workspace = true
 description.workspace = true
+readme.workspace = true
 authors.workspace = true
+edition.workspace = true
 repository.workspace = true
 license.workspace = true
-readme.workspace = true
 
 [lib]
 

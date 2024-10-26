@@ -1,10 +1,9 @@
 [package]
 
 name = "kbrain"
-readme = "README.md"
-version = "0.0.1"
-description = "The brain for K-Scale's humanoid robots"
-
+version.workspace = true
+description.workspace = true
+readme.workspace = true
 authors.workspace = true
 edition.workspace = true
 repository.workspace = true
