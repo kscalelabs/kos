@@ -13,5 +13,6 @@ authors = ["Wesley Maa <wesley@kscale.dev>", "Pawel Budzianowski <pawel@kscale.d
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/kscalelabs/kbrain"
+description = "The brain for K-Scale's humanoid robots"
 documentation = "https://docs.kscale.dev/software/actuators/overview"
 readme = "README.md"

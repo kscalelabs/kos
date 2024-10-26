@@ -11,6 +11,10 @@ __pycache__/
 .ruff_cache/
 .dmypy.json
 
+# Rust
+target/
+Cargo.lock
+
 # Databases
 *.db
 

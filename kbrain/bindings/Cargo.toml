@@ -27,3 +27,8 @@ serialport = "4.5.1"
 
 # Other packages in the workspace.
 kbrain = { path = "../rust" }
+
+[[bin]]
+
+name = "bindings"
+path = "src/bin.rs"
