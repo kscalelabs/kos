@@ -30,10 +30,13 @@ warn_redundant_casts = true
 incremental = true
 namespace_packages = false
 
-# Uncomment to exclude modules from Mypy.
-# [[tool.mypy.overrides]]
-# module = []
-# ignore_missing_imports = true
+[[tool.mypy.overrides]]
+
+module = [
+    "setuptools",
+    "setuptools_rust",
+]
+ignore_missing_imports = true
 
 [tool.isort]
 
@@ -70,3 +73,8 @@ combine-as-imports = true
 [tool.ruff.lint.pydocstyle]
 
 convention = "google"
+
+[build-system]
+
+requires = ["setuptools>=42", "wheel", "setuptools-rust>=1.5.2"]
+build-backend = "setuptools.build_meta"

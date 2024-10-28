@@ -1,7 +1,10 @@
 # requirements-dev.txt
 
+# Linting
 black
 darglint
 mypy
-pytest
 ruff
+
+# Testing
+pytest
