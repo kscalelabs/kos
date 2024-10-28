@@ -30,5 +30,10 @@ kscaleos = { path = "../rust" }
 
 [[bin]]
 
-name = "bindings"
-path = "src/bin.rs"
+name = "hello_world"
+path = "src/bin/hello_world.rs"
+
+[[bin]]
+
+name = "stub_gen"
+path = "src/bin/stub_gen.rs"
