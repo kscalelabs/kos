@@ -20,7 +20,7 @@ jobs:
 
     # We don't need to run on all platforms since this package is
     # platform-agnostic. The output wheel is something like
-    # "kos-<version>-py3-none-any.whl".
+    # "kscaleos-<version>-py3-none-any.whl".
     runs-on: ubuntu-latest
 
     steps:

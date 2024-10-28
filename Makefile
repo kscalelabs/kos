@@ -1,12 +1,12 @@
 # Makefile
 
 define HELP_MESSAGE
-kos
+K-Scale Operating System
 
 # Installing
 
-1. Create a new Conda environment: `conda create --name kos python=3.11`
-2. Activate the environment: `conda activate kos`
+1. Create a new Conda environment: `conda create --name kscaleos python=3.11`
+2. Activate the environment: `conda activate kscaleos`
 3. Install the package: `make install-dev`
 
 # Running Tests

@@ -1,1 +1,1 @@
-recursive-include kos/ *.py *.txt py.typed MANIFEST.in
+recursive-include kscaleos/ *.py *.txt py.typed MANIFEST.in

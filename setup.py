@@ -13,17 +13,17 @@ with open("README.md", "r", encoding="utf-8") as f:
     long_description: str = f.read()
 
 
-with open("kos/requirements.txt", "r", encoding="utf-8") as f:
+with open("kscaleos/requirements.txt", "r", encoding="utf-8") as f:
     requirements: list[str] = f.read().splitlines()
 
 
-with open("kos/requirements-dev.txt", "r", encoding="utf-8") as f:
+with open("kscaleos/requirements-dev.txt", "r", encoding="utf-8") as f:
     requirements_dev: list[str] = f.read().splitlines()
 
 
-with open("kos/__init__.py", "r", encoding="utf-8") as fh:
+with open("kscaleos/__init__.py", "r", encoding="utf-8") as fh:
     version_re = re.search(r"^__version__ = \"([^\"]*)\"", fh.read(), re.MULTILINE)
-assert version_re is not None, "Could not find version in kos/__init__.py"
+assert version_re is not None, "Could not find version in kscaleos/__init__.py"
 version: str = version_re.group(1)
 
 
@@ -36,15 +36,15 @@ class RustBuildExt(build_ext):
 
 
 setup(
-    name="kos",
+    name="kscaleos",
     version=version,
     description="The K-Scale Operating System",
     author="Benjamin Bolte",
-    url="https://github.com/kscalelabs/kos",
+    url="https://github.com/kscalelabs/kscaleos",
     rust_extensions=[
         RustExtension(
-            target="kos.bindings",
-            path="kos/bindings/Cargo.toml",
+            target="kscaleos.bindings",
+            path="kscaleos/bindings/Cargo.toml",
             binding=Binding.PyO3,
         ),
     ],
@@ -55,6 +55,6 @@ setup(
     install_requires=requirements,
     tests_require=requirements_dev,
     extras_require={"dev": requirements_dev},
-    packages=find_packages(include=["kos"]),
+    packages=find_packages(include=["kscaleos"]),
     cmdclass={"build_ext": RustBuildExt},
 )

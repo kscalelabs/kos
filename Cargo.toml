@@ -1,8 +1,8 @@
 [workspace]
 
 members = [
-    "kos/bindings",
-    "kos/rust",
+    "kscaleos/bindings",
+    "kscaleos/rust",
 ]
 resolver = "2"
 
@@ -12,7 +12,7 @@ version = "0.1.0"
 authors = ["Wesley Maa <wesley@kscale.dev>", "Pawel Budzianowski <pawel@kscale.dev>", "Benjamin Bolte <ben@kscale.dev>"]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/kscalelabs/kos"
+repository = "https://github.com/kscalelabs/kscaleos"
 description = "The K-Scale Operating System"
 documentation = "https://docs.kscale.dev/software/actuators/overview"
 readme = "README.md"
