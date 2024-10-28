@@ -1,6 +1,6 @@
 [package]
 
-name = "kos"
+name = "kscaleos"
 version.workspace = true
 description.workspace = true
 readme.workspace = true
@@ -11,10 +11,10 @@ license.workspace = true
 
 [lib]
 
-name = "kbrain"
+name = "kscaleos"
 crate-type = ["cdylib", "rlib"]
 
 [[bin]]
 
-name = "kbrain"
+name = "kscaleos"
 path = "src/bin.rs"

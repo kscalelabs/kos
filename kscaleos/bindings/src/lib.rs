@@ -1,5 +1,5 @@
-use kbrain::hello_world as kbrain_hello_world;
+use kscaleos::hello_world as kscaleos_hello_world;
 
 pub fn hello_world() {
-    kbrain_hello_world();
+    kscaleos_hello_world();
 }
