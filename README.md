@@ -1,3 +1,3 @@
-# k-brain
+# kOS
 
-Welcome to the k-brain project!
+Welcome to the K-Scale Operating System!

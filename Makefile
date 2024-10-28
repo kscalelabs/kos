@@ -1,12 +1,12 @@
 # Makefile
 
 define HELP_MESSAGE
-k-brain
+kos
 
 # Installing
 
-1. Create a new Conda environment: `conda create --name k-brain python=3.11`
-2. Activate the environment: `conda activate k-brain`
+1. Create a new Conda environment: `conda create --name kos python=3.11`
+2. Activate the environment: `conda activate kos`
 3. Install the package: `make install-dev`
 
 # Running Tests
