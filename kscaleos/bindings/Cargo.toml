@@ -20,7 +20,7 @@ pyo3 = { version = ">= 0.21.0", features = ["extension-module"] }
 pyo3-stub-gen = ">= 0.6.0"
 
 # Other packages in the workspace.
-kscaleos = { path = "../rust" }
+kscaleos = { path = "../kscaleos" }
 
 [[bin]]
 

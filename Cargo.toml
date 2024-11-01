@@ -2,7 +2,7 @@
 
 members = [
     "kscaleos/bindings",
-    "kscaleos/rust",
+    "kscaleos/kscaleos",
 ]
 resolver = "2"
 
@@ -14,5 +14,5 @@ edition = "2021"
 license = "MIT"
 repository = "https://github.com/kscalelabs/kscaleos"
 description = "The K-Scale Operating System"
-documentation = "https://docs.kscale.dev/software/actuators/overview"
+documentation = "https://docs.kscale.dev/kscaleos/intro"
 readme = "README.md"
