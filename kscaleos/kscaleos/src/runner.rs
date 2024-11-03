@@ -9,10 +9,9 @@ use std::{
 
 use crate::state::State;
 
-pub fn run(state: Arc<RwLock<State>>) {
+pub fn run(_state: Arc<RwLock<State>>) {
     loop {
-        let state = state.read().unwrap();
-        println!("Running main control loop... State: {:?}", state);
-        thread::sleep(Duration::from_millis(10));
+        println!("Running main control loop...");
+        thread::sleep(Duration::from_millis(100));
     }
 }

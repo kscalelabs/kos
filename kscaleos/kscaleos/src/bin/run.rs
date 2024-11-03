@@ -1,5 +1,5 @@
-use kscaleos::hello_world;
+use kscaleos::main as kscaleos_main;
 
 fn main() {
-    hello_world();
+    kscaleos_main();
 }

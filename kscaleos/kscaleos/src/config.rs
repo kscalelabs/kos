@@ -1,7 +1,6 @@
 use robstride::MotorType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MotorConfig {
@@ -27,11 +26,4 @@ pub struct LimbConfig {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub limbs: HashMap<Limb, LimbConfig>,
-}
-
-impl Config {
-    pub fn new(config_path: &str) -> Self {
-        let file = fs::File::open(config_path).expect("Failed to open config file");
-        serde_yaml::from_reader(file).expect("Failed to parse config YAML")
-    }
 }
