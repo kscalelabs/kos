@@ -26,9 +26,38 @@ message ActionResult {
     Error error = 3;
 }
 
-service RobotControl {
+message ActionResponse {
+    bool success = 1;
+    Error error = 2;
+}
+
+service ActuatorControl {
+    // Batch actuator commands
     rpc SetActuatorCommands(SetActuatorCommandsRequest) returns (SetActuatorCommandsResponse);
     rpc GetActuatorStates(GetActuatorStatesRequest) returns (GetActuatorStatesResponse);
+    
+    // Individual actuator commands
+    rpc ConfigureActuator(ConfigureActuatorRequest) returns (ActionResponse);
+    rpc ScanActuators(google.protobuf.Empty) returns (ScanActuatorsResponse);
+    rpc DisableActuator(DisableActuatorRequest) returns (ActionResponse);
+    rpc EnableActuator(EnableActuatorRequest) returns (ActionResponse);
+
+}
+
+service IMUService {
+    rpc GetIMUData(google.protobuf.Empty) returns (IMUDataResponse);
+    rpc CalibrateIMU(google.protobuf.Empty) returns (CalibrationResponse);
+}
+
+service SystemService {
+    rpc GetIPAddress(google.protobuf.Empty) returns (GetIPAddressResponse);
+    rpc SetWiFiCredentials(SetWiFiCredentialsRequest) returns (ActionResponse);
+    rpc GetSystemInfo(google.protobuf.Empty) returns (GetSystemInfoResponse);
+}
+
+service CalibrationService {
+    rpc GetCalibrationData(google.protobuf.Empty) returns (GetCalibrationDataResponse);
+    rpc SetCalibrationData(SetCalibrationDataRequest) returns (ActionResponse);
 }
 
 // Batch command messages
@@ -49,42 +78,79 @@ message SetActuatorCommandsResponse {
     repeated ActionResult results = 1;
 }
 
-// Batch state request messages
-message GetActuatorStatesRequest {
+message ConfigureActuatorRequest {
+    uint32 actuator_id = 1;
+    map<string, string> parameters = 2;
+}
+
+message ScanActuatorsResponse {
     repeated uint32 actuator_ids = 1;
+    Error error = 2;
 }
 
-message GetActuatorStatesResponse {
-    repeated ActuatorStateResult states = 1;
+message EnableActuatorRequest {
+    uint32 actuator_id = 1;
 }
 
-message ActuatorStateResult {
+message DisableActuatorRequest {
     uint32 actuator_id = 1;
     ActuatorState state = 2;
     Error error = 3;
 }
 
-// Control mode messages
-message PositionControl {
-    double position = 1; // Degrees
-    double speed = 2;    // Degrees/s (optional)
-    double time = 3;     // Time scaling (optional)
+// IMU Messages
+message IMUDataResponse {
+    IMUData data = 1;
+    Error error = 2;
 }
 
-message TorqueControl {
-    double torque = 1;   // Nm
-    double kp = 2;
-    double kd = 3;
-    double velocity = 4; // Desired velocity
-    double position = 5; // Desired position
+message IMUData {
+    double accel_x = 1;
+    double accel_y = 2;
+    double accel_z = 3;
+    double gyro_x = 4;
+    double gyro_y = 5;
+    double gyro_z = 6;
+    double mag_x = 7;
+    double mag_y = 8;
+    double mag_z = 9;
+    bool mag_available = 10;
 }
 
-message VelocityControl {
-    double velocity = 1; // Degrees/s
+message CalibrationResponse {
+    bool success = 1;
+    Error error = 2;
 }
 
-message ActuatorState {
-    double position = 1;
-    double velocity = 2;
-    double torque = 3;
+// System Messages
+message GetIPAddressResponse {
+    string ip_address = 1;
+    Error error = 2;
 }
+
+message SetWiFiCredentialsRequest {
+    string ssid = 1;
+    string password = 2;
+}
+
+message GetSystemInfoResponse {
+    uint64 total_ram = 1;
+    uint64 used_ram = 2;
+    uint64 total_disk = 3;
+    uint64 used_disk = 4;
+    float cpu_usage = 5;
+    float npu_usage = 6;
+    Error error = 7;
+}
+
+// Calibration Messages
+message GetCalibrationDataResponse {
+    string data = 1; // YAML data as string
+    Error error = 2;
+}
+
+message SetCalibrationDataRequest {
+    string data = 1; // YAML data as string
+}
+
+
