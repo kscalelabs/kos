@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package kscaleos.control;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/rpc/status.proto";
+
+// Common error handling
+enum ErrorCode {
+    UNKNOWN = 0;
+    NOT_IMPLEMENTED = 1;
+    INVALID_ARGUMENT = 2;
+    HARDWARE_FAILURE = 3;
+}
+
+message Error {
+    ErrorCode code = 1;
+    string message = 2;
+}
+
+// Per-actuator result message
+message ActionResult {
+    uint32 actuator_id = 1;
+    bool success = 2;
+    Error error = 3;
+}
+
+service RobotControl {
+    rpc SetActuatorCommands(SetActuatorCommandsRequest) returns (SetActuatorCommandsResponse);
+    rpc GetActuatorStates(GetActuatorStatesRequest) returns (GetActuatorStatesResponse);
+}
+
+// Batch command messages
+message SetActuatorCommandsRequest {
+    repeated ActuatorCommand commands = 1;
+}
+
+message ActuatorCommand {
+    uint32 actuator_id = 1;
+    oneof command {
+        PositionControl position_control = 2;
+        TorqueControl torque_control = 3;
+        VelocityControl velocity_control = 4;
+    }
+}
+
+message SetActuatorCommandsResponse {
+    repeated ActionResult results = 1;
+}
+
+// Batch state request messages
+message GetActuatorStatesRequest {
+    repeated uint32 actuator_ids = 1;
+}
+
+message GetActuatorStatesResponse {
+    repeated ActuatorStateResult states = 1;
+}
+
+message ActuatorStateResult {
+    uint32 actuator_id = 1;
+    ActuatorState state = 2;
+    Error error = 3;
+}
+
+// Control mode messages
+message PositionControl {
+    double position = 1; // Degrees
+    double speed = 2;    // Degrees/s (optional)
+    double time = 3;     // Time scaling (optional)
+}
+
+message TorqueControl {
+    double torque = 1;   // Nm
+    double kp = 2;
+    double kd = 3;
+    double velocity = 4; // Desired velocity
+    double position = 5; // Desired position
+}
+
+message VelocityControl {
+    double velocity = 1; // Degrees/s
+}
+
+message ActuatorState {
+    double position = 1;
+    double velocity = 2;
+    double torque = 3;
+}

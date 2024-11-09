@@ -1,0 +1,22 @@
+[workspace]
+members = [
+    "core",
+    "platforms/*",
+    "daemon",
+]
+
+[workspace.package]
+version = "0.1.1"
+authors = [
+    "Benjamin Bolte <ben@kscale.dev>",
+    "Denys Bezmenov <denys@kscale.dev>",
+    "Jingxiang Mo <jx@kscale.dev>",
+    "Pawel Budzianowski <pawel@kscale.dev>",
+    "Wesley Maa <wesley@kscale.dev>",
+]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/kscalelabs/kscaleos"
+description = "The K-Scale Operating System"
+documentation = "https://docs.kscale.dev/kscaleos/intro"
+readme = "README.md"
