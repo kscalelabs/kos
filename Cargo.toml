@@ -2,7 +2,7 @@
 
 members = [
     "kscaleos/bindings",
-    "kscaleos/kscaleos",
+    "kscaleos/kos",
 ]
 resolver = "2"
 
