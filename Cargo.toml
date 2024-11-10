@@ -1,8 +1,8 @@
 [workspace]
 
 members = [
-    "kscaleos/bindings",
-    "kscaleos/kos",
+    "kos/bindings",
+    "kos/kos",
 ]
 resolver = "2"
 
@@ -12,7 +12,7 @@ version = "0.1.0"
 authors = ["Wesley Maa <wesley@kscale.dev>", "Pawel Budzianowski <pawel@kscale.dev>", "Benjamin Bolte <ben@kscale.dev>"]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/kscalelabs/kscaleos"
+repository = "https://github.com/kscalelabs/kos"
 description = "The K-Scale Operating System"
-documentation = "https://docs.kscale.dev/kscaleos/intro"
+documentation = "https://docs.kscale.dev/kos/intro"
 readme = "README.md"
