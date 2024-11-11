@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package kos.processmanager;
+
+import "google/protobuf/empty.proto";
+import "kos/common.proto";
+
+option go_package = "kos/processmanager;processmanager";
+option java_package = "com.kos.processmanager";
+option csharp_namespace = "KOS.ProcessManager";
+
+// The ProcessManagerService manages processes like video streaming.
+service ProcessManagerService {
+    // Starts video streaming.
+    rpc StartVideoStreaming(google.protobuf.Empty) returns (kos.common.ActionResponse);
+
+    // Stops video streaming.
+    rpc StopVideoStreaming(google.protobuf.Empty) returns (kos.common.ActionResponse);
+}

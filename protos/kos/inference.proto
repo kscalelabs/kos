@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package kos.inference;
+
+import "google/protobuf/empty.proto";
+import "kos/common.proto";
+
+option go_package = "kos/inference;inference";
+option java_package = "com.kos.inference";
+option csharp_namespace = "KOS.Inference";
+
+// The InferenceService allows uploading models and running inference.
+service InferenceService {
+    // Uploads a model to the robot.
+    rpc UploadModel(UploadModelRequest) returns (UploadModelResponse);
+
+    // Runs inference using a specified model.
+    rpc Forward(ForwardRequest) returns (ForwardResponse);
+}
+
+// Request message for uploading a model.
+message UploadModelRequest {
+    bytes model = 1; // Model binary data
+}
+
+// Response message containing the uploaded model's UID.
+message UploadModelResponse {
+    string model_uid = 1;           // Unique identifier for the model
+    kos.common.Error error = 2; // Error details if upload failed
+}
+
+// Request message for running inference.
+message ForwardRequest {
+    string model_uid = 1;        // Model UID to use for inference
+    repeated float inputs = 2;   // Input data for the model
+}
+
+// Response message containing inference results.
+message ForwardResponse {
+    repeated float outputs = 1;        // Output data from the model
+    kos.common.Error error = 2;   // Error details if inference failed
+}

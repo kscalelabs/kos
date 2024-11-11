@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package kos.actuator;
+
+import "google/protobuf/empty.proto";
+import "google/longrunning/operations.proto";
+import "kos/common.proto";
+
+option go_package = "kos/actuator;actuator";
+option java_package = "com.kos.actuator";
+option csharp_namespace = "KOS.Actuator";
+
+// The ActuatorService provides methods to control and monitor actuators.
+service ActuatorService {
+    // Commands multiple actuators at once.
+    rpc CommandActuators(CommandActuatorsRequest) returns (CommandActuatorsResponse);
+
+    // Configures an actuator's parameters.
+    rpc ConfigureActuator(ConfigureActuatorRequest) returns (kos.common.ActionResponse);
+
+    // Calibrates an actuator (long-running operation).
+    rpc CalibrateActuator(CalibrateActuatorRequest) returns (google.longrunning.Operation) {
+        option (google.longrunning.operation_info) = {
+            response_type: "CalibrateActuatorResponse"
+            metadata_type: "CalibrateActuatorMetadata"
+        };
+    }
+
+    // Retrieves the state of multiple actuators.
+    rpc GetActuatorsState(GetActuatorsStateRequest) returns (GetActuatorsStateResponse);
+}
+
+// Message representing a command to an actuator.
+message ActuatorCommand {
+    uint32 actuator_id = 1; // Actuator ID
+    double position = 2;    // Desired position in degrees
+    double velocity = 3;    // Desired velocity in degrees/second
+    double torque = 4;      // Desired torque in Nm
+}
+
+// Request message for CommandActuators.
+message CommandActuatorsRequest {
+    repeated ActuatorCommand commands = 1; // List of actuator commands
+}
+
+// Response message for CommandActuators.
+message CommandActuatorsResponse {
+    repeated kos.common.ActionResult results = 1; // Results per actuator
+}
+
+// Request message for ConfigureActuator.
+message ConfigureActuatorRequest {
+    uint32 actuator_id = 1;    // Actuator ID
+    double kp = 2;             // Proportional gain
+    double kd = 3;             // Derivative gain
+    double ki = 4;             // Integral gain
+    double max_torque = 5;     // Max torque (%)
+    double protective_torque = 6; // Protective torque (%)
+    float protection_time = 7; // Protection time in seconds
+    bool torque_enabled = 8;   // Torque enabled flag
+}
+
+// Request message for CalibrateActuator.
+message CalibrateActuatorRequest {
+    uint32 actuator_id = 1;       // Actuator ID
+    double calibration_speed = 2; // Calibration speed in degrees/second
+    float threshold_current = 3;  // Threshold current in amperes
+}
+
+// Response message for CalibrateActuator operation.
+message CalibrateActuatorResponse {
+    uint32 actuator_id = 1;    // Actuator ID
+    kos.common.Error error = 2; // Error details if calibration failed
+}
+
+// Metadata for CalibrateActuator operation.
+message CalibrateActuatorMetadata {
+    uint32 actuator_id = 1; // Actuator ID
+    string status = 2;      // Status ("IN_PROGRESS", "SUCCEEDED", "FAILED")
+}
+
+// Request message for GetActuatorsState.
+message GetActuatorsStateRequest {
+    repeated uint32 actuator_ids = 1; // Actuator IDs to query
+}
+
+// Response message containing actuator states.
+message GetActuatorsStateResponse {
+    repeated ActuatorStateResponse states = 1; // List of actuator states
+}
+
+// State information for a single actuator.
+message ActuatorStateResponse {
+    uint32 actuator_id = 1; // Actuator ID
+    bool online = 2;        // Online status
+    double position = 3;    // Position in degrees
+    double velocity = 4;    // Velocity in degrees/second
+    double torque = 5;      // Torque in Nm
+    double temperature = 6; // Temperature in Celsius
+    float voltage = 7;      // Voltage in volts
+    float current = 8;      // Current in amperes
+}
