@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use eyre::Result;
-use std::collections::HashMap;
+use crate::grpc_interface::kos::*;
 
 #[async_trait]
 pub trait Actuator: Send + Sync {
