@@ -8,15 +8,13 @@ core = { path = "../core" }
 kscale_micro = { path = "../platforms/kscale_micro", optional = true }
 kscale_pro = { path = "../platforms/kscale_pro", optional = true }
 
+tokio = { version = "1", features = ["full"] }
+tonic = { version = "0.12", features = ["transport"] }
+
 # Also can add external platforms here?
 # e.g. third_party_platform = { git = "https://github.com/thirdparty/platform", optional = true }
 
-# Common dependencies
-[dependencies]
-tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.6", features = ["transport"] }
-
 [features]
-kscale_micro = ["kscale_micro"]
-kscale_pro = ["kscale_pro"]
+kscale_micro = ["dep:kscale_micro"]
+kscale_pro = ["dep:kscale_pro"]
 default = []
