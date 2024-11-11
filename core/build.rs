@@ -22,8 +22,7 @@ fn main() {
     let includes = [proto_root, &format!("{}/googleapis", proto_root)];
 
     // Create the output directory
-    std::fs::create_dir_all(out_dir.join("kos"))
-        .expect("Failed to create output directory");
+    std::fs::create_dir_all(out_dir.join("kos")).expect("Failed to create output directory");
 
     // Configure and compile Protobuf files
     tonic_build::configure()

@@ -1,13 +1,16 @@
+use crate::grpc_interface::kos::*;
 use async_trait::async_trait;
 use eyre::Result;
-use crate::grpc_interface::kos::*;
 
 #[async_trait]
 pub trait Actuator: Send + Sync {
     async fn command_actuators(&self, commands: Vec<ActuatorCommand>) -> Result<Vec<ActionResult>>;
     async fn configure_actuator(&self, config: ConfigureActuatorRequest) -> Result<()>;
     async fn calibrate_actuator(&self, request: CalibrateActuatorRequest) -> Result<()>;
-    async fn get_actuators_state(&self, actuator_ids: Vec<u32>) -> Result<Vec<ActuatorStateResponse>>;
+    async fn get_actuators_state(
+        &self,
+        actuator_ids: Vec<u32>,
+    ) -> Result<Vec<ActuatorStateResponse>>;
 }
 
 #[async_trait]

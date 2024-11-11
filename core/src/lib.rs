@@ -1,8 +1,12 @@
+#![allow(unknown_lints)]
+#![allow(clippy::doc_lazy_continuation)]
+
 pub mod config;
-pub mod telemetry;
-pub mod process_manager;
 pub mod grpc_interface;
 pub mod hal;
+pub mod process_manager;
+pub mod telemetry;
+
 #[cfg(test)]
 mod tests {
     use super::*;
