@@ -55,12 +55,12 @@ message SetWiFiCredentialsRequest {
 
 // Response message containing system information.
 message GetSystemInfoResponse {
-    uint64 total_ram = 1;        // Total RAM in bytes
-    uint64 used_ram = 2;         // Used RAM in bytes
-    uint64 total_disk = 3;       // Total disk space in bytes
-    uint64 used_disk = 4;        // Used disk space in bytes
-    float cpu_usage = 5;         // CPU usage percentage
-    float npu_usage = 6;         // NPU usage percentage
+    optional uint64 total_ram = 1;        // Total RAM in bytes
+    optional uint64 used_ram = 2;         // Used RAM in bytes
+    optional uint64 total_disk = 3;       // Total disk space in bytes
+    optional uint64 used_disk = 4;        // Used disk space in bytes
+    optional float cpu_usage = 5;         // CPU usage percentage
+    optional float npu_usage = 6;         // NPU usage percentage
     kos.common.Error error = 7; // Error details if any
 }
 

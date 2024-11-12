@@ -2,10 +2,14 @@
 #![allow(clippy::doc_lazy_continuation)]
 
 pub mod config;
-pub mod grpc_interface;
+mod grpc_interface;
 pub mod hal;
 pub mod process_manager;
+pub mod services;
 pub mod telemetry;
+
+pub use grpc_interface::google as google_proto;
+pub use grpc_interface::kos as kos_proto;
 
 #[cfg(test)]
 mod tests {
