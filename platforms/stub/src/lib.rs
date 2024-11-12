@@ -32,10 +32,12 @@ impl Platform for StubPlatform {
     }
 
     fn initialize(&mut self) -> eyre::Result<()> {
+        // Hardware initialization and background threads go here
         Ok(())
     }
 
     fn get_services(&self) -> Vec<ServiceEnum> {
+        // Add available services here
         vec![
             ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(
                 StubIMU::new(),
@@ -47,6 +49,7 @@ impl Platform for StubPlatform {
     }
 
     fn shutdown(&mut self) -> eyre::Result<()> {
+        // Shutdown and cleanup code goes here
         Ok(())
     }
 }
