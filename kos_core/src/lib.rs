@@ -11,6 +11,35 @@ pub mod telemetry;
 pub use grpc_interface::google as google_proto;
 pub use grpc_interface::kos as kos_proto;
 
+use hal::actuator_service_server::ActuatorServiceServer;
+use hal::imu_service_server::ImuServiceServer;
+use services::{ActuatorServiceImpl, IMUServiceImpl};
+use std::fmt::Debug;
+
+impl Debug for ActuatorServiceImpl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ActuatorServiceImpl")
+    }
+}
+impl Debug for IMUServiceImpl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "IMUServiceImpl")
+    }
+}
+
+#[derive(Debug)]
+pub enum ServiceEnum {
+    Actuator(ActuatorServiceServer<ActuatorServiceImpl>),
+    Imu(ImuServiceServer<IMUServiceImpl>),
+}
+
+pub trait Platform {
+    fn name(&self) -> &'static str;
+    fn initialize(&mut self) -> eyre::Result<()>;
+    fn get_services(&self) -> Vec<ServiceEnum>;
+    fn shutdown(&mut self) -> eyre::Result<()>;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

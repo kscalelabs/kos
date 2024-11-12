@@ -8,8 +8,11 @@ use eyre::Result;
 #[async_trait]
 pub trait Actuator: Send + Sync {
     async fn command_actuators(&self, commands: Vec<ActuatorCommand>) -> Result<Vec<ActionResult>>;
-    async fn configure_actuator(&self, config: ConfigureActuatorRequest) -> Result<()>;
-    async fn calibrate_actuator(&self, request: CalibrateActuatorRequest) -> Result<()>;
+    async fn configure_actuator(&self, config: ConfigureActuatorRequest) -> Result<ActionResponse>;
+    async fn calibrate_actuator(
+        &self,
+        request: CalibrateActuatorRequest,
+    ) -> Result<CalibrateActuatorResponse>;
     async fn get_actuators_state(
         &self,
         actuator_ids: Vec<u32>,

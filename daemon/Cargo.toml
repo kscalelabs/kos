@@ -13,6 +13,12 @@ stub = { path = "../platforms/stub", optional = true }
 tokio = { version = "1", features = ["full"] }
 tonic = { version = "0.12", features = ["transport"] }
 eyre = "0.6"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tower = "0.5"
+tower-http = {version = "0.6", features = ["cors"]}
+tonic-web = "0.12"
+
 
 # Also can add external platforms here?
 # e.g. third_party_platform = { git = "https://github.com/thirdparty/platform", optional = true }

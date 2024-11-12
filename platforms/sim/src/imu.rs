@@ -14,6 +14,12 @@ impl SimIMU {
     }
 }
 
+impl Default for SimIMU {
+    fn default() -> Self {
+        SimIMU::new()
+    }
+}
+
 #[async_trait]
 impl IMU for SimIMU {
     async fn get_values(&self) -> Result<ImuValuesResponse> {

@@ -14,6 +14,12 @@ impl StubIMU {
     }
 }
 
+impl Default for StubIMU {
+    fn default() -> Self {
+        StubIMU::new()
+    }
+}
+
 #[async_trait]
 impl IMU for StubIMU {
     async fn get_values(&self) -> Result<ImuValuesResponse> {

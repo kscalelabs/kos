@@ -1,7 +1,7 @@
 use crate::grpc_interface::google::longrunning::Operation;
 use crate::hal::IMU;
 use crate::kos_proto::common::ActionResponse;
-use crate::kos_proto::imu::imu_service_server::{ImuService, ImuServiceServer};
+use crate::kos_proto::imu::imu_service_server::ImuService;
 use crate::kos_proto::imu::*;
 use eyre::OptionExt;
 use std::sync::Arc;
