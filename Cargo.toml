@@ -18,7 +18,7 @@ authors = [
 ]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/kscalelabs/kscaleos"
+repository = "https://github.com/kscalelabs/kos"
 description = "The K-Scale Operating System"
-documentation = "https://docs.kscale.dev/kscaleos/intro"
+documentation = "https://docs.kscale.dev/os/intro"
 readme = "README.md"
