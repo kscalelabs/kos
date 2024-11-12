@@ -1,0 +1,3 @@
+grpcio
+protobuf==5.27.2
+googleapis-common-protos

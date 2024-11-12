@@ -5,8 +5,8 @@ K-Scale Operating System
 
 # Installing
 
-1. Create a new Conda environment: `conda create --name kscaleos python=3.11`
-2. Activate the environment: `conda activate kscaleos`
+1. Create a new Conda environment: `conda create --name pykos python=3.11`
+2. Activate the environment: `conda activate pykos`
 3. Install the package: `make install-dev`
 
 # Running Tests
@@ -21,6 +21,23 @@ export HELP_MESSAGE
 all:
 	@echo "$$HELP_MESSAGE"
 .PHONY: all
+
+# ------------------------ #
+#    Protobuf Generation   #
+# ------------------------ #
+
+generate-proto:
+	python -m grpc_tools.protoc --python_out=. --grpc_python_out=. --proto_path=../proto --proto_path=../proto/googleapis ../proto/kos/*
+.PHONY: generate-proto
+
+
+# ------------------------ #
+#          Build           #
+# ------------------------ #
+
+install-dev:
+	@pip install --verbose -e '.[dev]'
+.PHONY: install-dev
 
 # ------------------------ #
 #        PyPI Build        #
