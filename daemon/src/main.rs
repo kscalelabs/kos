@@ -4,7 +4,6 @@
 
 use eyre::Result;
 use kos_core::google_proto::longrunning::operations_server::OperationsServer;
-use kos_core::hal::Operation;
 use kos_core::services::OperationsServiceImpl;
 use kos_core::Platform;
 use kos_core::ServiceEnum;
@@ -34,15 +33,14 @@ fn add_service_to_router(
 
 async fn run_server(
     platform: &(dyn Platform + Send + Sync),
-    operations_store: Arc<Mutex<HashMap<String, Operation>>>,
+    operations_service: Arc<OperationsServiceImpl>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
     let mut server_builder = Server::builder();
 
-    let services = platform.create_services(operations_store.clone());
+    let services = platform.create_services(operations_service.clone());
 
-    let operations_service =
-        OperationsServer::new(OperationsServiceImpl::new(operations_store.clone()));
+    let operations_service = OperationsServer::new(operations_service);
 
     let mut router = server_builder.add_service(operations_service);
 
@@ -51,44 +49,34 @@ async fn run_server(
         router = add_service_to_router(router, service);
     }
 
+    info!("Serving on {}", addr);
     // Serve the accumulated router
     router.serve(addr).await?;
     Ok(())
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<()> {
     // logging
     tracing_subscriber::fmt()
         .with_env_filter(
             EnvFilter::from_default_env()
                 .add_directive("h2=error".parse().unwrap())
-                .add_directive("grpc=error".parse().unwrap())
+                .add_directive("grpc=error".parse().unwrap()),
         )
         .init();
 
-
-    // long runningoperations store
     let operations_store = Arc::new(Mutex::new(HashMap::new()));
+    let operations_service = Arc::new(OperationsServiceImpl::new(operations_store));
 
-    // initialize platform
-    let platform: Arc<Mutex<dyn Platform + Send + Sync>> =
-        Arc::new(Mutex::new(PlatformImpl::new()));
-    {
-        let mut platform = platform.lock().await;
-        info!("Initializing platform {}", platform.name());
-        platform.initialize(operations_store.clone())?;
+    let mut platform = PlatformImpl::new();
+
+    platform.initialize(operations_service.clone())?;
+
+    if let Err(e) = run_server(&platform, operations_service).await {
+        error!("Server error: {:?}", e);
+        std::process::exit(1);
     }
-
-    // run server
-    let platform_clone = platform.clone();
-    tokio::spawn(async move {
-        let platform = platform_clone.lock().await;
-        if let Err(e) = run_server(&*platform, operations_store).await {
-            error!("Failed to run server: {:?}", e);
-        }
-    })
-    .await?;
 
     Ok(())
 }

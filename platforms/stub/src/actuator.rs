@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use eyre::Result;
 use kos_core::google_proto::longrunning::Operation;
+use kos_core::services::OperationsServiceImpl;
 use kos_core::{
     hal::{
         ActionResponse, Actuator, ActuatorCommand, CalibrateActuatorMetadata,
@@ -8,51 +9,62 @@ use kos_core::{
     },
     kos_proto::{actuator::*, common::ActionResult},
 };
-use prost::Message;
-use prost_types::Any;
-use std::collections::HashMap;
+use std::sync::mpsc::{channel, Sender};
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use tokio::time::{sleep, Duration};
+use std::thread;
+use tokio::runtime::Runtime;
+use tokio::time::Duration;
 use tracing::debug;
+
 pub struct StubActuator {
-    operations_store: Arc<Mutex<HashMap<String, Operation>>>,
+    operations: Arc<OperationsServiceImpl>,
+    calibration_tx: Sender<u32>,
 }
 
 impl StubActuator {
-    pub fn new(operations_store: Arc<Mutex<HashMap<String, Operation>>>) -> Self {
-        StubActuator { operations_store }
-    }
+    pub fn new(operations: Arc<OperationsServiceImpl>) -> Self {
+        let (tx, rx) = channel::<u32>();
 
-    pub fn start_supervisor_task(operations_store: Arc<Mutex<HashMap<String, Operation>>>) {
-        tokio::spawn(async move {
+        // Spawn the calibration thread
+        let operations_clone = operations.clone();
+        thread::spawn(move || {
+            // Create a new runtime for this thread
+            let rt = Runtime::new().expect("Failed to create runtime");
+
             loop {
-                sleep(Duration::from_secs(15)).await;
-                let mut store = operations_store.lock().await;
-                debug!("Checking operations store for calibration status, {:?}", store);
-                for operation in store.values_mut() {
-                    if let Some(metadata) = &mut operation.metadata {
-                        if metadata.type_url == "type.googleapis.com/kos.actuator.CalibrateActuatorMetadata" {
-                            // Decode the existing metadata
-                            let mut decoded_metadata = CalibrateActuatorMetadata::decode(&metadata.value[..]).unwrap();
-                            
-                            // Update the status to calibrated
-                            decoded_metadata.status = CalibrationStatus::Calibrated.to_string();
-                            
-                            // Re-encode the updated metadata
-                            let mut buf = Vec::new();
-                            decoded_metadata.encode(&mut buf).unwrap();
-                            
-                            // Update the operation's metadata with the new encoded value
-                            metadata.value = buf;
-                            
-                            // Mark the operation as done
-                            operation.done = true;
-                        }
+                // Wait for actuator IDs to calibrate
+                if let Ok(actuator_id) = rx.recv() {
+                    let ops = operations_clone.clone();
+                    debug!("Calibrating actuator ID: {}", actuator_id);
+
+                    // Sleep for 15 seconds to simulate calibration
+                    thread::sleep(Duration::from_secs(15));
+                    debug!("Calibrated actuator ID: {}", actuator_id);
+
+                    // Update the operation status
+                    let operation_name = format!("operations/calibrate_actuator/{:?}", actuator_id);
+                    debug!("Updating operation status for: {}", operation_name);
+
+                    let metadata = CalibrateActuatorMetadata {
+                        actuator_id,
+                        status: CalibrationStatus::Calibrated.to_string(),
+                    };
+
+                    if let Err(e) =
+                        rt.block_on(ops.update_metadata(&operation_name, metadata, true))
+                    {
+                        debug!("Failed to update calibration status: {}", e);
                     }
+
+                    debug!("Updated operation status for: {}", operation_name);
                 }
             }
         });
+
+        StubActuator {
+            operations,
+            calibration_tx: tx,
+        }
     }
 }
 
@@ -81,23 +93,21 @@ impl Actuator for StubActuator {
             status: CalibrationStatus::Calibrating.to_string(),
         };
 
-        let mut buf = Vec::new();
-        metadata.encode(&mut buf).unwrap();
-
-        let operation = Operation {
-            name: format!("operations/calibrate_actuator/{:?}", request.actuator_id),
-            metadata: Some(Any {
-                type_url: "type.googleapis.com/kos.actuator.CalibrateActuatorMetadata".to_string(),
-                value: buf,
-            }),
-            done: false,
-            result: None,
-        };
-
-        self.operations_store
-            .lock()
+        let name = format!("operations/calibrate_actuator/{:?}", request.actuator_id);
+        let operation = self
+            .operations
+            .create(
+                name,
+                metadata,
+                "type.googleapis.com/kos.actuator.CalibrateActuatorMetadata",
+            )
             .await
-            .insert(operation.name.clone(), operation.clone());
+            .map_err(|e| eyre::eyre!("Failed to create operation: {}", e))?;
+
+        // Send actuator ID to calibration thread
+        self.calibration_tx
+            .send(request.actuator_id)
+            .map_err(|e| eyre::eyre!("Failed to start calibration: {}", e))?;
 
         Ok(operation)
     }

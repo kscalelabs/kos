@@ -10,10 +10,8 @@ use kos_core::kos_proto::{
     imu::imu_service_server::ImuServiceServer,
 };
 use kos_core::services::{ActuatorServiceImpl, IMUServiceImpl};
-use kos_core::{Platform, ServiceEnum};
-use std::collections::HashMap;
+use kos_core::{services::OperationsServiceImpl, Platform, ServiceEnum};
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 pub struct StubPlatform {}
 
@@ -34,23 +32,19 @@ impl Platform for StubPlatform {
         "Stub"
     }
 
-    fn initialize(&mut self, operations_store: Arc<Mutex<HashMap<String, Operation>>>) -> eyre::Result<()> {
-        // Start the supervisor task
-        StubActuator::start_supervisor_task(operations_store.clone());
+    fn initialize(&mut self, _operations_service: Arc<OperationsServiceImpl>) -> eyre::Result<()> {
+        // Initialize the platform
         Ok(())
     }
 
-    fn create_services(
-        &self,
-        operations_store: Arc<Mutex<HashMap<String, Operation>>>,
-    ) -> Vec<ServiceEnum> {
+    fn create_services(&self, operations_service: Arc<OperationsServiceImpl>) -> Vec<ServiceEnum> {
         // Add available services here
         vec![
             ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(
-                StubIMU::new(operations_store.clone()),
+                StubIMU::new(operations_service.clone()),
             )))),
             ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
-                Arc::new(StubActuator::new(operations_store.clone())),
+                Arc::new(StubActuator::new(operations_service.clone())),
             ))),
         ]
     }

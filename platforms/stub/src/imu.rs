@@ -1,24 +1,25 @@
 use crate::Operation;
 use async_trait::async_trait;
 use eyre::Result;
+use kos_core::services::OperationsServiceImpl;
 use kos_core::{
-    hal::{EulerAnglesResponse, ImuValuesResponse, QuaternionResponse, IMU},
+    hal::{
+        CalibrateImuMetadata, CalibrationStatus, EulerAnglesResponse, ImuValuesResponse,
+        QuaternionResponse, IMU,
+    },
     kos_proto::common::ActionResponse,
 };
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::Mutex;
 use uuid::Uuid;
 
-use std::collections::HashMap;
-
 pub struct StubIMU {
-    operations_store: Arc<Mutex<HashMap<String, Operation>>>,
+    operations_service: Arc<OperationsServiceImpl>,
 }
 
 impl StubIMU {
-    pub fn new(operations_store: Arc<Mutex<HashMap<String, Operation>>>) -> Self {
-        StubIMU { operations_store }
+    pub fn new(operations_service: Arc<OperationsServiceImpl>) -> Self {
+        StubIMU { operations_service }
     }
 }
 
@@ -52,10 +53,18 @@ impl IMU for StubIMU {
             done: false,
             result: None,
         };
-        {
-            let mut store = self.operations_store.lock().await;
-            store.insert(operation.name.clone(), operation.clone());
-        }
+        let metadata = CalibrateImuMetadata {
+            status: CalibrationStatus::Calibrating.to_string(),
+        };
+        let operation = self
+            .operations_service
+            .create(
+                operation.name,
+                metadata,
+                "type.googleapis.com/kos.imu.CalibrateIMUMetadata",
+            )
+            .await?;
+
         Ok(operation)
     }
 
