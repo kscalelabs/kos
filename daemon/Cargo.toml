@@ -1,11 +1,17 @@
 [package]
-name = "daemon"
-version = "0.1.0"
-edition = "2021"
+name = "kos"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description.workspace = true
+documentation.workspace = true
+readme.workspace = true
 
 [dependencies]
-kos_core = { path = "../kos_core" }
-kscale_micro = { path = "../platforms/kscale_micro", optional = true }
+kos_core = { version = "0.1.1", path = "../kos_core" }
+kscale_micro = { version = "0.1.0", path = "../platforms/kscale_micro", optional = true }
 tokio = { version = "1", features = ["full"] }
 tonic = { version = "0.12", features = ["transport"] }
 eyre = "0.6"
@@ -13,14 +19,11 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tower = "0.5"
 
-sim = { path = "../platforms/sim", optional = true }
-stub = { path = "../platforms/stub", optional = true }
+sim = { version = "0.1.0", path = "../platforms/sim", optional = true }
+stub = { version = "0.1.0", path = "../platforms/stub", optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-kscale_pro = { path = "../platforms/kscale_pro", optional = true }
-
-# Also can add external platforms here?
-# e.g. third_party_platform = { git = "https://github.com/thirdparty/platform", optional = true }
+kscale_pro = { version = "0.1.0", path = "../platforms/kscale_pro", optional = true }
 
 [features]
 kscale_micro = ["dep:kscale_micro"]
@@ -28,3 +31,7 @@ kscale_pro = ["dep:kscale_pro"]
 sim = ["dep:sim"]
 stub = ["dep:stub"]
 default = ["stub"]
+
+[[bin]]
+name = "kos"
+path = "src/main.rs"
