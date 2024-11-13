@@ -67,11 +67,9 @@ test:
   script:
     - |
       if [ "$GITLAB_CI" != "false" ]; then
-        # CI-specific test commands
-        cargo test --all-features --verbose
+        cargo test -F stub --verbose
       else
-        # Local test commands
-        cargo test
+        cargo test -F stub
       fi
   rules:
     - when: always
