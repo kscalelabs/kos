@@ -28,6 +28,7 @@ fn main() {
     tonic_build::configure()
         .build_server(true)
         .out_dir(out_dir.join("kos"))
+        .protoc_arg("--experimental_allow_proto3_optional")
         .compile_protos(&protos, &includes)
         .expect("Failed to compile protos");
 
