@@ -1,10 +1,10 @@
-image: kos-builder:latest
-
 variables:
   CARGO_HOME: $CI_PROJECT_DIR/.cargo
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
   TOOLCHAIN_IMAGE: $CI_REGISTRY_IMAGE/toolchain
+
+image: $TOOLCHAIN_IMAGE:latest
 
 # Cache dependencies between builds
 cache:
