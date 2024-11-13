@@ -10,6 +10,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .dmypy.json
+venv/
 
 # python protobuf
 pykos/kos/
@@ -21,6 +22,9 @@ Cargo.lock
 
 # Databases
 *.db
+
+# Gitlab
+.gitlab-ci-local/
 
 # Build artifacts
 build/

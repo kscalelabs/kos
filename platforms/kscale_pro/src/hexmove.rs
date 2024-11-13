@@ -2,7 +2,7 @@
 use kos_core::{
     hal::{
         CalibrateImuMetadata, CalibrationStatus, EulerAnglesResponse, ImuValuesResponse,
-        QuaternionResponse, IMU,
+        QuaternionResponse, IMU, Operation,
     },
     kos_proto::common::ActionResponse,
 };

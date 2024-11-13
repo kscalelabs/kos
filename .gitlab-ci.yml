@@ -1,0 +1,75 @@
+image: kos-builder:latest
+
+variables:
+  CARGO_HOME: $CI_PROJECT_DIR/.cargo
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+# Cache dependencies between builds
+cache:
+  paths:
+    - .cargo
+    - target/
+
+# Define stages
+stages:
+  - check
+  - test
+  - build
+
+# Check formatting and run clippy on all branches
+format:
+  stage: check
+  script:
+    - cargo fmt -- --check
+  rules:
+    - when: always
+
+clippy:
+  stage: check
+  script:
+    - cargo clippy -- -D warnings
+  rules:
+    - when: always
+
+# Test all features
+test:
+  stage: test
+  script:
+    - |
+      if [ "$GITLAB_CI" != "false" ]; then
+        # CI-specific test commands
+        cargo test --all-features --verbose
+      else
+        # Local test commands
+        cargo test
+      fi
+  rules:
+    - when: always
+
+# Build binaries only on tags/releases
+.build_template: &build_definition
+  stage: build
+  variables:
+    CROSS_REMOTE: 1
+  script:
+    - cross build --release --target $TARGET --features $FEATURES --no-default-features
+  artifacts:
+    paths:
+      - target/$TARGET/release/daemon
+  rules:
+    - if: $CI_COMMIT_TAG
+
+# Linux x86_64
+build-linux-x86_64-stub-release:
+  <<: *build_definition
+  variables:
+    TARGET: x86_64-unknown-linux-gnu
+    FEATURES: stub
+
+# Linux aarch64
+build-linux-aarch64-stub-release:
+  <<: *build_definition
+  variables:
+    TARGET: aarch64-unknown-linux-gnu
+    FEATURES: stub
