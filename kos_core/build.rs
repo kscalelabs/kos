@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 fn main() {
     // Path to the Protobuf files
-    let proto_root = "../proto";
+    let proto_root = "proto";
 
     // Where to output the compiled Rust files
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
