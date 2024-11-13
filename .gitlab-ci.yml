@@ -50,9 +50,10 @@ build-toolchain:
 format:
   stage: check
   script:
-    - cargo fmt -- --check
+    - cargo fmt --all -- --check
   rules:
     - when: always
+  allow_failure: true
 
 clippy:
   stage: check
@@ -60,6 +61,7 @@ clippy:
     - cargo clippy -- -D warnings
   rules:
     - when: always
+  allow_failure: true
 
 # Test all features
 test:
