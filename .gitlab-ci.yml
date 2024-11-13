@@ -4,6 +4,7 @@ variables:
   CARGO_HOME: $CI_PROJECT_DIR/.cargo
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  TOOLCHAIN_IMAGE: $CI_REGISTRY_IMAGE/toolchain:latest
 
 # Cache dependencies between builds
 cache:
@@ -13,9 +14,36 @@ cache:
 
 # Define stages
 stages:
+  - build-toolchain
   - check
   - test
   - build
+
+.runner: &runner
+  tags:
+    - linux-x64
+
+build-toolchain:
+  <<: *runner
+  stage: build-toolchain
+  image: docker:latest
+  
+  script:
+    - |
+      if [ "$GITLAB_CI" != "false" ]; then
+        echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+        docker pull $TOOLCHAIN_IMAGE:latest || true
+      fi
+    - docker build --progress=plain --cache-from $TOOLCHAIN_IMAGE:latest -t $TOOLCHAIN_IMAGE:latest -f toolchain/Dockerfile .
+    - |
+      if [ "$GITLAB_CI" != "false" ]; then
+        docker push $TOOLCHAIN_IMAGE:latest
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - toolchain/**/*
+        - .gitlab-ci.yml
 
 # Check formatting and run clippy on all branches
 format:
