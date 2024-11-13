@@ -4,3 +4,10 @@ pre-build = [
     "apt-get update",
     "apt-get install -y protobuf-compiler gcc-aarch64-linux-gnu g++-aarch64-linux-gnu build-essential"
 ]
+
+[target.x86_64-unknown-linux-gnu]
+image = "ubuntu:24.04"
+pre-build = [
+    "apt-get update",
+    "apt-get install -y protobuf-compiler build-essential"
+]
