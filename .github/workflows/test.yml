@@ -25,10 +25,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
+      - name: Change directory
+        run: cd pykos
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.8"
 
       - name: Restore cache
         id: restore-cache

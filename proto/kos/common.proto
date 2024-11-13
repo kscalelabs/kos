@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package kos.common;
+
+option go_package = "kos/common;common";
+option java_package = "com.kos.common";
+option csharp_namespace = "KOS.Common";
+
+// Common error codes
+enum ErrorCode {
+    UNKNOWN = 0;
+    NOT_IMPLEMENTED = 1;
+    INVALID_ARGUMENT = 2;
+    HARDWARE_FAILURE = 3;
+    TIMEOUT = 4;
+    UNAUTHORIZED = 5;
+}
+
+// Common error message
+message Error {
+    ErrorCode code = 1;     // Error code
+    string message = 2;     // Error message
+}
+
+// Common action response
+message ActionResponse {
+    bool success = 1;       // Indicates if the action was successful
+    Error error = 2;        // Error details if the action failed
+}
+
+// Common result for per-actuator actions
+message ActionResult {
+    uint32 actuator_id = 1; // Actuator ID
+    bool success = 2;       // Indicates if the action was successful
+    Error error = 3;        // Error details if the action failed
+}

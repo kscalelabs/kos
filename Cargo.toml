@@ -1,18 +1,27 @@
 [workspace]
-
-members = [
-    "kos/bindings",
-    "kos/kos",
-]
 resolver = "2"
 
-[workspace.package]
+members = [
+    "kos_core",
+    "daemon",
+]
 
-version = "0.1.0"
-authors = ["Wesley Maa <wesley@kscale.dev>", "Pawel Budzianowski <pawel@kscale.dev>", "Benjamin Bolte <ben@kscale.dev>"]
+exclude = [
+    "platforms",
+]
+
+[workspace.package]
+version = "0.1.1"
+authors = [
+    "Benjamin Bolte <ben@kscale.dev>",
+    "Denys Bezmenov <denys@kscale.dev>",
+    "Jingxiang Mo <jx@kscale.dev>",
+    "Pawel Budzianowski <pawel@kscale.dev>",
+    "Wesley Maa <wesley@kscale.dev>",
+]
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/kscalelabs/kos"
 description = "The K-Scale Operating System"
-documentation = "https://docs.kscale.dev/kos/intro"
+documentation = "https://docs.kscale.dev/os/intro"
 readme = "README.md"

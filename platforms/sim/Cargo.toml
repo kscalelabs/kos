@@ -1,0 +1,9 @@
+[package]
+name = "sim"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+kos_core = { path = "../../kos_core" }
+async-trait = "0.1"
+eyre = "0.6"

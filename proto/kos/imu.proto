@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package kos.imu;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/duration.proto";
+import "google/longrunning/operations.proto";
+import "kos/common.proto";
+
+option go_package = "kos/imu;imu";
+option java_package = "com.kos.imu";
+option csharp_namespace = "KOS.IMU";
+
+// The IMUService provides methods to interact with the Inertial Measurement Unit.
+service IMUService {
+    // Retrieves the latest IMU sensor values.
+    rpc GetValues(google.protobuf.Empty) returns (IMUValuesResponse);
+
+    // Calibrates the IMU (long-running operation).
+    rpc Calibrate(google.protobuf.Empty) returns (google.longrunning.Operation) {
+        option (google.longrunning.operation_info) = {
+            response_type: "CalibrateIMUResponse"
+            metadata_type: "CalibrateIMUMetadata"
+        };
+    }
+
+    // Zeros the IMU readings.
+    rpc Zero(ZeroIMURequest) returns (kos.common.ActionResponse);
+
+    // Retrieves Euler angles from the IMU.
+    rpc GetEuler(google.protobuf.Empty) returns (EulerAnglesResponse);
+
+    // Retrieves quaternion from the IMU.
+    rpc GetQuaternion(google.protobuf.Empty) returns (QuaternionResponse);
+}
+
+// Response message containing IMU values.
+message IMUValuesResponse {
+    double accel_x = 1; // Acceleration X-axis
+    double accel_y = 2; // Acceleration Y-axis
+    double accel_z = 3; // Acceleration Z-axis
+    double gyro_x = 4;  // Gyroscope X-axis
+    double gyro_y = 5;  // Gyroscope Y-axis
+    double gyro_z = 6;  // Gyroscope Z-axis
+    optional double mag_x = 7;   // Magnetometer X-axis
+    optional double mag_y = 8;   // Magnetometer Y-axis
+    optional double mag_z = 9;   // Magnetometer Z-axis
+    kos.common.Error error = 10; // Error details if any
+}
+
+// Response message for Calibrate IMU operation.
+message CalibrateIMUResponse {
+    kos.common.Error error = 1; // Error details if calibration failed
+}
+
+// Metadata for Calibrate IMU operation.
+message CalibrateIMUMetadata {
+    string status = 1; // Status ("IN_PROGRESS", "SUCCEEDED", "FAILED")
+}
+
+// Request message for Zero IMU.
+message ZeroIMURequest {
+    google.protobuf.Duration duration = 1; // Duration for zeroing
+}
+
+// Response message containing Euler angles.
+message EulerAnglesResponse {
+    double roll = 1;    // Roll angle
+    double pitch = 2;   // Pitch angle
+    double yaw = 3;     // Yaw angle
+    kos.common.Error error = 4; // Error details if any
+}
+
+// Response message containing quaternion.
+message QuaternionResponse {
+    double x = 1; // Quaternion X component
+    double y = 2; // Quaternion Y component
+    double z = 3; // Quaternion Z component
+    double w = 4; // Quaternion W component
+    kos.common.Error error = 5; // Error details if any
+}

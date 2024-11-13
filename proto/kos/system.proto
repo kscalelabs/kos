@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package kos.system;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/longrunning/operations.proto";
+import "kos/common.proto";
+
+option go_package = "kos/system;system";
+option java_package = "com.kos.system";
+option csharp_namespace = "KOS.System";
+
+// The SystemService provides methods to interact with system-level functions.
+service SystemService {
+    // Retrieves IP addresses of network interfaces.
+    rpc GetIPAddresses(google.protobuf.Empty) returns (GetIPAddressesResponse);
+
+    // Sets Wi-Fi credentials.
+    rpc SetWiFiCredentials(SetWiFiCredentialsRequest) returns (kos.common.ActionResponse);
+
+    // Retrieves system information.
+    rpc GetSystemInfo(google.protobuf.Empty) returns (GetSystemInfoResponse);
+
+    // Retrieves diagnostic logs.
+    rpc GetDiagnosticLogs(GetDiagnosticLogsRequest) returns (GetDiagnosticLogsResponse);
+
+    // Uploads an OTA update (long-running operation).
+    rpc UploadOTA(UploadOTARequest) returns (google.longrunning.Operation) {
+        option (google.longrunning.operation_info) = {
+            response_type: "UploadOTAResponse"
+            metadata_type: "UploadOTAMetadata"
+        };
+    }
+}
+
+// Response message containing IP addresses.
+message GetIPAddressesResponse {
+    repeated NetworkInterface interfaces = 1; // Network interfaces and their IPs
+    kos.common.Error error = 2;          // Error details if any
+}
+
+// Network interface information.
+message NetworkInterface {
+    string name = 1;                  // Interface name
+    repeated string ip_addresses = 2; // List of IP addresses
+}
+
+// Request message for setting Wi-Fi credentials.
+message SetWiFiCredentialsRequest {
+    string ssid = 1;      // Wi-Fi SSID
+    string password = 2;  // Wi-Fi password
+    // Additional fields for enterprise networks can be added here
+}
+
+// Response message containing system information.
+message GetSystemInfoResponse {
+    optional uint64 total_ram = 1;        // Total RAM in bytes
+    optional uint64 used_ram = 2;         // Used RAM in bytes
+    optional uint64 total_disk = 3;       // Total disk space in bytes
+    optional uint64 used_disk = 4;        // Used disk space in bytes
+    optional float cpu_usage = 5;         // CPU usage percentage
+    optional float npu_usage = 6;         // NPU usage percentage
+    kos.common.Error error = 7; // Error details if any
+}
+
+// Request message for retrieving diagnostic logs.
+message GetDiagnosticLogsRequest {
+    google.protobuf.Timestamp start_time = 1; // Start time for logs
+    google.protobuf.Timestamp end_time = 2;   // End time for logs
+}
+
+// Response message containing diagnostic logs.
+message GetDiagnosticLogsResponse {
+    bytes logs = 1;                // Logs data (e.g., tar.xz file)
+    kos.common.Error error = 2; // Error details if any
+}
+
+// Request message for uploading an OTA update.
+message UploadOTARequest {
+    bytes ota_file = 1; // OTA update file data
+}
+
+// Response message for UploadOTA operation.
+message UploadOTAResponse {
+    kos.common.Error error = 1; // Error details if upload failed
+}
+
+// Metadata for UploadOTA operation.
+message UploadOTAMetadata {
+    string status = 1; // Status ("IN_PROGRESS", "SUCCEEDED", "FAILED")
+}
