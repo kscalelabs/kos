@@ -35,7 +35,6 @@ impl ActuatorService for ActuatorServiceImpl {
             .await
             .map_err(|e| Status::internal(format!("Failed to command actuators, {:?}", e)))?;
 
-
         trace!(
             "Commanding actuators, request: {:?}, results: {:?}",
             telemetry_commands.clone(),

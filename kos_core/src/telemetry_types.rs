@@ -1,6 +1,8 @@
+use crate::grpc_interface::kos::actuator::{
+    ActuatorCommand as ProtoActuatorCommand, ActuatorStateResponse,
+};
 use crate::grpc_interface::kos::imu::{EulerAnglesResponse, ImuValuesResponse, QuaternionResponse};
 use serde::Serialize;
-use crate::grpc_interface::kos::actuator::{ActuatorStateResponse, ActuatorCommand as ProtoActuatorCommand};
 
 #[derive(Serialize)]
 pub struct ImuValues {
