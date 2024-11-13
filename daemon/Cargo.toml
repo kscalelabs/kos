@@ -16,9 +16,6 @@ eyre = "0.6"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tower = "0.5"
-tower-http = {version = "0.6", features = ["cors"]}
-tonic-web = "0.12"
-
 
 # Also can add external platforms here?
 # e.g. third_party_platform = { git = "https://github.com/thirdparty/platform", optional = true }

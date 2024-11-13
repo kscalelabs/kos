@@ -116,6 +116,15 @@ impl Actuator for StubActuator {
         &self,
         _actuator_ids: Vec<u32>,
     ) -> Result<Vec<ActuatorStateResponse>> {
-        Ok(vec![])
+        Ok(vec![ActuatorStateResponse {
+            actuator_id: 1,
+            online: true,
+            position: Some(0.0),
+            velocity: Some(0.0),
+            torque: Some(0.0),
+            temperature: Some(0.0),
+            voltage: Some(0.0),
+            current: Some(0.0),
+        }])
     }
 }

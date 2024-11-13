@@ -50,14 +50,14 @@ message CommandActuatorsResponse {
 
 // Request message for ConfigureActuator.
 message ConfigureActuatorRequest {
-    uint32 actuator_id = 1;    // Actuator ID
-    optional double kp = 2;             // Proportional gain
-    optional double kd = 3;             // Derivative gain
-    optional double ki = 4;             // Integral gain
-    optional double max_torque = 5;     // Max torque (%)
+    uint32 actuator_id = 1;                // Actuator ID
+    optional double kp = 2;                // Proportional gain
+    optional double kd = 3;                // Derivative gain
+    optional double ki = 4;                // Integral gain
+    optional double max_torque = 5;        // Max torque (%)
     optional double protective_torque = 6; // Protective torque (%)
-    optional float protection_time = 7; // Protection time in seconds
-    optional bool torque_enabled = 8;   // Torque enabled flag
+    optional float protection_time = 7;    // Protection time in seconds
+    optional bool torque_enabled = 8;      // Torque enabled flag
 }
 
 // Request message for CalibrateActuator.
@@ -91,8 +91,8 @@ message GetActuatorsStateResponse {
 
 // State information for a single actuator.
 message ActuatorStateResponse {
-    uint32 actuator_id = 1; // Actuator ID
-    optional bool online = 2;        // Online status
+    uint32 actuator_id = 1;          // Actuator ID
+    bool online = 2;                 // Online status
     optional double position = 3;    // Position in degrees
     optional double velocity = 4;    // Velocity in degrees/second
     optional double torque = 5;      // Torque in Nm

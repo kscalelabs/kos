@@ -3,9 +3,12 @@ use crate::hal::IMU;
 use crate::kos_proto::common::ActionResponse;
 use crate::kos_proto::imu::imu_service_server::ImuService;
 use crate::kos_proto::imu::*;
+use crate::telemetry::Telemetry;
+use crate::telemetry_types::{EulerAngles, ImuValues, Quaternion};
 use eyre::OptionExt;
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
+use tracing::trace;
 
 pub struct IMUServiceImpl {
     imu: Arc<dyn IMU>,
@@ -28,6 +31,19 @@ impl ImuService for IMUServiceImpl {
             .get_values()
             .await
             .map_err(|e| Status::internal(format!("Failed to get IMU values, {:?}", e)))?;
+
+        let telemetry = Telemetry::get().await;
+        if let Some(telemetry) = telemetry {
+            if let Err(e) = telemetry
+                .publish("imu/values", &ImuValues::from(&values))
+                .await
+            {
+                tracing::warn!("Failed to publish telemetry: {}", e);
+            }
+        }
+
+        trace!("Getting IMU values, response: {:?}", values);
+
         Ok(Response::new(values))
     }
 
@@ -71,17 +87,45 @@ impl ImuService for IMUServiceImpl {
         &self,
         _request: Request<()>,
     ) -> Result<Response<EulerAnglesResponse>, Status> {
-        Ok(Response::new(self.imu.get_euler().await.map_err(|e| {
-            Status::internal(format!("Failed to get euler, {:?}", e))
-        })?))
+        let euler = self
+            .imu
+            .get_euler()
+            .await
+            .map_err(|e| Status::internal(format!("Failed to get euler, {:?}", e)))?;
+
+        let telemetry = Telemetry::get().await;
+        if let Some(telemetry) = telemetry {
+            if let Err(e) = telemetry
+                .publish("imu/euler", &EulerAngles::from(&euler))
+                .await
+            {
+                tracing::warn!("Failed to publish telemetry: {}", e);
+            }
+        }
+
+        Ok(Response::new(euler))
     }
 
     async fn get_quaternion(
         &self,
         _request: Request<()>,
     ) -> Result<Response<QuaternionResponse>, Status> {
-        Ok(Response::new(self.imu.get_quaternion().await.map_err(
-            |e| Status::internal(format!("Failed to get quaternion, {:?}", e)),
-        )?))
+        let quaternion = self
+            .imu
+            .get_quaternion()
+            .await
+            .map_err(|e| Status::internal(format!("Failed to get quaternion, {:?}", e)))?;
+
+        let telemetry = Telemetry::get().await;
+        if let Some(telemetry) = telemetry {
+            if let Err(e) = telemetry
+                .publish("imu/quaternion", &Quaternion::from(&quaternion))
+                .await
+            {
+                tracing::warn!("Failed to publish telemetry: {}", e);
+            }
+        }
+
+        Ok(Response::new(quaternion))
     }
 }

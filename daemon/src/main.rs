@@ -5,6 +5,7 @@
 use eyre::Result;
 use kos_core::google_proto::longrunning::operations_server::OperationsServer;
 use kos_core::services::OperationsServiceImpl;
+use kos_core::telemetry::Telemetry;
 use kos_core::Platform;
 use kos_core::ServiceEnum;
 use std::collections::HashMap;
@@ -62,9 +63,14 @@ async fn main() -> Result<()> {
         .with_env_filter(
             EnvFilter::from_default_env()
                 .add_directive("h2=error".parse().unwrap())
-                .add_directive("grpc=error".parse().unwrap()),
+                .add_directive("grpc=error".parse().unwrap())
+                .add_directive("rumqttc=error".parse().unwrap())
+                .add_directive("kos_core::telemetry=error".parse().unwrap()),
         )
         .init();
+
+    // telemetry
+    Telemetry::initialize("test", "localhost", 1883).await?;
 
     let operations_store = Arc::new(Mutex::new(HashMap::new()));
     let operations_service = Arc::new(OperationsServiceImpl::new(operations_store));
