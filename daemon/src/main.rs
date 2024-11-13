@@ -60,7 +60,11 @@ async fn run_server(
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // logging
     tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
+        .with_env_filter(
+            EnvFilter::from_default_env()
+                .add_directive("h2=error".parse().unwrap())
+                .add_directive("grpc=error".parse().unwrap())
+        )
         .init();
 
 
