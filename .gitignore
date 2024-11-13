@@ -12,8 +12,8 @@ __pycache__/
 .dmypy.json
 
 # python protobuf
-kscaleos_client_py/kos/
-!kscaleos_client_py/kos/__init__.py
+pykos/kos/
+!pykos/kos/__init__.py
 
 # Rust
 target/
