@@ -1,22 +1,30 @@
+use crate::Operation;
 use async_trait::async_trait;
 use eyre::Result;
 use kos_core::{
-    hal::{CalibrationStatus, EulerAnglesResponse, ImuValuesResponse, QuaternionResponse, IMU},
+    hal::{EulerAnglesResponse, ImuValuesResponse, QuaternionResponse, IMU},
     kos_proto::common::ActionResponse,
 };
+use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::Mutex;
+use uuid::Uuid;
 
-pub struct StubIMU {}
+use std::collections::HashMap;
+
+pub struct StubIMU {
+    operations_store: Arc<Mutex<HashMap<String, Operation>>>,
+}
 
 impl StubIMU {
-    pub fn new() -> Self {
-        StubIMU {}
+    pub fn new(operations_store: Arc<Mutex<HashMap<String, Operation>>>) -> Self {
+        StubIMU { operations_store }
     }
 }
 
 impl Default for StubIMU {
     fn default() -> Self {
-        StubIMU::new()
+        unimplemented!("StubIMU cannot be default, it requires an operations store")
     }
 }
 
@@ -37,8 +45,18 @@ impl IMU for StubIMU {
         })
     }
 
-    async fn calibrate(&self) -> Result<CalibrationStatus> {
-        Ok(CalibrationStatus::Calibrating)
+    async fn calibrate(&self) -> Result<Operation> {
+        let operation = Operation {
+            name: format!("operations/imu/calibrate/{}", Uuid::new_v4()),
+            metadata: None,
+            done: false,
+            result: None,
+        };
+        {
+            let mut store = self.operations_store.lock().await;
+            store.insert(operation.name.clone(), operation.clone());
+        }
+        Ok(operation)
     }
 
     async fn zero(&self, _duration: Duration) -> Result<ActionResponse> {

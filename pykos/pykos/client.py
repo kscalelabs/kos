@@ -1,7 +1,7 @@
 import grpc
 
-from .services.imu import IMUServiceClient
-
+from pykos.services.imu import IMUServiceClient
+from pykos.services.actuator import ActuatorServiceClient
 class KOS:
     """
     KOS client
@@ -18,6 +18,7 @@ class KOS:
         self.port = port
         self.channel = grpc.insecure_channel(f"{self.ip}:{self.port}")
         self.imu = IMUServiceClient(self.channel)
+        self.actuator = ActuatorServiceClient(self.channel)
 
     def close(self):
         """

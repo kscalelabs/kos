@@ -49,18 +49,13 @@ impl ActuatorService for ActuatorServiceImpl {
         request: Request<CalibrateActuatorRequest>,
     ) -> Result<Response<Operation>, Status> {
         let calibrate_request = request.into_inner();
-        let _status = self
+        let operation = self
             .actuator
             .calibrate_actuator(calibrate_request)
             .await
             .map_err(|e| Status::internal(format!("Failed to calibrate actuator, {:?}", e)))?;
 
-        Ok(Response::new(Operation {
-            name: "operations/calibrate_actuator/0".to_string(),
-            metadata: None,
-            done: false,
-            result: None,
-        }))
+        Ok(Response::new(operation))
     }
 
     async fn get_actuators_state(

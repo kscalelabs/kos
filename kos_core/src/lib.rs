@@ -13,8 +13,12 @@ pub use grpc_interface::kos as kos_proto;
 
 use hal::actuator_service_server::ActuatorServiceServer;
 use hal::imu_service_server::ImuServiceServer;
+use hal::Operation;
 use services::{ActuatorServiceImpl, IMUServiceImpl};
+use std::collections::HashMap;
 use std::fmt::Debug;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 impl Debug for ActuatorServiceImpl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -35,8 +39,11 @@ pub enum ServiceEnum {
 
 pub trait Platform {
     fn name(&self) -> &'static str;
-    fn initialize(&mut self) -> eyre::Result<()>;
-    fn get_services(&self) -> Vec<ServiceEnum>;
+    fn initialize(&mut self, operations_store: Arc<Mutex<HashMap<String, Operation>>>) -> eyre::Result<()>;
+    fn create_services(
+        &self,
+        operations_store: Arc<Mutex<HashMap<String, Operation>>>,
+    ) -> Vec<ServiceEnum>;
     fn shutdown(&mut self) -> eyre::Result<()>;
 }
 

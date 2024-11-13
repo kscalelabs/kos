@@ -1,7 +1,8 @@
 use async_trait::async_trait;
 use eyre::Result;
 use kos_core::{
-    hal::{CalibrationStatus, EulerAnglesResponse, ImuValuesResponse, QuaternionResponse, IMU},
+    google_proto::longrunning::Operation,
+    hal::{EulerAnglesResponse, ImuValuesResponse, QuaternionResponse, IMU},
     kos_proto::common::ActionResponse,
 };
 use std::time::Duration;
@@ -26,7 +27,7 @@ impl IMU for SimIMU {
         todo!()
     }
 
-    async fn calibrate(&self) -> Result<CalibrationStatus> {
+    async fn calibrate(&self) -> Result<Operation> {
         todo!()
     }
 
