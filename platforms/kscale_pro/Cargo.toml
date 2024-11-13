@@ -2,3 +2,7 @@
 name = "kscale_pro"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+robstride = "0.2.8"
+imu = "0.1.4"
