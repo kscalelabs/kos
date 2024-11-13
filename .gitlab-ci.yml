@@ -3,6 +3,7 @@ variables:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
   TOOLCHAIN_IMAGE: $CI_REGISTRY_IMAGE/toolchain
+  GIT_SUBMODULE_STRATEGY: recursive
 
 image: $TOOLCHAIN_IMAGE:latest
 
