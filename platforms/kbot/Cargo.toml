@@ -5,6 +5,7 @@ authors = ["Wesley Maa <wesley@kscale.dev>"]
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/kscalelabs/kos"
+description = "KOS platform for KBot"
 
 [dependencies]
 kos_core = { version = "0.1.1", path = "../../kos_core" }
