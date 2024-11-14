@@ -27,7 +27,7 @@ all:
 # ------------------------ #
 
 generate-proto:
-	python -m grpc_tools.protoc --python_out=. --grpc_python_out=. --proto_path=../proto --proto_path=../proto/googleapis ../proto/kos/*
+	python -m grpc_tools.protoc --python_out=. --grpc_python_out=. --proto_path=../kos_core/proto --proto_path=../proto/googleapis ../proto/kos/*
 .PHONY: generate-proto
 
 

@@ -15,11 +15,17 @@ use tonic::transport::Server;
 use tracing::{debug, error, info};
 use tracing_subscriber::filter::EnvFilter;
 
-#[cfg(feature = "sim")]
-use sim::SimPlatform as PlatformImpl;
+#[cfg(not(any(feature = "kos-sim", feature = "kos-zeroth-01", feature = "kos-kbot")))]
+use kos_stub::StubPlatform as PlatformImpl;
 
-#[cfg(feature = "stub")]
-use stub::StubPlatform as PlatformImpl;
+#[cfg(feature = "kos-sim")]
+use kos_sim::SimPlatform as PlatformImpl;
+
+#[cfg(feature = "kos-zeroth-01")]
+use kos_zeroth_01::Zeroth01Platform as PlatformImpl;
+
+#[cfg(feature = "kos-kbot")]
+use kos_kbot::KbotPlatform as PlatformImpl;
 
 fn add_service_to_router(
     router: tonic::transport::server::Router,
@@ -69,13 +75,18 @@ async fn main() -> Result<()> {
         )
         .init();
 
+    let mut platform = PlatformImpl::new();
+
     // telemetry
-    Telemetry::initialize("test", "localhost", 1883).await?;
+    Telemetry::initialize(
+        format!("{}-{}", platform.name(), platform.serial()).as_str(),
+        "localhost",
+        1883,
+    )
+    .await?;
 
     let operations_store = Arc::new(Mutex::new(HashMap::new()));
     let operations_service = Arc::new(OperationsServiceImpl::new(operations_store));
-
-    let mut platform = PlatformImpl::new();
 
     platform.initialize(operations_service.clone())?;
 

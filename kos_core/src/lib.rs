@@ -38,6 +38,7 @@ pub enum ServiceEnum {
 
 pub trait Platform {
     fn name(&self) -> &'static str;
+    fn serial(&self) -> String;
     fn initialize(&mut self, operations_service: Arc<OperationsServiceImpl>) -> eyre::Result<()>;
     fn create_services(&self, operations_service: Arc<OperationsServiceImpl>) -> Vec<ServiceEnum>;
     fn shutdown(&mut self) -> eyre::Result<()>;

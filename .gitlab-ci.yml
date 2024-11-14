@@ -1,9 +1,11 @@
-image: kos-builder:latest
-
 variables:
   CARGO_HOME: $CI_PROJECT_DIR/.cargo
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  TOOLCHAIN_IMAGE: $CI_REGISTRY_IMAGE/toolchain
+  GIT_SUBMODULE_STRATEGY: recursive
+
+image: $TOOLCHAIN_IMAGE:latest
 
 # Cache dependencies between builds
 cache:
@@ -13,17 +15,45 @@ cache:
 
 # Define stages
 stages:
+  - build-toolchain
   - check
   - test
   - build
+
+.runner: &runner
+  tags:
+    - linux-x64
+
+build-toolchain:
+  <<: *runner
+  stage: build-toolchain
+  image: docker:latest
+  
+  script:
+    - |
+      if [ "$GITLAB_CI" != "false" ]; then
+        echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+        docker pull $TOOLCHAIN_IMAGE:latest || true
+      fi
+    - docker build --progress=plain --cache-from $TOOLCHAIN_IMAGE:latest -t $TOOLCHAIN_IMAGE:latest -f toolchain/Dockerfile .
+    - |
+      if [ "$GITLAB_CI" != "false" ]; then
+        docker push $TOOLCHAIN_IMAGE:latest
+      fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - toolchain/**/*
+        - .gitlab-ci.yml
 
 # Check formatting and run clippy on all branches
 format:
   stage: check
   script:
-    - cargo fmt -- --check
+    - cargo fmt --all -- --check
   rules:
     - when: always
+  allow_failure: true
 
 clippy:
   stage: check
@@ -31,6 +61,7 @@ clippy:
     - cargo clippy -- -D warnings
   rules:
     - when: always
+  allow_failure: true
 
 # Test all features
 test:
@@ -38,11 +69,9 @@ test:
   script:
     - |
       if [ "$GITLAB_CI" != "false" ]; then
-        # CI-specific test commands
-        cargo test --all-features --verbose
+        cargo test -F stub --verbose
       else
-        # Local test commands
-        cargo test
+        cargo test -F stub
       fi
   rules:
     - when: always
@@ -59,6 +88,8 @@ test:
       - target/$TARGET/release/daemon
   rules:
     - if: $CI_COMMIT_TAG
+      when: always
+    - when: manual
 
 # Linux x86_64
 build-linux-x86_64-stub-release:

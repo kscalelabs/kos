@@ -1,7 +1,13 @@
 [package]
 name = "kos_core"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description.workspace = true
+documentation.workspace = true
+readme.workspace = true
 build = "build.rs"
 
 [dependencies]

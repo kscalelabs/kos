@@ -13,23 +13,27 @@ use kos_core::services::{ActuatorServiceImpl, IMUServiceImpl};
 use kos_core::{services::OperationsServiceImpl, Platform, ServiceEnum};
 use std::sync::Arc;
 
-pub struct KscaleProPlatform {}
+pub struct KbotPlatform {}
 
-impl KscaleProPlatform {
+impl KbotPlatform {
     pub fn new() -> Self {
         Self {}
     }
 }
 
-impl Default for KscaleProPlatform {
+impl Default for KbotPlatform {
     fn default() -> Self {
-        KscaleProPlatform::new()
+        KbotPlatform::new()
     }
 }
 
-impl Platform for KscaleProPlatform {
+impl Platform for KbotPlatform {
     fn name(&self) -> &'static str {
-        "Kscale Pro"
+        "KBot"
+    }
+
+    fn serial(&self) -> String {
+        "00000000".to_string()
     }
 
     fn initialize(&mut self, _operations_service: Arc<OperationsServiceImpl>) -> eyre::Result<()> {
@@ -41,10 +45,10 @@ impl Platform for KscaleProPlatform {
         // Add available services here
         vec![
             ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(
-                KscaleProIMU::new("can0", 1, 1),
+                KbotIMU::new("can0", 1, 1),
             )))),
             ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
-                Arc::new(KscaleProActuator::new(
+                Arc::new(KbotActuator::new(
                     "/dev/ttyCH341USB0",
                     HashMap::new()
                 )),

@@ -1,13 +1,14 @@
 [package]
-name = "kos-sim"
+name = "kos-kbot"
 version = "0.1.1"
-authors = ["Denys Bezmenov <denys@kscale.dev>"]
+authors = ["Wesley Maa <wesley@kscale.dev>"]
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/kscalelabs/kos"
-description = "KOS platform for simulation"
+description = "KOS platform for KBot"
 
 [dependencies]
 kos_core = { version = "0.1.1", path = "../../kos_core" }
-async-trait = "0.1"
 eyre = "0.6"
+robstride = "0.2.8"
+imu = "0.1.4"

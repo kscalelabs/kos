@@ -1,11 +1,11 @@
 [package]
-name = "kos-sim"
+name = "kos-zeroth-01"
 version = "0.1.1"
-authors = ["Denys Bezmenov <denys@kscale.dev>"]
+authors = ["Denys Bezmenov <denys@kscale.dev>", "Jingxiang Mo <jx@kscale.dev>"]
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/kscalelabs/kos"
-description = "KOS platform for simulation"
+description = "KOS platform for Zeroth-01"
 
 [dependencies]
 kos_core = { version = "0.1.1", path = "../../kos_core" }
