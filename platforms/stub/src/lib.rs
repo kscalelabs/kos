@@ -4,6 +4,7 @@ mod imu;
 pub use actuator::*;
 pub use imu::*;
 
+use eyre::Result;
 use kos_core::hal::Operation;
 use kos_core::kos_proto::{
     actuator::actuator_service_server::ActuatorServiceServer,
@@ -41,16 +42,19 @@ impl Platform for StubPlatform {
         Ok(())
     }
 
-    fn create_services(&self, operations_service: Arc<OperationsServiceImpl>) -> Vec<ServiceEnum> {
+    fn create_services(
+        &self,
+        operations_service: Arc<OperationsServiceImpl>,
+    ) -> Result<Vec<ServiceEnum>> {
         // Add available services here
-        vec![
+        Ok(vec![
             ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(
                 StubIMU::new(operations_service.clone()),
             )))),
             ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
                 Arc::new(StubActuator::new(operations_service.clone())),
             ))),
-        ]
+        ])
     }
 
     fn shutdown(&mut self) -> eyre::Result<()> {

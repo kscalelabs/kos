@@ -45,7 +45,7 @@ async fn run_server(
     let addr = "[::1]:50051".parse()?;
     let mut server_builder = Server::builder();
 
-    let services = platform.create_services(operations_service.clone());
+    let services = platform.create_services(operations_service.clone())?;
 
     let operations_service = OperationsServer::new(operations_service);
 

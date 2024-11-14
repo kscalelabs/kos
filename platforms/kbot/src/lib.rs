@@ -4,6 +4,7 @@ mod hexmove;
 pub use actuator::*;
 pub use hexmove::*;
 
+use eyre::{Result, WrapErr};
 use kos_core::hal::Operation;
 use kos_core::kos_proto::{
     actuator::actuator_service_server::ActuatorServiceServer,
@@ -11,6 +12,7 @@ use kos_core::kos_proto::{
 };
 use kos_core::services::{ActuatorServiceImpl, IMUServiceImpl};
 use kos_core::{services::OperationsServiceImpl, Platform, ServiceEnum};
+use std::collections::HashMap;
 use std::sync::Arc;
 
 pub struct KbotPlatform {}
@@ -41,19 +43,21 @@ impl Platform for KbotPlatform {
         Ok(())
     }
 
-    fn create_services(&self, operations_service: Arc<OperationsServiceImpl>) -> Vec<ServiceEnum> {
-        // Add available services here
-        vec![
+    fn create_services(
+        &self,
+        operations_service: Arc<OperationsServiceImpl>,
+    ) -> Result<Vec<ServiceEnum>> {
+        Ok(vec![
             ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(
-                KbotIMU::new("can0", 1, 1),
+                KBotIMU::new(operations_service.clone(), "can0", 1, 1).wrap_err("Failed to create IMU")?,
             )))),
             ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
-                Arc::new(KbotActuator::new(
-                    "/dev/ttyCH341USB0",
-                    HashMap::new()
-                )),
+                Arc::new(
+                    KBotActuator::new(operations_service, "/dev/ttyCH341USB0", HashMap::new(), None, None, None)
+                        .wrap_err("Failed to create actuator")?,
+                ),
             ))),
-        ]
+        ])
     }
 
     fn shutdown(&mut self) -> eyre::Result<()> {

@@ -5,6 +5,7 @@ pub use crate::kos_proto::{actuator::*, common::ActionResult, imu::*};
 use async_trait::async_trait;
 use eyre::Result;
 use std::fmt::Display;
+
 #[async_trait]
 pub trait Actuator: Send + Sync {
     async fn command_actuators(&self, commands: Vec<ActuatorCommand>) -> Result<Vec<ActionResult>>;
