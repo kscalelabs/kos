@@ -32,6 +32,10 @@ impl Platform for StubPlatform {
         "Stub"
     }
 
+    fn serial(&self) -> String {
+        "00000000".to_string()
+    }
+
     fn initialize(&mut self, _operations_service: Arc<OperationsServiceImpl>) -> eyre::Result<()> {
         // Initialize the platform
         Ok(())

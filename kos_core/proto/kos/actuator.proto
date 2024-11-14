@@ -58,6 +58,7 @@ message ConfigureActuatorRequest {
     optional double protective_torque = 6; // Protective torque (%)
     optional float protection_time = 7;    // Protection time in seconds
     optional bool torque_enabled = 8;      // Torque enabled flag
+    optional uint32 new_actuator_id = 9;   // New actuator ID
 }
 
 // Request message for CalibrateActuator.
