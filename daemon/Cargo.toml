@@ -11,7 +11,6 @@ readme.workspace = true
 
 [dependencies]
 kos_core = { version = "0.1.1", path = "../kos_core" }
-kscale_micro = { version = "0.1.0", path = "../platforms/kscale_micro", optional = true }
 tokio = { version = "1", features = ["full"] }
 tonic = { version = "0.12", features = ["transport"] }
 eyre = "0.6"
@@ -19,18 +18,18 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tower = "0.5"
 
-sim = { version = "0.1.0", path = "../platforms/sim", optional = true }
-stub = { version = "0.1.0", path = "../platforms/stub", optional = true }
+kos-sim = { version = "0.1.0", path = "../platforms/sim", optional = true }
+kos-stub = { version = "0.1.0", path = "../platforms/stub", optional = true }
+kos-zeroth-01 = { version = "0.1.0", path = "../platforms/zeroth-01", optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-kscale_pro = { version = "0.1.0", path = "../platforms/kscale_pro", optional = true }
+kos-kbot = { version = "0.1.0", path = "../platforms/kbot", optional = true }
 
 [features]
-kscale_micro = ["dep:kscale_micro"]
-kscale_pro = ["dep:kscale_pro"]
-sim = ["dep:sim"]
-stub = ["dep:stub"]
-default = ["stub"]
+kos-zeroth-01 = ["dep:kos-zeroth-01"]
+kos-sim = ["dep:kos-sim"]
+kos-stub = ["dep:kos-stub"]
+default = ["kos-stub"]
 
 [[bin]]
 name = "kos"

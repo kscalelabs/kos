@@ -15,11 +15,11 @@ use tonic::transport::Server;
 use tracing::{debug, error, info};
 use tracing_subscriber::filter::EnvFilter;
 
-#[cfg(feature = "sim")]
-use sim::SimPlatform as PlatformImpl;
+#[cfg(feature = "kos-sim")]
+use kos_sim::SimPlatform as PlatformImpl;
 
-#[cfg(feature = "stub")]
-use stub::StubPlatform as PlatformImpl;
+#[cfg(feature = "kos-stub")]
+use kos_stub::StubPlatform as PlatformImpl;
 
 fn add_service_to_router(
     router: tonic::transport::server::Router,

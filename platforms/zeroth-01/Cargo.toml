@@ -1,7 +1,7 @@
 [package]
-name = "kos-stub"
+name = "kos-zeroth-01"
 version = "0.1.1"
-authors = ["Denys Bezmenov <denys@kscale.dev>"]
+authors = ["Denys Bezmenov <denys@kscale.dev>", "Jingxiang Mo <jx@kscale.dev>"]
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/kscalelabs/kos"
@@ -10,8 +10,3 @@ repository = "https://github.com/kscalelabs/kos"
 kos_core = { version = "0.1.1", path = "../../kos_core" }
 async-trait = "0.1"
 eyre = "0.6"
-tokio = { version = "1", features = ["full"] }
-uuid = { version = "1", features = ["v4"] }
-prost-types = "0.13"
-prost = "0.13"
-tracing = "0.1"
