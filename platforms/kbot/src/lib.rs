@@ -10,11 +10,9 @@ pub use hexmove::*;
 
 use eyre::{Result, WrapErr};
 use kos_core::hal::Operation;
-use kos_core::kos_proto::{
-    actuator::actuator_service_server::ActuatorServiceServer,
-    imu::imu_service_server::ImuServiceServer,
-};
-use kos_core::services::{ActuatorServiceImpl, IMUServiceImpl};
+use kos_core::kos_proto::actuator::actuator_service_server::ActuatorServiceServer;
+
+use kos_core::services::ActuatorServiceImpl;
 use kos_core::{services::OperationsServiceImpl, Platform, ServiceEnum};
 use robstride::MotorType;
 use std::collections::HashMap;
@@ -54,10 +52,14 @@ impl Platform for KbotPlatform {
     ) -> Result<Vec<ServiceEnum>> {
         #[cfg(target_os = "linux")]
         Ok(vec![
-            ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(
-                KBotIMU::new(operations_service.clone(), "can0", 1, 1)
-                    .wrap_err("Failed to create IMU")?,
-            )))),
+            ServiceEnum::Imu(
+                kos_core::kos_proto::imu::imu_service_server::ImuServiceServer::new(
+                    kos_core::services::IMUServiceImpl::new(Arc::new(
+                        KBotIMU::new(operations_service.clone(), "can0", 1, 1)
+                            .wrap_err("Failed to create IMU")?,
+                    )),
+                ),
+            ),
             ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
                 Arc::new(
                     KBotActuator::new(

@@ -95,8 +95,25 @@ impl IMU for KBotIMU {
         })
     }
 
-    async fn zero(&self, duration: Duration) -> Result<ActionResponse> {
-        info!("Zeroing IMU with duration: {:?} - unimplemented", duration);
+    async fn zero(
+        &self,
+        duration: Option<Duration>,
+        max_retries: Option<u32>,
+        max_angular_error: Option<f32>,
+        max_vel: Option<f32>,
+        max_accel: Option<f32>,
+    ) -> Result<ActionResponse> {
+        if self
+            .imu
+            .zero_imu(duration.as_millis() as u32, max_retries, max_angular_error)
+            .is_err()
+        {
+            error!("Failed to zero IMU");
+            Ok(ActionResponse {
+                success: false,
+                error: Some("Failed to zero IMU".to_string()),
+            })
+        }
         Ok(ActionResponse {
             success: true,
             error: None,
@@ -115,7 +132,14 @@ impl IMU for KBotIMU {
     }
 
     async fn get_quaternion(&self) -> Result<QuaternionResponse> {
-        error!("Quaternion operation not implemented");
-        Err(eyre::eyre!("Not implemented"))
+        debug!("Reading quaternion");
+        let data = self.imu.get_data();
+        Ok(QuaternionResponse {
+            w: data.qw as f64,
+            x: data.qx as f64,
+            y: data.qy as f64,
+            z: data.qz as f64,
+            error: None,
+        })
     }
 }

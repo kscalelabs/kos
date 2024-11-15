@@ -5,7 +5,6 @@ use crate::kos_proto::imu::imu_service_server::ImuService;
 use crate::kos_proto::imu::*;
 use crate::telemetry::Telemetry;
 use crate::telemetry_types::{EulerAngles, ImuValues, Quaternion};
-use eyre::OptionExt;
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use tracing::trace;
@@ -66,18 +65,25 @@ impl ImuService for IMUServiceImpl {
         &self,
         request: Request<ZeroImuRequest>,
     ) -> Result<Response<ActionResponse>, Status> {
-        let duration = request
-            .into_inner()
-            .duration
-            .ok_or_eyre("Duration is required")
-            .map_err(|_| Status::internal("Failed to parse duration"))?;
+        let request: ZeroImuRequest = request.into_inner();
 
-        let duration = std::time::Duration::from_nanos(duration.nanos as u64)
-            + std::time::Duration::from_secs(duration.seconds as u64);
+        let duration = request.duration;
+
+        // Convert proto duration to std::time::Duration
+        let duration = duration.map(|d| {
+            std::time::Duration::from_nanos(d.nanos as u64)
+                + std::time::Duration::from_secs(d.seconds as u64)
+        });
+
+        let max_retries = request.max_retries;
+
+        let max_angular_error = request.max_angular_error.map(|e| e as f32);
+        let max_vel = request.max_velocity.map(|v| v as f32);
+        let max_accel = request.max_acceleration.map(|a| a as f32);
 
         let response = self
             .imu
-            .zero(duration)
+            .zero(duration, max_retries, max_angular_error, max_vel, max_accel)
             .await
             .map_err(|e| Status::internal(format!("Failed to zero IMU, {:?}", e)))?;
         Ok(Response::new(response))
