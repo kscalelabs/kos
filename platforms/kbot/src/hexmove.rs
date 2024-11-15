@@ -17,7 +17,12 @@ pub struct KBotIMU {
 }
 
 impl KBotIMU {
-    pub fn new(operations_service: Arc<OperationsServiceImpl>, interface: &str, can_id: u32, model: u32) -> Result<Self> {
+    pub fn new(
+        operations_service: Arc<OperationsServiceImpl>,
+        interface: &str,
+        can_id: u32,
+        model: u32,
+    ) -> Result<Self> {
         info!(
             "Initializing KBotIMU with interface: {}, CAN ID: {}, model: {}",
             interface, can_id, model

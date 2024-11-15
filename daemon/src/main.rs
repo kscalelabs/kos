@@ -42,7 +42,7 @@ async fn run_server(
     platform: &(dyn Platform + Send + Sync),
     operations_service: Arc<OperationsServiceImpl>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:50051".parse()?;
+    let addr = "0.0.0.0:50051".parse()?;
     let mut server_builder = Server::builder();
 
     let services = platform.create_services(operations_service.clone())?;
