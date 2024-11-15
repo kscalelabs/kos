@@ -21,7 +21,14 @@ pub trait Actuator: Send + Sync {
 pub trait IMU: Send + Sync {
     async fn get_values(&self) -> Result<ImuValuesResponse>;
     async fn calibrate(&self) -> Result<Operation>;
-    async fn zero(&self, duration: std::time::Duration) -> Result<ActionResponse>;
+    async fn zero(
+        &self,
+        duration: Option<std::time::Duration>,
+        max_retries: Option<u32>,
+        max_angular_error: Option<f32>,
+        max_vel: Option<f32>,
+        max_accel: Option<f32>,
+    ) -> Result<ActionResponse>;
     async fn get_euler(&self) -> Result<EulerAnglesResponse>;
     async fn get_quaternion(&self) -> Result<QuaternionResponse>;
 }

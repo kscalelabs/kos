@@ -95,8 +95,19 @@ impl IMU for KBotIMU {
         })
     }
 
-    async fn zero(&self, duration: Duration) -> Result<ActionResponse> {
-        if self.imu.zero_imu(duration.as_millis() as u32).is_err() {
+    async fn zero(
+        &self,
+        duration: Option<Duration>,
+        max_retries: Option<u32>,
+        max_angular_error: Option<f32>,
+        max_vel: Option<f32>,
+        max_accel: Option<f32>,
+    ) -> Result<ActionResponse> {
+        if self
+            .imu
+            .zero_imu(duration.as_millis() as u32, max_retries, max_angular_error)
+            .is_err()
+        {
             error!("Failed to zero IMU");
             Ok(ActionResponse {
                 success: false,

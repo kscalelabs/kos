@@ -61,6 +61,10 @@ message CalibrateIMUMetadata {
 // Request message for Zero IMU.
 message ZeroIMURequest {
     google.protobuf.Duration duration = 1; // Duration for zeroing
+    optional uint32 max_retries = 2; // Maximum number of retries
+    optional double max_angular_error = 3; // Maximum angular error during zeroing
+    optional double max_velocity = 4; // Maximum velocity during zeroing
+    optional double max_acceleration = 5; // Maximum acceleration during zeroing
 }
 
 // Response message containing Euler angles.
