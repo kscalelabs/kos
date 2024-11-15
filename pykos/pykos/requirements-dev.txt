@@ -1,3 +1,10 @@
 # requirements-dev.txt
 
 grpcio-tools
+
+# python checks
+black
+darglint
+mypy
+pytest
+ruff
