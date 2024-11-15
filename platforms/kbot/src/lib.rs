@@ -81,10 +81,9 @@ impl Platform for KbotPlatform {
         ]);
 
         #[cfg(not(target_os = "linux"))]
-        Ok(vec![
-            ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
-                Arc::new(
-                    KBotActuator::new(
+        Ok(vec![ServiceEnum::Actuator(ActuatorServiceServer::new(
+            ActuatorServiceImpl::new(Arc::new(
+                KBotActuator::new(
                     operations_service,
                     "/dev/ttyCH341USB0",
                     HashMap::from([
@@ -100,9 +99,8 @@ impl Platform for KbotPlatform {
                     None,
                 )
                 .wrap_err("Failed to create actuator")?,
-                ),
-            ))),
-        ])
+            )),
+        ))])
     }
 
     fn shutdown(&mut self) -> eyre::Result<()> {
