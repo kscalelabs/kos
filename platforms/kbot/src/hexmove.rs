@@ -96,7 +96,13 @@ impl IMU for KBotIMU {
     }
 
     async fn zero(&self, duration: Duration) -> Result<ActionResponse> {
-        info!("Zeroing IMU with duration: {:?} - unimplemented", duration);
+        if self.imu.zero_imu(duration.as_millis() as u32).is_err() {
+            error!("Failed to zero IMU");
+            Ok(ActionResponse {
+                success: false,
+                error: Some("Failed to zero IMU".to_string()),
+            })
+        }
         Ok(ActionResponse {
             success: true,
             error: None,
