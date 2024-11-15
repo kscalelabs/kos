@@ -1,7 +1,11 @@
 mod actuator;
+
+#[cfg(target_os = "linux")]
 mod hexmove;
 
 pub use actuator::*;
+
+#[cfg(target_os = "linux")]
 pub use hexmove::*;
 
 use eyre::{Result, WrapErr};
@@ -48,6 +52,7 @@ impl Platform for KbotPlatform {
         &self,
         operations_service: Arc<OperationsServiceImpl>,
     ) -> Result<Vec<ServiceEnum>> {
+        #[cfg(target_os = "linux")]
         Ok(vec![
             ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(
                 KBotIMU::new(operations_service.clone(), "can0", 1, 1)
@@ -73,7 +78,29 @@ impl Platform for KbotPlatform {
                     .wrap_err("Failed to create actuator")?,
                 ),
             ))),
-        ])
+        ]);
+
+        #[cfg(not(target_os = "linux"))]
+        Ok(vec![ServiceEnum::Actuator(ActuatorServiceServer::new(
+            ActuatorServiceImpl::new(Arc::new(
+                KBotActuator::new(
+                    operations_service,
+                    "/dev/ttyCH341USB0",
+                    HashMap::from([
+                        (1, MotorType::Type04),
+                        (2, MotorType::Type04),
+                        (3, MotorType::Type04),
+                        (4, MotorType::Type04),
+                        (5, MotorType::Type04),
+                        (6, MotorType::Type01),
+                    ]),
+                    None,
+                    None,
+                    None,
+                )
+                .wrap_err("Failed to create actuator")?,
+            )),
+        ))])
     }
 
     fn shutdown(&mut self) -> eyre::Result<()> {
