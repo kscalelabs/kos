@@ -1,41 +1,46 @@
-from kos import actuator_pb2_grpc, actuator_pb2
-from google.protobuf.empty_pb2 import Empty
-from google.protobuf.any_pb2 import Any
+"""Actuator service client."""
+
+import grpc
 from google.longrunning import operations_pb2, operations_pb2_grpc
+from google.protobuf.any_pb2 import Any
+
+from kos import actuator_pb2, actuator_pb2_grpc
 from kos.actuator_pb2 import CalibrateActuatorMetadata
+
 
 class CalibrationStatus:
     Calibrating = "calibrating"
     Calibrated = "calibrated"
     Timeout = "timeout"
 
+
 class CalibrationMetadata:
-    def __init__(self, metadata_any: Any):
+    def __init__(self, metadata_any: Any) -> None:
         self.actuator_id = None
         self.status = None
         self.decode_metadata(metadata_any)
 
-    def decode_metadata(self, metadata_any: Any):
+    def decode_metadata(self, metadata_any: Any) -> None:
         metadata = CalibrateActuatorMetadata()
         if metadata_any.Is(CalibrateActuatorMetadata.DESCRIPTOR):
             metadata_any.Unpack(metadata)
             self.actuator_id = metadata.actuator_id
             self.status = metadata.status
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"CalibrationMetadata(actuator_id={self.actuator_id}, status={self.status})"
-    
-    def __repr__(self):
+
+    def __repr__(self) -> str:
         return self.__str__()
 
+
 class ActuatorServiceClient:
-    def __init__(self, channel):
+    def __init__(self, channel: grpc.Channel) -> None:
         self.stub = actuator_pb2_grpc.ActuatorServiceStub(channel)
         self.operations_stub = operations_pb2_grpc.OperationsStub(channel)
 
-    def calibrate(self, actuator_id: int):
-        """
-        Calibrate an actuator.
+    def calibrate(self, actuator_id: int) -> CalibrationMetadata:
+        """Calibrate an actuator.
 
         Returns:
             Operation: The operation for the calibration.
@@ -44,14 +49,15 @@ class ActuatorServiceClient:
         metadata = CalibrationMetadata(response.metadata)
         return metadata
 
-    def get_calibration_status(self, actuator_id: int):
-        response = self.operations_stub.GetOperation(operations_pb2.GetOperationRequest(name=f"operations/calibrate_actuator/{actuator_id}"))
+    def get_calibration_status(self, actuator_id: int) -> str:
+        response = self.operations_stub.GetOperation(
+            operations_pb2.GetOperationRequest(name=f"operations/calibrate_actuator/{actuator_id}")
+        )
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
 
-    def command_actuators(self, commands: list[dict]):
-        """
-        Command multiple actuators at once.
+    def command_actuators(self, commands: list[dict]) -> list[actuator_pb2.ActionResult]:
+        """Command multiple actuators at once.
 
         Args:
             commands: List of dictionaries containing actuator commands.
@@ -66,9 +72,8 @@ class ActuatorServiceClient:
         response = self.stub.CommandActuators(request)
         return response.results
 
-    def configure_actuator(self, actuator_id: int, **kwargs):
-        """
-        Configure an actuator's parameters.
+    def configure_actuator(self, actuator_id: int, **kwargs: Any) -> actuator_pb2.ActionResponse:
+        """Configure an actuator's parameters.
 
         Args:
             actuator_id: ID of the actuator to configure
@@ -83,9 +88,8 @@ class ActuatorServiceClient:
         request = actuator_pb2.ConfigureActuatorRequest(**config)
         return self.stub.ConfigureActuator(request)
 
-    def get_actuators_state(self, actuator_ids: list[int]):
-        """
-        Get the state of multiple actuators.
+    def get_actuators_state(self, actuator_ids: list[int]) -> list[actuator_pb2.ActuatorStateResponse]:
+        """Get the state of multiple actuators.
 
         Args:
             actuator_ids: List of actuator IDs to query
@@ -96,5 +100,3 @@ class ActuatorServiceClient:
         request = actuator_pb2.GetActuatorsStateRequest(actuator_ids=actuator_ids)
         response = self.stub.GetActuatorsState(request)
         return response.states
-
-    
