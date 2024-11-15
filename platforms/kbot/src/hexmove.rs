@@ -121,7 +121,14 @@ impl IMU for KBotIMU {
     }
 
     async fn get_quaternion(&self) -> Result<QuaternionResponse> {
-        error!("Quaternion operation not implemented");
-        Err(eyre::eyre!("Not implemented"))
+        debug!("Reading quaternion");
+        let data = self.imu.get_data();
+        Ok(QuaternionResponse {
+            w: data.qw as f64,
+            x: data.qx as f64,
+            y: data.qy as f64,
+            z: data.qz as f64,
+            error: None,
+        })
     }
 }
