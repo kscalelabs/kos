@@ -1,8 +1,10 @@
 """Actuator service client."""
 
+from typing import Any, Dict, List, Optional
+
 import grpc
 from google.longrunning import operations_pb2, operations_pb2_grpc
-from google.protobuf.any_pb2 import Any
+from google.protobuf.any_pb2 import Any as AnyPb2
 
 from kos import actuator_pb2, actuator_pb2_grpc
 from kos.actuator_pb2 import CalibrateActuatorMetadata
@@ -15,17 +17,17 @@ class CalibrationStatus:
 
 
 class CalibrationMetadata:
-    def __init__(self, metadata_any: Any) -> None:
-        self.actuator_id = None
-        self.status = None
+    def __init__(self, metadata_any: AnyPb2) -> None:
+        self.actuator_id: Optional[int] = None
+        self.status: Optional[str] = None
         self.decode_metadata(metadata_any)
 
-    def decode_metadata(self, metadata_any: Any) -> None:
+    def decode_metadata(self, metadata_any: AnyPb2) -> None:
         metadata = CalibrateActuatorMetadata()
         if metadata_any.Is(CalibrateActuatorMetadata.DESCRIPTOR):
             metadata_any.Unpack(metadata)
             self.actuator_id = metadata.actuator_id
-            self.status = metadata.status
+            self.status = metadata.status if metadata.HasField("status") else None
 
     def __str__(self) -> str:
         return f"CalibrationMetadata(actuator_id={self.actuator_id}, status={self.status})"
@@ -56,7 +58,7 @@ class ActuatorServiceClient:
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
 
-    def command_actuators(self, commands: list[dict]) -> list[actuator_pb2.ActionResult]:
+    def command_actuators(self, commands: List[Dict[str, Any]]) -> List[actuator_pb2.ActionResult]:
         """Command multiple actuators at once.
 
         Args:
@@ -72,7 +74,7 @@ class ActuatorServiceClient:
         response = self.stub.CommandActuators(request)
         return response.results
 
-    def configure_actuator(self, actuator_id: int, **kwargs: Any) -> actuator_pb2.ActionResponse:
+    def configure_actuator(self, actuator_id: int, **kwargs: dict[str, Any]) -> actuator_pb2.ActionResponse:
         """Configure an actuator's parameters.
 
         Args:
@@ -88,7 +90,7 @@ class ActuatorServiceClient:
         request = actuator_pb2.ConfigureActuatorRequest(**config)
         return self.stub.ConfigureActuator(request)
 
-    def get_actuators_state(self, actuator_ids: list[int]) -> list[actuator_pb2.ActuatorStateResponse]:
+    def get_actuators_state(self, actuator_ids: List[int]) -> List[actuator_pb2.ActuatorStateResponse]:
         """Get the state of multiple actuators.
 
         Args:

@@ -1,6 +1,8 @@
 # requirements-dev.txt
 
 grpcio-tools
+types-grpcio
+types-protobuf
 
 # python checks
 black
