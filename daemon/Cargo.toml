@@ -29,7 +29,7 @@ kos-kbot = { version = "0.1.0", path = "../platforms/kbot", optional = true }
 kos-zeroth-01 = ["dep:kos-zeroth-01"]
 kos-sim = ["dep:kos-sim"]
 kos-stub = ["dep:kos-stub"]
-default = ["kos-kbot"]
+default = ["kos-stub"]
 
 [[bin]]
 name = "kos"
