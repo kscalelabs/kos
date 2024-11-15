@@ -51,7 +51,7 @@ class ActuatorServiceClient:
         metadata = CalibrationMetadata(response.metadata)
         return metadata
 
-    def get_calibration_status(self, actuator_id: int) -> str:
+    def get_calibration_status(self, actuator_id: int) -> Optional[str]:
         response = self.operations_stub.GetOperation(
             operations_pb2.GetOperationRequest(name=f"operations/calibrate_actuator/{actuator_id}")
         )
@@ -74,7 +74,7 @@ class ActuatorServiceClient:
         response = self.stub.CommandActuators(request)
         return response.results
 
-    def configure_actuator(self, actuator_id: int, **kwargs: dict[str, Any]) -> actuator_pb2.ActionResponse:
+    def configure_actuator(self, actuator_id: int, **kwargs: Dict[str, Any]) -> actuator_pb2.ActionResponse:
         """Configure an actuator's parameters.
 
         Args:

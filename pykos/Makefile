@@ -27,7 +27,12 @@ all:
 # ------------------------ #
 
 generate-proto:
-	python -m grpc_tools.protoc --python_out=. --grpc_python_out=. --proto_path=../kos_core/proto --proto_path=../proto/googleapis ../proto/kos/*
+	python -m grpc_tools.protoc \
+		--python_out=. \
+		--grpc_python_out=. \
+		--proto_path=../kos_core/proto/ \
+		--proto_path=../kos_core/proto/googleapis \
+		../kos_core/proto/kos/*.proto
 .PHONY: generate-proto
 
 
@@ -57,7 +62,7 @@ push-to-pypi: build-for-pypi
 #       Static Checks      #
 # ------------------------ #
 
-py-files := $(shell find . -name '*.py')
+py-files := $(shell find . -name '*.py' -not -path './kos/*' -not -path './pykos/kos/*')
 
 format:
 	@black $(py-files)
@@ -68,7 +73,7 @@ static-checks:
 	@black --diff --check $(py-files)
 	@ruff check $(py-files)
 	@mypy --install-types --non-interactive $(py-files)
-.PHONY: lint
+.PHONY: static-checks
 
 # ------------------------ #
 #        Unit tests        #

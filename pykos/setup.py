@@ -38,6 +38,10 @@ setup(
     tests_require=requirements_dev,
     extras_require={"dev": requirements_dev},
     packages=["pykos"],
+    package_data={
+        "pykos": ["py.typed"],
+    },
+    include_package_data=True,
     entry_points={
         "console_scripts": [
             "pykos=pykos.cli:cli",
