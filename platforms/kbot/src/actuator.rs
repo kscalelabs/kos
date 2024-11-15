@@ -56,7 +56,7 @@ impl Actuator for KBotActuator {
             if let Some(position) = command.position {
                 let result = self.motors_supervisor.set_position(
                     command.actuator_id as u8,
-                    position as f32 * std::f32::consts::PI / 180.0,
+                    position.to_radians() as f32,
                 );
                 motor_result.push(result);
             }
@@ -158,7 +158,7 @@ impl Actuator for KBotActuator {
             .map(|(id, state)| ActuatorStateResponse {
                 actuator_id: u32::from(*id),
                 online: matches!(state.mode, robstride::MotorMode::Motor),
-                position: Some((state.position as f64) * 180.0 / std::f64::consts::PI),
+                position: Some(state.position.to_degrees() as f64),
                 velocity: Some(state.velocity as f64),
                 torque: Some(state.torque as f64),
                 temperature: None,
