@@ -5,7 +5,6 @@ use crate::kos_proto::imu::imu_service_server::ImuService;
 use crate::kos_proto::imu::*;
 use crate::telemetry::Telemetry;
 use crate::telemetry_types::{EulerAngles, ImuValues, Quaternion};
-use eyre::OptionExt;
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use tracing::trace;
@@ -72,7 +71,8 @@ impl ImuService for IMUServiceImpl {
 
         // Convert proto duration to std::time::Duration
         let duration = duration.map(|d| {
-            std::time::Duration::from_nanos(d.nanos as u64) + std::time::Duration::from_secs(d.seconds as u64)
+            std::time::Duration::from_nanos(d.nanos as u64)
+                + std::time::Duration::from_secs(d.seconds as u64)
         });
 
         let max_retries = request.max_retries;

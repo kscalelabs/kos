@@ -10,7 +10,6 @@ use kos_core::{
     kos_proto::common::ActionResponse,
 };
 use std::sync::Arc;
-use std::time::Duration;
 use uuid::Uuid;
 
 pub struct StubIMU {
@@ -68,7 +67,14 @@ impl IMU for StubIMU {
         Ok(operation)
     }
 
-    async fn zero(&self, _duration: Duration) -> Result<ActionResponse> {
+    async fn zero(
+        &self,
+        _duration: Option<std::time::Duration>,
+        _max_retries: Option<u32>,
+        _max_angular_error: Option<f32>,
+        _max_vel: Option<f32>,
+        _max_accel: Option<f32>,
+    ) -> Result<ActionResponse> {
         Ok(ActionResponse {
             success: true,
             error: None,
