@@ -3,7 +3,11 @@ use async_trait::async_trait;
 use eyre::{Result, WrapErr};
 use kos_core::{
     hal::{ActionResponse, Actuator, ActuatorCommand, CalibrateActuatorRequest},
-    kos_proto::{actuator::*, common::{ActionResult, ErrorCode}, common::Error as KosError },
+    kos_proto::{
+        actuator::*,
+        common::Error as KosError,
+        common::{ActionResult, ErrorCode},
+    },
 };
 use std::collections::HashMap;
 
@@ -46,39 +50,36 @@ impl KBotActuator {
 
 #[async_trait]
 impl Actuator for KBotActuator {
-    async fn command_actuators(
-        &self,
-        commands: Vec<ActuatorCommand>,
-    ) -> Result<Vec<ActionResult>> {
+    async fn command_actuators(&self, commands: Vec<ActuatorCommand>) -> Result<Vec<ActionResult>> {
         let mut results = vec![];
         for command in commands {
             let mut motor_result = vec![];
             if let Some(position) = command.position {
-                let result = self.motors_supervisor.set_position(
-                    command.actuator_id as u8,
-                    position.to_radians() as f32,
-                );
+                let result = self
+                    .motors_supervisor
+                    .set_position(command.actuator_id as u8, position.to_radians() as f32);
                 motor_result.push(result);
             }
             if let Some(velocity) = command.velocity {
-                let result = self.motors_supervisor.set_velocity(
-                    command.actuator_id as u8,
-                    velocity as f32,
-                );
+                let result = self
+                    .motors_supervisor
+                    .set_velocity(command.actuator_id as u8, velocity as f32);
                 motor_result.push(result);
             }
             if let Some(torque) = command.torque {
-                let result = self.motors_supervisor.set_torque(
-                    command.actuator_id as u8,
-                    torque as f32,
-                );
+                let result = self
+                    .motors_supervisor
+                    .set_torque(command.actuator_id as u8, torque as f32);
                 motor_result.push(result);
             }
 
             let success = motor_result.iter().all(|r| r.is_ok());
             let error = if !success {
                 Some(KosError {
-                    code: if motor_result.iter().any(|r| matches!(r, Err(e) if e.kind() == std::io::ErrorKind::NotFound)) {
+                    code: if motor_result
+                        .iter()
+                        .any(|r| matches!(r, Err(e) if e.kind() == std::io::ErrorKind::NotFound))
+                    {
                         ErrorCode::InvalidArgument as i32
                     } else {
                         ErrorCode::HardwareFailure as i32
@@ -103,10 +104,7 @@ impl Actuator for KBotActuator {
         Ok(results)
     }
 
-    async fn configure_actuator(
-        &self,
-        config: ConfigureActuatorRequest,
-    ) -> Result<ActionResponse> {
+    async fn configure_actuator(&self, config: ConfigureActuatorRequest) -> Result<ActionResponse> {
         let motor_id = config.actuator_id as u8;
         let mut results = vec![];
 
@@ -125,7 +123,10 @@ impl Actuator for KBotActuator {
         let success = results.iter().all(|r| r.is_ok());
         let error = if !success {
             Some(kos_core::kos_proto::common::Error {
-                code: if results.iter().any(|r| matches!(r, Err(e) if e.kind() == std::io::ErrorKind::NotFound)) {
+                code: if results
+                    .iter()
+                    .any(|r| matches!(r, Err(e) if e.kind() == std::io::ErrorKind::NotFound))
+                {
                     ErrorCode::InvalidArgument as i32
                 } else {
                     ErrorCode::HardwareFailure as i32
