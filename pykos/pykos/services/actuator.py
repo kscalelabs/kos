@@ -48,3 +48,53 @@ class ActuatorServiceClient:
         response = self.operations_stub.GetOperation(operations_pb2.GetOperationRequest(name=f"operations/calibrate_actuator/{actuator_id}"))
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
+
+    def command_actuators(self, commands: list[dict]):
+        """
+        Command multiple actuators at once.
+
+        Args:
+            commands: List of dictionaries containing actuator commands.
+                     Each dict should have 'actuator_id' and optionally 'position',
+                     'velocity', and 'torque'.
+
+        Returns:
+            List of ActionResult objects indicating success/failure for each command.
+        """
+        actuator_commands = [actuator_pb2.ActuatorCommand(**cmd) for cmd in commands]
+        request = actuator_pb2.CommandActuatorsRequest(commands=actuator_commands)
+        response = self.stub.CommandActuators(request)
+        return response.results
+
+    def configure_actuator(self, actuator_id: int, **kwargs):
+        """
+        Configure an actuator's parameters.
+
+        Args:
+            actuator_id: ID of the actuator to configure
+            **kwargs: Configuration parameters that may include:
+                     kp, kd, ki, max_torque, protective_torque,
+                     protection_time, torque_enabled, new_actuator_id
+
+        Returns:
+            ActionResponse indicating success/failure
+        """
+        config = {"actuator_id": actuator_id, **kwargs}
+        request = actuator_pb2.ConfigureActuatorRequest(**config)
+        return self.stub.ConfigureActuator(request)
+
+    def get_actuators_state(self, actuator_ids: list[int]):
+        """
+        Get the state of multiple actuators.
+
+        Args:
+            actuator_ids: List of actuator IDs to query
+
+        Returns:
+            List of ActuatorStateResponse objects containing the state information
+        """
+        request = actuator_pb2.GetActuatorsStateRequest(actuator_ids=actuator_ids)
+        response = self.stub.GetActuatorsState(request)
+        return response.states
+
+    
