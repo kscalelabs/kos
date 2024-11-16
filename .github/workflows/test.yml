@@ -25,9 +25,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Change directory
-        run: cd pykos
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -46,15 +43,18 @@ jobs:
             python-requirements-
 
       - name: Install package
+        working-directory: ./pykos
         run: |
           pip install --upgrade --upgrade-strategy eager --extra-index-url https://download.pytorch.org/whl/cpu -e '.[dev]'
 
       - name: Run static checks
+        working-directory: ./pykos
         run: |
           mkdir -p .mypy_cache
           make static-checks
 
       - name: Run unit tests
+        working-directory: ./pykos
         run: |
           make test
 

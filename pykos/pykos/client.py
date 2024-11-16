@@ -1,10 +1,13 @@
+"""KOS client."""
+
 import grpc
 
-from pykos.services.imu import IMUServiceClient
 from pykos.services.actuator import ActuatorServiceClient
+from pykos.services.imu import IMUServiceClient
+
+
 class KOS:
-    """
-    KOS client
+    """KOS client.
 
     Args:
         ip (str, optional): IP address of the robot running KOS. Defaults to localhost.
@@ -13,15 +16,14 @@ class KOS:
     Attributes:
         imu (IMUServiceClient): Client for the IMU service.
     """
-    def __init__(self, ip: str = "localhost", port: int = 50051):
+
+    def __init__(self, ip: str = "localhost", port: int = 50051) -> None:
         self.ip = ip
         self.port = port
         self.channel = grpc.insecure_channel(f"{self.ip}:{self.port}")
         self.imu = IMUServiceClient(self.channel)
         self.actuator = ActuatorServiceClient(self.channel)
 
-    def close(self):
-        """
-        Close the gRPC channel.
-        """
+    def close(self) -> None:
+        """Close the gRPC channel."""
         self.channel.close()

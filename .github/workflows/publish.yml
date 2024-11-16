@@ -27,9 +27,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Change directory
-        run: cd pykos
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -41,7 +38,9 @@ jobs:
           pip install build wheel
 
       - name: Build package
+        working-directory: ./pykos
         run: python -m build --sdist --wheel --outdir dist/ .
 
       - name: Publish package
+        working-directory: ./pykos
         uses: pypa/gh-action-pypi-publish@release/v1

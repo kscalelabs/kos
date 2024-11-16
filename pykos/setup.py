@@ -3,6 +3,7 @@
 """Setup script for the project."""
 
 import re
+from typing import List
 
 from setuptools import setup
 
@@ -11,11 +12,11 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 
 with open("pykos/requirements.txt", "r", encoding="utf-8") as f:
-    requirements: list[str] = f.read().splitlines()
+    requirements: List[str] = f.read().splitlines()
 
 
 with open("pykos/requirements-dev.txt", "r", encoding="utf-8") as f:
-    requirements_dev: list[str] = f.read().splitlines()
+    requirements_dev: List[str] = f.read().splitlines()
 
 
 with open("pykos/__init__.py", "r", encoding="utf-8") as fh:
@@ -37,6 +38,10 @@ setup(
     tests_require=requirements_dev,
     extras_require={"dev": requirements_dev},
     packages=["pykos"],
+    package_data={
+        "pykos": ["py.typed"],
+    },
+    include_package_data=True,
     entry_points={
         "console_scripts": [
             "pykos=pykos.cli:cli",

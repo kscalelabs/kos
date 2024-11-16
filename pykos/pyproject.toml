@@ -29,14 +29,27 @@ warn_redundant_casts = true
 
 incremental = true
 namespace_packages = false
+exclude = ["kos/.*\\.py$"]
 
 [[tool.mypy.overrides]]
 
 module = [
     "setuptools",
     "setuptools_rust",
+    "grpc",
+    "grpc.*",
+    "google.protobuf.*",
+    "google.longrunning.*",
+    "kos.*",
+    "pykos.*",
+    "kos.actuator_pb2_grpc",
+    "kos.imu_pb2_grpc",
+    "kos.actuator_pb2",
+    "kos.imu_pb2"
 ]
 ignore_missing_imports = true
+follow_imports = "skip"
+disallow_untyped_defs = false
 
 [tool.isort]
 

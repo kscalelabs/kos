@@ -1,3 +1,11 @@
 # requirements-dev.txt
 
 grpcio-tools
+types-protobuf
+
+# python checks
+black
+darglint
+mypy
+pytest
+ruff
