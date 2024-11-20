@@ -1,7 +1,7 @@
 pub use crate::grpc_interface::google::longrunning::*;
 pub use crate::grpc_interface::kos;
 pub use crate::grpc_interface::kos::common::ActionResponse;
-pub use crate::kos_proto::{actuator::*, common::ActionResult, imu::*};
+pub use crate::kos_proto::{actuator::*, common::ActionResult, imu::*, process_manager::*};
 use async_trait::async_trait;
 use eyre::Result;
 use std::fmt::Display;
@@ -31,6 +31,12 @@ pub trait IMU: Send + Sync {
     ) -> Result<ActionResponse>;
     async fn get_euler(&self) -> Result<EulerAnglesResponse>;
     async fn get_quaternion(&self) -> Result<QuaternionResponse>;
+}
+
+#[async_trait]
+pub trait ProcessManager: Send + Sync {
+    async fn start_kclip(&self) -> Result<KClipStartResponse>;
+    async fn stop_kclip(&self) -> Result<KClipStopResponse>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

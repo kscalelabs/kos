@@ -8,9 +8,9 @@ use eyre::Result;
 use lazy_static::lazy_static;
 use rumqttc::{AsyncClient, MqttOptions, QoS};
 use serde::Serialize;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use std::sync::atomic::{AtomicU64, Ordering};
 
 #[derive(Clone)]
 pub struct Telemetry {
@@ -89,7 +89,8 @@ impl Telemetry {
     }
 
     pub fn update_video_timestamp(&self, new_video_timestamp: u64) {
-        self.video_timestamp.store(new_video_timestamp, Ordering::SeqCst);
+        self.video_timestamp
+            .store(new_video_timestamp, Ordering::SeqCst);
     }
 
     pub fn get_frame_number(&self) -> u64 {
@@ -101,7 +102,8 @@ impl Telemetry {
     }
 
     pub fn update_inference_step(&self, new_inference_step: u64) {
-        self.inference_step.store(new_inference_step, Ordering::SeqCst);
+        self.inference_step
+            .store(new_inference_step, Ordering::SeqCst);
     }
 
     pub fn increment_inference_step(&self) {
