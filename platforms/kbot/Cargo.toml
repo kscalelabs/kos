@@ -13,6 +13,10 @@ eyre = "0.6"
 tracing = "0.1"
 async-trait = "0.1"
 robstride = "0.2.9"
+gstreamer = "0.20"
+gstreamer-app = "0.20"
+gstreamer-video = "0.20"
+uuid = "1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-imu = "0.1.6"
+imu = ">=0.1.6"

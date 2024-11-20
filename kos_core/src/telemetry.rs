@@ -97,6 +97,10 @@ impl Telemetry {
         self.frame_number.load(Ordering::SeqCst)
     }
 
+    pub fn increment_frame_number(&self) {
+        self.frame_number.fetch_add(1, Ordering::SeqCst);
+    }
+
     pub fn get_video_timestamp(&self) -> u64 {
         self.video_timestamp.load(Ordering::SeqCst)
     }
