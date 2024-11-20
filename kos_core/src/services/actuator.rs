@@ -43,6 +43,8 @@ impl ActuatorService for ActuatorServiceImpl {
 
         let telemetry = Telemetry::get().await;
         if let Some(telemetry) = telemetry {
+            telemetry.increment_inference_step();
+
             if let Err(e) = telemetry
                 .publish("actuator/command", &telemetry_commands)
                 .await
