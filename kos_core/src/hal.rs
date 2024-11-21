@@ -35,7 +35,7 @@ pub trait IMU: Send + Sync {
 
 #[async_trait]
 pub trait ProcessManager: Send + Sync {
-    async fn start_kclip(&self) -> Result<KClipStartResponse>;
+    async fn start_kclip(&self, action: String) -> Result<KClipStartResponse>;
     async fn stop_kclip(&self) -> Result<KClipStopResponse>;
 }
 

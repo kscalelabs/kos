@@ -1,12 +1,12 @@
 use async_trait::async_trait;
 use eyre::{eyre, Result, WrapErr};
+use gstreamer as gst;
+use gstreamer::prelude::*;
+use gstreamer_app as gst_app;
 use kos_core::hal::{KClipStartResponse, KClipStopResponse, ProcessManager};
 use kos_core::kos_proto::common::{Error, ErrorCode};
 use std::sync::Mutex;
 use uuid::Uuid;
-use gstreamer as gst;
-use gstreamer::prelude::*;
-use gstreamer_app as gst_app;
 
 pub struct KBotProcessManager {
     kclip_uuid: Mutex<Option<String>>,
@@ -16,7 +16,7 @@ pub struct KBotProcessManager {
 impl KBotProcessManager {
     pub fn new() -> Self {
         gst::init().unwrap();
-        
+
         KBotProcessManager {
             kclip_uuid: Mutex::new(None),
             pipeline: Mutex::new(None),
@@ -25,9 +25,9 @@ impl KBotProcessManager {
 
     fn create_pipeline(uuid: &str) -> Result<(gst::Pipeline, gst::Element)> {
         gst::init().wrap_err("Failed to initialize GStreamer")?;
-        
+
         let pipeline = gst::Pipeline::new(None);
-        
+
         // Create elements
         let src = gst::ElementFactory::make("videotestsrc")
             .name("src")
@@ -88,10 +88,12 @@ impl KBotProcessManager {
 
         let appsink = gst_app::AppSink::builder()
             .name("appsink0")
-            .caps(&gst::Caps::builder("video/x-raw")
-                .features(["memory:NVMM"])
-                .field("format", "NV12")
-                .build())
+            .caps(
+                &gst::Caps::builder("video/x-raw")
+                    .features(["memory:NVMM"])
+                    .field("format", "NV12")
+                    .build(),
+            )
             .build();
 
         appsink.set_callbacks(
@@ -99,13 +101,19 @@ impl KBotProcessManager {
                 .new_sample(move |appsink| {
                     let sample = appsink.pull_sample().map_err(|_| gst::FlowError::Error)?;
                     let buffer = sample.buffer().ok_or(gst::FlowError::Error)?;
-                    
+
                     let pts = buffer.pts();
-                    tracing::debug!("New frame PTS: {:?}", pts);
+                    let telemetry = kos_core::telemetry::Telemetry::try_get();
+                    if let Some(telemetry) = telemetry {
+                        if let Some(pts) = pts {
+                            telemetry.update_video_timestamp(pts.nseconds());
+                            telemetry.increment_frame_number();
+                        }
+                    }
 
                     Ok(gst::FlowSuccess::Ok)
                 })
-                .build()
+                .build(),
         );
 
         let encoder = gst::ElementFactory::make("nvv4l2h265enc")
@@ -118,9 +126,7 @@ impl KBotProcessManager {
             .build()
             .wrap_err("Failed to create H265 parser")?;
 
-        let muxer = gst::ElementFactory::make("qtmux")
-            .name("qtmux0")
-            .build()?;
+        let muxer = gst::ElementFactory::make("qtmux").name("qtmux0").build()?;
 
         let sink = gst::ElementFactory::make("filesink")
             .name("filesink0")
@@ -143,7 +149,7 @@ impl KBotProcessManager {
             &muxer,
             &sink,
         ])?;
-        
+
         // Link elements up to tee
         gst::Element::link_many(&[
             &src,
@@ -155,19 +161,10 @@ impl KBotProcessManager {
         ])?;
 
         // Link monitoring branch
-        gst::Element::link_many(&[
-            &queue_monitor,
-            &appsink.upcast_ref(),
-        ])?;
+        gst::Element::link_many(&[&queue_monitor, &appsink.upcast_ref()])?;
 
         // Link recording branch
-        gst::Element::link_many(&[
-            &queue_record,
-            &encoder,
-            &parser,
-            &muxer,
-            &sink,
-        ])?;
+        gst::Element::link_many(&[&queue_record, &encoder, &parser, &muxer, &sink])?;
 
         // Link tee to both queues using proper pad names
         tee.link_pads(Some("src_%u"), &queue_monitor, None)?;
@@ -179,7 +176,7 @@ impl KBotProcessManager {
 
 #[async_trait]
 impl ProcessManager for KBotProcessManager {
-    async fn start_kclip(&self) -> Result<KClipStartResponse> {
+    async fn start_kclip(&self, _action: String) -> Result<KClipStartResponse> {
         let mut kclip_uuid = self.kclip_uuid.lock().unwrap();
         if kclip_uuid.is_some() {
             return Ok(KClipStartResponse {
@@ -195,10 +192,10 @@ impl ProcessManager for KBotProcessManager {
         *kclip_uuid = Some(new_uuid.clone());
 
         let (pipeline, _sink) = Self::create_pipeline(&new_uuid)?;
-        
+
         // Start the pipeline
         pipeline.set_state(gst::State::Playing)?;
-        
+
         let mut pipeline_guard = self.pipeline.lock().unwrap();
         *pipeline_guard = Some(pipeline);
 
@@ -210,18 +207,21 @@ impl ProcessManager for KBotProcessManager {
 
     async fn stop_kclip(&self) -> Result<KClipStopResponse> {
         let mut pipeline_guard = self.pipeline.lock().unwrap();
-        
+
         if let Some(pipeline) = pipeline_guard.as_ref() {
             // Get the bus
-            let bus = pipeline.bus().ok_or_else(|| eyre!("Failed to get pipeline bus"))?;
-            
+            let bus = pipeline
+                .bus()
+                .ok_or_else(|| eyre!("Failed to get pipeline bus"))?;
+
             // Send EOS event
             pipeline.send_event(gst::event::Eos::new());
-            
+
             // Wait for EOS or Error message with timeout
             let timeout = gst::ClockTime::from_seconds(5);
-            let msg = bus.timed_pop_filtered(timeout, &[gst::MessageType::Eos, gst::MessageType::Error]);
-            
+            let msg =
+                bus.timed_pop_filtered(timeout, &[gst::MessageType::Eos, gst::MessageType::Error]);
+
             match msg {
                 Some(msg) => {
                     use gst::MessageView;
@@ -234,9 +234,11 @@ impl ProcessManager for KBotProcessManager {
                                 clip_uuid: None,
                                 error: Some(Error {
                                     code: ErrorCode::Unknown as i32,
-                                    message: format!("Pipeline error: {} ({})", 
-                                        err.error(), 
-                                        err.debug().unwrap_or_default()),
+                                    message: format!(
+                                        "Pipeline error: {} ({})",
+                                        err.error(),
+                                        err.debug().unwrap_or_default()
+                                    ),
                                 }),
                             });
                         }
@@ -265,9 +267,15 @@ impl ProcessManager for KBotProcessManager {
 
             // Get the UUID before clearing
             let uuid = self.kclip_uuid.lock().unwrap().take();
-            
+
             // Clear the pipeline
             *pipeline_guard = None;
+
+            let telemetry = kos_core::telemetry::Telemetry::try_get();
+            if let Some(telemetry) = telemetry {
+                telemetry.update_video_timestamp(0);
+                telemetry.update_frame_number(0);
+            }
 
             Ok(KClipStopResponse {
                 clip_uuid: uuid,

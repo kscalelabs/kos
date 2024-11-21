@@ -60,7 +60,10 @@ impl Default for KBotIMU {
 #[async_trait]
 impl IMU for KBotIMU {
     async fn get_values(&self) -> Result<ImuValuesResponse> {
-        let data = self.imu.get_data().map_err(|e| eyre::eyre!("Failed to get IMU data: {}", e))?;
+        let data = self
+            .imu
+            .get_data()
+            .map_err(|e| eyre::eyre!("Failed to get IMU data: {}", e))?;
         trace!(
             "Reading IMU values, accel x: {}, y: {}, z: {}, angle x: {}, y: {}, z: {}",
             data.x_velocity,
@@ -128,7 +131,10 @@ impl IMU for KBotIMU {
 
     async fn get_euler(&self) -> Result<EulerAnglesResponse> {
         debug!("Reading Euler angles");
-        let data = self.imu.get_data().map_err(|e| eyre::eyre!("Failed to get IMU data: {}", e))?;
+        let data = self
+            .imu
+            .get_data()
+            .map_err(|e| eyre::eyre!("Failed to get IMU data: {}", e))?;
         Ok(EulerAnglesResponse {
             roll: data.x_angle as f64,
             pitch: data.y_angle as f64,
@@ -139,7 +145,10 @@ impl IMU for KBotIMU {
 
     async fn get_quaternion(&self) -> Result<QuaternionResponse> {
         debug!("Reading quaternion");
-        let data = self.imu.get_data().map_err(|e| eyre::eyre!("Failed to get IMU data: {}", e))?;
+        let data = self
+            .imu
+            .get_data()
+            .map_err(|e| eyre::eyre!("Failed to get IMU data: {}", e))?;
         Ok(QuaternionResponse {
             w: data.qw as f64,
             x: data.qx as f64,

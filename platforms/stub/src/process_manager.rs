@@ -19,7 +19,7 @@ impl StubProcessManager {
 
 #[async_trait]
 impl ProcessManager for StubProcessManager {
-    async fn start_kclip(&self) -> Result<KClipStartResponse> {
+    async fn start_kclip(&self, _action: String) -> Result<KClipStartResponse> {
         let mut kclip_uuid = self.kclip_uuid.lock().unwrap();
         if kclip_uuid.is_some() {
             return Ok(KClipStartResponse {

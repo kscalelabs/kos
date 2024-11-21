@@ -22,6 +22,10 @@ pub mod kos {
     pub mod system {
         tonic::include_proto!("kos/kos.system");
     }
+
+    pub mod kclip {
+        tonic::include_proto!("kos/kos.kclip");
+    }
 }
 
 pub mod google {

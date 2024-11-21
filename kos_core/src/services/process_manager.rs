@@ -19,13 +19,13 @@ impl ProcessManagerServiceImpl {
 impl ProcessManagerService for ProcessManagerServiceImpl {
     async fn start_k_clip(
         &self,
-        _request: Request<()>,
+        request: Request<KClipStartRequest>,
     ) -> Result<Response<KClipStartResponse>, Status> {
         trace!("Starting K-Clip");
 
         Ok(Response::new(
             self.process_manager
-                .start_kclip()
+                .start_kclip(request.get_ref().action.clone())
                 .await
                 .map_err(|e| Status::internal(format!("Failed to start K-Clip, {:?}", e)))?,
         ))
