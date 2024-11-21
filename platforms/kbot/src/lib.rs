@@ -62,26 +62,26 @@ impl Platform for KbotPlatform {
                     )),
                 ),
             ),
-            ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
-                Arc::new(
-                    KBotActuator::new(
-                        operations_service,
-                        "/dev/ttyCH341USB0",
-                        HashMap::from([
-                            (1, MotorType::Type04),
-                            (2, MotorType::Type04),
-                            (3, MotorType::Type04),
-                            (4, MotorType::Type04),
-                            (5, MotorType::Type04),
-                            (6, MotorType::Type01),
-                        ]),
-                        None,
-                        None,
-                        None,
-                    )
-                    .wrap_err("Failed to create actuator")?,
-                ),
-            ))),
+            // ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
+            //     Arc::new(
+            //         KBotActuator::new(
+            //             operations_service,
+            //             "/dev/ttyCH341USB0",
+            //             HashMap::from([
+            //                 (1, MotorType::Type04),
+            //                 (2, MotorType::Type04),
+            //                 (3, MotorType::Type04),
+            //                 (4, MotorType::Type04),
+            //                 (5, MotorType::Type04),
+            //                 (6, MotorType::Type01),
+            //             ]),
+            //             None,
+            //             None,
+            //             None,
+            //         )
+            //         .wrap_err("Failed to create actuator")?,
+            //     ),
+            // ))),
             ServiceEnum::ProcessManager(ProcessManagerServiceServer::new(
                 ProcessManagerServiceImpl::new(Arc::new(KBotProcessManager::new())),
             )),
