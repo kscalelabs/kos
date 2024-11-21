@@ -23,7 +23,12 @@ pub struct TelemetryLogger {
 }
 
 impl TelemetryLogger {
-    pub async fn new(uuid: String, action: String, output_path: impl AsRef<Path>) -> Result<Self> {
+    pub async fn new(
+        uuid: String,
+        action: String,
+        output_path: impl AsRef<Path>,
+        robot_name: String,
+    ) -> Result<Self> {
         // Setup MQTT client
         let mut mqtt_options = MqttOptions::new("kos-telemetry-logger", "localhost", 1883);
         mqtt_options.set_keep_alive(std::time::Duration::from_secs(5));
@@ -52,13 +57,22 @@ impl TelemetryLogger {
 
         // Subscribe to relevant topics
         mqtt_client
-            .subscribe("robots/+/imu/values", QoS::AtLeastOnce)
+            .subscribe(
+                format!("robots/{}/imu/values", robot_name),
+                QoS::AtLeastOnce,
+            )
             .await?;
         mqtt_client
-            .subscribe("robots/+/actuator/state", QoS::AtLeastOnce)
+            .subscribe(
+                format!("robots/{}/actuator/state", robot_name),
+                QoS::AtLeastOnce,
+            )
             .await?;
         mqtt_client
-            .subscribe("robots/+/actuator/command", QoS::AtLeastOnce)
+            .subscribe(
+                format!("robots/{}/actuator/command", robot_name),
+                QoS::AtLeastOnce,
+            )
             .await?;
 
         let logger = Self {

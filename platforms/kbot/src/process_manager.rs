@@ -3,24 +3,31 @@ use eyre::{eyre, Result, WrapErr};
 use gstreamer as gst;
 use gstreamer::prelude::*;
 use gstreamer_app as gst_app;
-use kos_core::hal::{KClipStartResponse, KClipStopResponse, ProcessManager};
-use kos_core::kos_proto::common::{Error, ErrorCode};
-use std::sync::Mutex;
+use kos_core::{
+    hal::{KClipStartResponse, KClipStopResponse, ProcessManager},
+    kos_proto::common::{Error, ErrorCode},
+    services::TelemetryLogger,
+};
+use tokio::sync::Mutex;
 use uuid::Uuid;
 
 pub struct KBotProcessManager {
     kclip_uuid: Mutex<Option<String>>,
     pipeline: Mutex<Option<gst::Pipeline>>,
+    telemetry_logger: Mutex<Option<TelemetryLogger>>,
+    robot_name: String,
 }
 
 impl KBotProcessManager {
-    pub fn new() -> Self {
-        gst::init().unwrap();
+    pub fn new(robot_name: String) -> Result<Self> {
+        gst::init().wrap_err("Failed to initialize GStreamer")?;
 
-        KBotProcessManager {
+        Ok(KBotProcessManager {
             kclip_uuid: Mutex::new(None),
             pipeline: Mutex::new(None),
-        }
+            telemetry_logger: Mutex::new(None),
+            robot_name,
+        })
     }
 
     fn create_pipeline(uuid: &str) -> Result<(gst::Pipeline, gst::Element)> {
@@ -176,8 +183,8 @@ impl KBotProcessManager {
 
 #[async_trait]
 impl ProcessManager for KBotProcessManager {
-    async fn start_kclip(&self, _action: String) -> Result<KClipStartResponse> {
-        let mut kclip_uuid = self.kclip_uuid.lock().unwrap();
+    async fn start_kclip(&self, action: String) -> Result<KClipStartResponse> {
+        let mut kclip_uuid = self.kclip_uuid.lock().await;
         if kclip_uuid.is_some() {
             return Ok(KClipStartResponse {
                 clip_uuid: None,
@@ -190,13 +197,27 @@ impl ProcessManager for KBotProcessManager {
 
         let new_uuid = Uuid::new_v4().to_string();
         *kclip_uuid = Some(new_uuid.clone());
+        drop(kclip_uuid);
 
         let (pipeline, _sink) = Self::create_pipeline(&new_uuid)?;
 
         // Start the pipeline
         pipeline.set_state(gst::State::Playing)?;
 
-        let mut pipeline_guard = self.pipeline.lock().unwrap();
+        // Start telemetry logger
+        let logger = TelemetryLogger::new(
+            new_uuid.clone(),
+            action,
+            format!("telemetry_{}.kclip", new_uuid),
+            self.robot_name.clone(),
+        )
+        .await?;
+
+        let mut telemetry_logger = self.telemetry_logger.lock().await;
+        *telemetry_logger = Some(logger);
+        drop(telemetry_logger);
+
+        let mut pipeline_guard = self.pipeline.lock().await;
         *pipeline_guard = Some(pipeline);
 
         Ok(KClipStartResponse {
@@ -206,8 +227,18 @@ impl ProcessManager for KBotProcessManager {
     }
 
     async fn stop_kclip(&self) -> Result<KClipStopResponse> {
-        let mut pipeline_guard = self.pipeline.lock().unwrap();
+        // Take the logger first
+        let logger = {
+            let mut logger_guard = self.telemetry_logger.lock().await;
+            logger_guard.take()
+        };
 
+        // Stop logger if it exists
+        if let Some(logger) = logger {
+            logger.stop().await?;
+        }
+
+        let mut pipeline_guard = self.pipeline.lock().await;
         if let Some(pipeline) = pipeline_guard.as_ref() {
             // Get the bus
             let bus = pipeline
@@ -266,7 +297,10 @@ impl ProcessManager for KBotProcessManager {
             }
 
             // Get the UUID before clearing
-            let uuid = self.kclip_uuid.lock().unwrap().take();
+            let uuid = {
+                let mut uuid_guard = self.kclip_uuid.lock().await;
+                uuid_guard.take()
+            };
 
             // Clear the pipeline
             *pipeline_guard = None;

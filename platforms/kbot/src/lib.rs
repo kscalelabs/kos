@@ -14,7 +14,10 @@ use eyre::{Result, WrapErr};
 use kos_core::hal::Operation;
 use kos_core::kos_proto::actuator::actuator_service_server::ActuatorServiceServer;
 use kos_core::kos_proto::process_manager::process_manager_service_server::ProcessManagerServiceServer;
-use kos_core::{services::{OperationsServiceImpl, ActuatorServiceImpl, ProcessManagerServiceImpl}, Platform, ServiceEnum};
+use kos_core::{
+    services::{ActuatorServiceImpl, OperationsServiceImpl, ProcessManagerServiceImpl},
+    Platform, ServiceEnum,
+};
 use robstride::MotorType;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -53,60 +56,66 @@ impl Platform for KbotPlatform {
         operations_service: Arc<OperationsServiceImpl>,
     ) -> Result<Vec<ServiceEnum>> {
         if cfg!(target_os = "linux") {
+            let robot_name = format!("KBot-{}", self.serial());
+
+            // Create the process manager first and handle any errors
+            let process_manager = KBotProcessManager::new(robot_name)
+                .wrap_err("Failed to initialize GStreamer process manager")?;
+
             Ok(vec![
                 ServiceEnum::Imu(
-                kos_core::kos_proto::imu::imu_service_server::ImuServiceServer::new(
-                    kos_core::services::IMUServiceImpl::new(Arc::new(
-                        KBotIMU::new(operations_service.clone(), "can0", 1, 1)
-                            .wrap_err("Failed to create IMU")?,
-                    )),
+                    kos_core::kos_proto::imu::imu_service_server::ImuServiceServer::new(
+                        kos_core::services::IMUServiceImpl::new(Arc::new(
+                            KBotIMU::new(operations_service.clone(), "can0", 1, 1)
+                                .wrap_err("Failed to create IMU")?,
+                        )),
+                    ),
                 ),
-            ),
-            // ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
-            //     Arc::new(
-            //         KBotActuator::new(
-            //             operations_service,
-            //             "/dev/ttyCH341USB0",
-            //             HashMap::from([
-            //                 (1, MotorType::Type04),
-            //                 (2, MotorType::Type04),
-            //                 (3, MotorType::Type04),
-            //                 (4, MotorType::Type04),
-            //                 (5, MotorType::Type04),
-            //                 (6, MotorType::Type01),
-            //             ]),
-            //             None,
-            //             None,
-            //             None,
-            //         )
-            //         .wrap_err("Failed to create actuator")?,
-            //     ),
-            // ))),
-            ServiceEnum::ProcessManager(ProcessManagerServiceServer::new(
-                ProcessManagerServiceImpl::new(Arc::new(KBotProcessManager::new())),
-            )),
-        ])
+                ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
+                    Arc::new(
+                        KBotActuator::new(
+                            operations_service,
+                            "/dev/ttyCH341USB0",
+                            HashMap::from([
+                                (1, MotorType::Type04),
+                                (2, MotorType::Type04),
+                                (3, MotorType::Type04),
+                                (4, MotorType::Type04),
+                                (5, MotorType::Type04),
+                                (6, MotorType::Type01),
+                            ]),
+                            None,
+                            None,
+                            None,
+                        )
+                        .wrap_err("Failed to create actuator")?,
+                    ),
+                ))),
+                ServiceEnum::ProcessManager(ProcessManagerServiceServer::new(
+                    ProcessManagerServiceImpl::new(Arc::new(process_manager)),
+                )),
+            ])
         } else {
             Ok(vec![ServiceEnum::Actuator(ActuatorServiceServer::new(
                 ActuatorServiceImpl::new(Arc::new(
-                KBotActuator::new(
-                    operations_service,
-                    "/dev/ttyCH341USB0",
-                    HashMap::from([
-                        (1, MotorType::Type04),
-                        (2, MotorType::Type04),
-                        (3, MotorType::Type04),
-                        (4, MotorType::Type04),
-                        (5, MotorType::Type04),
-                        (6, MotorType::Type01),
-                    ]),
-                    None,
-                    None,
-                    None,
-                )
-                .wrap_err("Failed to create actuator")?,
-            )),
-        ))])
+                    KBotActuator::new(
+                        operations_service,
+                        "/dev/ttyCH341USB0",
+                        HashMap::from([
+                            (1, MotorType::Type04),
+                            (2, MotorType::Type04),
+                            (3, MotorType::Type04),
+                            (4, MotorType::Type04),
+                            (5, MotorType::Type04),
+                            (6, MotorType::Type01),
+                        ]),
+                        None,
+                        None,
+                        None,
+                    )
+                    .wrap_err("Failed to create actuator")?,
+                )),
+            ))])
         }
     }
 
