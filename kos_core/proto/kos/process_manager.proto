@@ -11,9 +11,23 @@ option csharp_namespace = "KOS.ProcessManager";
 
 // The ProcessManagerService manages processes like video streaming.
 service ProcessManagerService {
-    // Starts video streaming.
-    rpc StartVideoStreaming(google.protobuf.Empty) returns (kos.common.ActionResponse);
+    // Starts kclip recording.
+    rpc StartKClip(KClipStartRequest) returns (KClipStartResponse);
 
-    // Stops video streaming.
-    rpc StopVideoStreaming(google.protobuf.Empty) returns (kos.common.ActionResponse);
+    // Stops kclip recording.
+    rpc StopKClip(google.protobuf.Empty) returns (KClipStopResponse);
+}
+
+message KClipStartRequest {
+    string action = 1;
+}
+
+message KClipStartResponse {
+    optional string clip_uuid = 1;
+    kos.common.Error error = 2;
+}
+
+message KClipStopResponse {
+    optional string clip_uuid = 1;
+    kos.common.Error error = 2;
 }

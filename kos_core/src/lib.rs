@@ -4,7 +4,6 @@
 pub mod config;
 mod grpc_interface;
 pub mod hal;
-pub mod process_manager;
 pub mod services;
 pub mod telemetry;
 pub mod telemetry_types;
@@ -14,8 +13,9 @@ pub use grpc_interface::kos as kos_proto;
 
 use hal::actuator_service_server::ActuatorServiceServer;
 use hal::imu_service_server::ImuServiceServer;
+use hal::process_manager_service_server::ProcessManagerServiceServer;
 use services::OperationsServiceImpl;
-use services::{ActuatorServiceImpl, IMUServiceImpl};
+use services::{ActuatorServiceImpl, IMUServiceImpl, ProcessManagerServiceImpl};
 use std::fmt::Debug;
 use std::sync::Arc;
 
@@ -29,11 +29,17 @@ impl Debug for IMUServiceImpl {
         write!(f, "IMUServiceImpl")
     }
 }
+impl Debug for ProcessManagerServiceImpl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ProcessManagerServiceImpl")
+    }
+}
 
 #[derive(Debug)]
 pub enum ServiceEnum {
     Actuator(ActuatorServiceServer<ActuatorServiceImpl>),
     Imu(ImuServiceServer<IMUServiceImpl>),
+    ProcessManager(ProcessManagerServiceServer<ProcessManagerServiceImpl>),
 }
 
 pub trait Platform {

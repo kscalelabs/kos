@@ -17,6 +17,9 @@ eyre = "0.6"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tower = "0.5"
+gstreamer = "0.23"
+gstreamer-base = "0.23"
+glib = "0.17"
 
 kos-sim = { version = "0.1.0", path = "../platforms/sim", optional = true }
 kos-stub = { version = "0.1.0", path = "../platforms/stub", optional = true }

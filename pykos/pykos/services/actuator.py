@@ -6,7 +6,7 @@ import grpc
 from google.longrunning import operations_pb2, operations_pb2_grpc
 from google.protobuf.any_pb2 import Any as AnyPb2
 
-from kos import actuator_pb2, actuator_pb2_grpc
+from kos import actuator_pb2, actuator_pb2_grpc, common_pb2
 from kos.actuator_pb2 import CalibrateActuatorMetadata
 
 
@@ -58,7 +58,7 @@ class ActuatorServiceClient:
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
 
-    def command_actuators(self, commands: List[Dict[str, Any]]) -> List[actuator_pb2.ActionResult]:
+    def command_actuators(self, commands: List[Dict[str, Any]]) -> List[common_pb2.ActionResult]:
         """Command multiple actuators at once.
 
         Args:
@@ -74,7 +74,7 @@ class ActuatorServiceClient:
         response = self.stub.CommandActuators(request)
         return response.results
 
-    def configure_actuator(self, actuator_id: int, **kwargs: Dict[str, Any]) -> actuator_pb2.ActionResponse:
+    def configure_actuator(self, actuator_id: int, **kwargs: Dict[str, Any]) -> common_pb2.ActionResult:
         """Configure an actuator's parameters.
 
         Args:
@@ -90,7 +90,7 @@ class ActuatorServiceClient:
         request = actuator_pb2.ConfigureActuatorRequest(**config)
         return self.stub.ConfigureActuator(request)
 
-    def get_actuators_state(self, actuator_ids: List[int]) -> List[actuator_pb2.ActuatorStateResponse]:
+    def get_actuators_state(self, actuator_ids: List[int]) -> List[common_pb2.ActionResult]:
         """Get the state of multiple actuators.
 
         Args:
