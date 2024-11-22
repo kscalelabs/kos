@@ -16,7 +16,6 @@ fn main() {
         "kos/inference.proto",
         "kos/process_manager.proto",
         "kos/system.proto",
-        "kos/kclip.proto",
         "google/longrunning/operations.proto",
     ];
 
