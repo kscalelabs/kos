@@ -56,10 +56,8 @@ impl Platform for KbotPlatform {
         operations_service: Arc<OperationsServiceImpl>,
     ) -> Result<Vec<ServiceEnum>> {
         if cfg!(target_os = "linux") {
-            let robot_name = format!("KBot-{}", self.serial());
-
             // Create the process manager first and handle any errors
-            let process_manager = KBotProcessManager::new(robot_name)
+            let process_manager = KBotProcessManager::new(self.name().to_string(), self.serial())
                 .wrap_err("Failed to initialize GStreamer process manager")?;
 
             Ok(vec![
@@ -71,26 +69,26 @@ impl Platform for KbotPlatform {
                         )),
                     ),
                 ),
-                ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
-                    Arc::new(
-                        KBotActuator::new(
-                            operations_service,
-                            "/dev/ttyCH341USB0",
-                            HashMap::from([
-                                (1, MotorType::Type04),
-                                (2, MotorType::Type04),
-                                (3, MotorType::Type04),
-                                (4, MotorType::Type04),
-                                (5, MotorType::Type04),
-                                (6, MotorType::Type01),
-                            ]),
-                            None,
-                            None,
-                            None,
-                        )
-                        .wrap_err("Failed to create actuator")?,
-                    ),
-                ))),
+                // ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
+                //     Arc::new(
+                //         KBotActuator::new(
+                //             operations_service,
+                //             "/dev/ttyCH341USB0",
+                //             HashMap::from([
+                //                 (1, MotorType::Type04),
+                //                 (2, MotorType::Type04),
+                //                 (3, MotorType::Type04),
+                //                 (4, MotorType::Type04),
+                //                 (5, MotorType::Type04),
+                //                 (6, MotorType::Type01),
+                //             ]),
+                //             None,
+                //             None,
+                //             None,
+                //         )
+                //         .wrap_err("Failed to create actuator")?,
+                //     ),
+                // ))),
                 ServiceEnum::ProcessManager(ProcessManagerServiceServer::new(
                     ProcessManagerServiceImpl::new(Arc::new(process_manager)),
                 )),

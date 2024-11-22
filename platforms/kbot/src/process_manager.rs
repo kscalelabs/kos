@@ -16,10 +16,11 @@ pub struct KBotProcessManager {
     pipeline: Mutex<Option<gst::Pipeline>>,
     telemetry_logger: Mutex<Option<TelemetryLogger>>,
     robot_name: String,
+    robot_serial: String,
 }
 
 impl KBotProcessManager {
-    pub fn new(robot_name: String) -> Result<Self> {
+    pub fn new(robot_name: String, robot_serial: String) -> Result<Self> {
         gst::init().wrap_err("Failed to initialize GStreamer")?;
 
         Ok(KBotProcessManager {
@@ -27,6 +28,7 @@ impl KBotProcessManager {
             pipeline: Mutex::new(None),
             telemetry_logger: Mutex::new(None),
             robot_name,
+            robot_serial,
         })
     }
 
@@ -210,6 +212,7 @@ impl ProcessManager for KBotProcessManager {
             action,
             format!("telemetry_{}.kclip", new_uuid),
             self.robot_name.clone(),
+            self.robot_serial.clone(),
         )
         .await?;
 

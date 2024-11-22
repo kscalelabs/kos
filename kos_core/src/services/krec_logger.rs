@@ -26,6 +26,7 @@ impl TelemetryLogger {
         action: String,
         output_path: impl AsRef<Path>,
         robot_name: String,
+        robot_serial: String,
     ) -> Result<Self> {
         // Setup MQTT client
         let mut mqtt_options = MqttOptions::new("kos-telemetry-logger", "localhost", 1883);
@@ -37,7 +38,7 @@ impl TelemetryLogger {
             uuid,
             task: action,
             robot_platform: robot_name.clone(),
-            robot_serial: String::new(), // Add if available
+            robot_serial: robot_serial.clone(),
             start_timestamp: std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)?
                 .as_nanos() as u64,
