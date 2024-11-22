@@ -8,6 +8,9 @@ use kos_core::{
     kos_proto::common::{Error, ErrorCode},
     services::TelemetryLogger,
 };
+use krec::combine_with_video;
+use std::env;
+use std::path::PathBuf;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -32,9 +35,7 @@ impl KBotProcessManager {
         })
     }
 
-    fn create_pipeline(uuid: &str) -> Result<(gst::Pipeline, gst::Element)> {
-        gst::init().wrap_err("Failed to initialize GStreamer")?;
-
+    fn create_pipeline(video_path: &PathBuf) -> Result<(gst::Pipeline, gst::Element)> {
         let pipeline = gst::Pipeline::new(None);
 
         // Create elements
@@ -139,25 +140,33 @@ impl KBotProcessManager {
 
         let sink = gst::ElementFactory::make("filesink")
             .name("filesink0")
-            .property("location", format!("out_{}.mov", uuid))
-            .build()?;
+            .property(
+                "location",
+                video_path
+                    .to_str()
+                    .ok_or_else(|| eyre!("Invalid video path"))?,
+            )
+            .build()
+            .wrap_err("Failed to create filesink")?;
 
         // Add elements to pipeline
-        pipeline.add_many(&[
-            &src,
-            &videorate,
-            &capsfilter,
-            &nvvidconv,
-            &nvvidconv_caps,
-            &tee,
-            &queue_monitor,
-            &queue_record,
-            &appsink.upcast_ref(),
-            &encoder,
-            &parser,
-            &muxer,
-            &sink,
-        ])?;
+        pipeline
+            .add_many(&[
+                &src,
+                &videorate,
+                &capsfilter,
+                &nvvidconv,
+                &nvvidconv_caps,
+                &tee,
+                &queue_monitor,
+                &queue_record,
+                &appsink.upcast_ref(),
+                &encoder,
+                &parser,
+                &muxer,
+                &sink,
+            ])
+            .wrap_err("Failed to add elements to pipeline")?;
 
         // Link elements up to tee
         gst::Element::link_many(&[
@@ -179,7 +188,40 @@ impl KBotProcessManager {
         tee.link_pads(Some("src_%u"), &queue_monitor, None)?;
         tee.link_pads(Some("src_%u"), &queue_record, None)?;
 
-        Ok((pipeline, sink))
+        Ok((pipeline, appsink.upcast()))
+    }
+
+    // Add a method to get the recordings directory
+    fn recordings_dir() -> PathBuf {
+        // Use XDG_DATA_HOME if set, otherwise default to ~/.local/share/kos/recordings
+        env::var_os("XDG_DATA_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| {
+                let home = env::var_os("HOME")
+                    .map(PathBuf::from)
+                    .unwrap_or_else(|| PathBuf::from("/tmp"));
+                home.join(".local/share")
+            })
+            .join("kos/recordings")
+    }
+
+    // Add a method to ensure the recordings directory exists
+    fn ensure_recordings_dir() -> Result<PathBuf> {
+        let dir = Self::recordings_dir();
+        std::fs::create_dir_all(&dir).wrap_err_with(|| {
+            format!("Failed to create recordings directory: {}", dir.display())
+        })?;
+        Ok(dir)
+    }
+
+    // Add a method to generate paths for a recording
+    fn recording_paths(uuid: &str) -> Result<(PathBuf, PathBuf, PathBuf)> {
+        let dir = Self::ensure_recordings_dir()?;
+        Ok((
+            dir.join(format!("telemetry_{}.kclip", uuid)),
+            dir.join(format!("video_{}.mov", uuid)),
+            dir.join(format!("recording_{}.mkv", uuid)),
+        ))
     }
 }
 
@@ -198,10 +240,12 @@ impl ProcessManager for KBotProcessManager {
         }
 
         let new_uuid = Uuid::new_v4().to_string();
+        let (telemetry_path, video_path, _) = Self::recording_paths(&new_uuid)?;
+
         *kclip_uuid = Some(new_uuid.clone());
         drop(kclip_uuid);
 
-        let (pipeline, _sink) = Self::create_pipeline(&new_uuid)?;
+        let (pipeline, _sink) = Self::create_pipeline(&video_path)?;
 
         // Start the pipeline
         pipeline.set_state(gst::State::Playing)?;
@@ -210,7 +254,7 @@ impl ProcessManager for KBotProcessManager {
         let logger = TelemetryLogger::new(
             new_uuid.clone(),
             action,
-            format!("telemetry_{}.kclip", new_uuid),
+            telemetry_path,
             self.robot_name.clone(),
             self.robot_serial.clone(),
         )
@@ -230,17 +274,35 @@ impl ProcessManager for KBotProcessManager {
     }
 
     async fn stop_kclip(&self) -> Result<KClipStopResponse> {
-        // Take the logger first
-        let logger = {
-            let mut logger_guard = self.telemetry_logger.lock().await;
-            logger_guard.take()
+        // Get the UUID first
+        let uuid = {
+            let mut uuid_guard = self.kclip_uuid.lock().await;
+            uuid_guard.take()
         };
 
-        // Stop logger if it exists
-        if let Some(logger) = logger {
+        // Early return if no recording is active
+        let uuid = match uuid {
+            Some(uuid) => uuid,
+            None => {
+                return Ok(KClipStopResponse {
+                    clip_uuid: None,
+                    error: Some(Error {
+                        code: ErrorCode::InvalidArgument as i32,
+                        message: "No active KClip recording".to_string(),
+                    }),
+                })
+            }
+        };
+
+        // Get the paths
+        let (telemetry_path, video_path, merged_path) = Self::recording_paths(&uuid)?;
+
+        // Stop telemetry logger
+        if let Some(logger) = self.telemetry_logger.lock().await.take() {
             logger.stop().await?;
         }
 
+        // Stop the pipeline
         let mut pipeline_guard = self.pipeline.lock().await;
         if let Some(pipeline) = pipeline_guard.as_ref() {
             // Get the bus
@@ -299,12 +361,6 @@ impl ProcessManager for KBotProcessManager {
                 });
             }
 
-            // Get the UUID before clearing
-            let uuid = {
-                let mut uuid_guard = self.kclip_uuid.lock().await;
-                uuid_guard.take()
-            };
-
             // Clear the pipeline
             *pipeline_guard = None;
 
@@ -314,16 +370,23 @@ impl ProcessManager for KBotProcessManager {
                 telemetry.update_frame_number(0);
             }
 
+            // Merge the video file
+            combine_with_video(
+                video_path.to_str().unwrap(),
+                telemetry_path.to_str().unwrap(),
+                merged_path.to_str().unwrap(),
+            )?;
+
             Ok(KClipStopResponse {
-                clip_uuid: uuid,
+                clip_uuid: Some(uuid),
                 error: None,
             })
         } else {
             Ok(KClipStopResponse {
                 clip_uuid: None,
                 error: Some(Error {
-                    code: ErrorCode::InvalidArgument as i32,
-                    message: "No active KClip recording".to_string(),
+                    code: ErrorCode::Unknown as i32,
+                    message: "Pipeline not found for active recording".to_string(),
                 }),
             })
         }
