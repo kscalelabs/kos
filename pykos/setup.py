@@ -81,7 +81,7 @@ setup(
     },
     setup_requires=["grpcio-tools"],
     cmdclass={
-        'build_py': BuildPyCommand,
-        'egg_info': EggInfoCommand,
+        "build_py": BuildPyCommand,
+        "egg_info": EggInfoCommand,
     },
 )
