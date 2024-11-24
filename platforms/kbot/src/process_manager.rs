@@ -13,6 +13,7 @@ use std::env;
 use std::path::PathBuf;
 use tokio::sync::Mutex;
 use uuid::Uuid;
+use chrono::Local;
 
 pub struct KBotProcessManager {
     kclip_uuid: Mutex<Option<String>>,
@@ -39,17 +40,16 @@ impl KBotProcessManager {
         let pipeline = gst::Pipeline::new(None);
 
         // Create elements
-        let src = gst::ElementFactory::make("videotestsrc")
+        let src = gst::ElementFactory::make("v4l2src")
             .name("src")
-            .property_from_str("pattern", "smpte")
-            .property("is-live", true)
+            .property("device", "/dev/video0")
             .build()
-            .wrap_err("Failed to create videotestsrc")?;
+            .wrap_err("Failed to create v4l2src")?;
 
-        let videorate = gst::ElementFactory::make("videorate")
-            .name("videorate0")
+        let videoscale = gst::ElementFactory::make("videoscale")
+            .name("videoscale0")
             .build()
-            .wrap_err("Failed to create videorate")?;
+            .wrap_err("Failed to create videoscale")?;
 
         let capsfilter = gst::ElementFactory::make("capsfilter")
             .name("capsfilter0")
@@ -58,7 +58,6 @@ impl KBotProcessManager {
                 gst::Caps::builder("video/x-raw")
                     .field("width", 640i32)
                     .field("height", 480i32)
-                    .field("framerate", gst::Fraction::new(30, 1))
                     .build(),
             )
             .build()
@@ -153,7 +152,7 @@ impl KBotProcessManager {
         pipeline
             .add_many(&[
                 &src,
-                &videorate,
+                &videoscale,
                 &capsfilter,
                 &nvvidconv,
                 &nvvidconv_caps,
@@ -171,7 +170,7 @@ impl KBotProcessManager {
         // Link elements up to tee
         gst::Element::link_many(&[
             &src,
-            &videorate,
+            &videoscale,
             &capsfilter,
             &nvvidconv,
             &nvvidconv_caps,
@@ -217,10 +216,11 @@ impl KBotProcessManager {
     // Add a method to generate paths for a recording
     fn recording_paths(uuid: &str) -> Result<(PathBuf, PathBuf, PathBuf)> {
         let dir = Self::ensure_recordings_dir()?;
+        let timestamp = Local::now().format("%Y%m%d_%H%M%S");
         Ok((
-            dir.join(format!("telemetry_{}.kclip", uuid)),
-            dir.join(format!("video_{}.mov", uuid)),
-            dir.join(format!("recording_{}.mkv", uuid)),
+            dir.join(format!("telemetry_{}.krec", uuid)),
+            dir.join(format!("video_{}.mkv", uuid)),
+            dir.join(format!("recording_{}_{}.krec.mkv", timestamp, uuid)),
         ))
     }
 }

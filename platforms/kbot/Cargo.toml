@@ -21,3 +21,4 @@ uuid = "1"
 tokio = { version = "1", features = ["full"] }
 [target.'cfg(target_os = "linux")'.dependencies]
 imu = ">=0.1.6"
+chrono = "0.4"
