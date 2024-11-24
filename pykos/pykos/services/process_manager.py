@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 
 import grpc
 from google.protobuf.empty_pb2 import Empty
-
 from kos import process_manager_pb2_grpc
 from kos.common_pb2 import Error
 from kos.process_manager_pb2 import KClipStartRequest

@@ -27,12 +27,17 @@ all:
 # ------------------------ #
 
 generate-proto:
+	rm -rf kos_protos
 	python -m grpc_tools.protoc \
 		--python_out=. \
 		--grpc_python_out=. \
 		--proto_path=../kos_core/proto/ \
 		--proto_path=../kos_core/proto/googleapis \
 		../kos_core/proto/kos/*.proto
+	mkdir -p kos_protos
+	mv kos/* kos_protos/
+	rm -rf kos
+	touch kos_protos/__init__.py
 .PHONY: generate-proto
 
 
@@ -62,7 +67,7 @@ push-to-pypi: build-for-pypi
 #       Static Checks      #
 # ------------------------ #
 
-py-files := $(shell find . -name '*.py' -not -path './kos/*' -not -path './pykos/kos/*')
+py-files := $(shell find . -name '*.py' -not -path './kos_protos/*' -not -path './pykos/kos_protos/*')
 
 format:
 	@black $(py-files)

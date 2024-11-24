@@ -2,7 +2,6 @@
 
 import grpc
 from google.protobuf.empty_pb2 import Empty
-
 from kos import imu_pb2, imu_pb2_grpc
 
 
