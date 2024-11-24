@@ -8,10 +8,10 @@ use krec::{
 };
 use prost::Message;
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS};
+use serde::Deserialize;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 struct ActuatorCommandData {
@@ -192,7 +192,6 @@ impl TelemetryLogger {
                         }
                     }
 
-
                     // Check if inference step has increased
                     let mut current = current_step.lock().await;
                     if frame.inference_step > *current {
@@ -205,10 +204,7 @@ impl TelemetryLogger {
                             if let Err(e) = krec.save(&output_path) {
                                 tracing::warn!("Failed to save KRec file: {}", e);
                             } else {
-                                tracing::debug!(
-                                "Saved {} frames to KRec file",
-                                krec.frames.len()
-                                );
+                                tracing::debug!("Saved {} frames to KRec file", krec.frames.len());
                             }
                         }
                         // Reset frame for next step
