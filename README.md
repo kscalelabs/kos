@@ -26,6 +26,11 @@ cross build --release --target aarch64-unknown-linux-gnu --features kscale_pro
 RUST_LOG=debug cargo run --features stub
 ```
 
+You can specify logging levels for individual modules by adding `module_name=log_level` to the `RUST_LOG` environment variable. For example:
+```bash
+RUST_LOG=debug,krec=warn cargo run --features stub
+```
+
 ## Contributing
 - Use `cargo fmt --all` to format the code.
 - Use `cargo clippy` to check for lint errors.

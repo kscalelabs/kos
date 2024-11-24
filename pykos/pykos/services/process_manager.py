@@ -1,4 +1,5 @@
-"""Process manager service client"""
+"""Process manager service client."""
+
 from typing import Optional, Tuple
 
 import grpc

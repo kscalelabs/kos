@@ -8,9 +8,26 @@ use krec::{
 };
 use prost::Message;
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS};
+use serde::Deserialize;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+
+#[derive(Deserialize, Debug)]
+struct ActuatorCommandData {
+    frame_number: u64,
+    video_timestamp: u64,
+    inference_step: u64,
+    data: Vec<ActuatorCommandItem>,
+}
+
+#[derive(Deserialize, Debug)]
+struct ActuatorCommandItem {
+    actuator_id: u32,
+    position: Option<f64>,
+    velocity: Option<f64>,
+    torque: Option<f64>,
+}
 
 pub struct TelemetryLogger {
     krec: Arc<Mutex<KRec>>,
@@ -50,22 +67,21 @@ impl TelemetryLogger {
         let current_inference_step = Arc::new(Mutex::new(0));
         let current_frame = Arc::new(Mutex::new(KRecFrame::default()));
 
-        // Subscribe to relevant topics
         mqtt_client
             .subscribe(
-                format!("robots/{}/imu/values", robot_name),
+                format!("robots/{}-{}/imu/values", robot_name, robot_serial),
                 QoS::AtLeastOnce,
             )
             .await?;
         mqtt_client
             .subscribe(
-                format!("robots/{}/actuator/state", robot_name),
+                format!("robots/{}-{}/actuator/state", robot_name, robot_serial),
                 QoS::AtLeastOnce,
             )
             .await?;
         mqtt_client
             .subscribe(
-                format!("robots/{}/actuator/command", robot_name),
+                format!("robots/{}-{}/actuator/command", robot_name, robot_serial),
                 QoS::AtLeastOnce,
             )
             .await?;
@@ -121,6 +137,8 @@ impl TelemetryLogger {
                                 },
                                 quaternion: None,
                             });
+                        } else {
+                            tracing::error!("Failed to decode ImuValuesResponse {:?}", payload);
                         }
                     } else if topic.contains("/imu/quaternion") {
                         if let Ok(quat) = QuaternionResponse::decode(payload.as_ref()) {
@@ -136,6 +154,8 @@ impl TelemetryLogger {
                                     w: quat.w,
                                 });
                             }
+                        } else {
+                            tracing::error!("Failed to decode QuaternionResponse {:?}", payload);
                         }
                     } else if topic.contains("/actuator/state") {
                         if let Ok(state) = ActuatorStateResponse::decode(payload.as_ref()) {
@@ -149,16 +169,26 @@ impl TelemetryLogger {
                                 voltage: state.voltage,
                                 current: state.current,
                             });
+                        } else {
+                            tracing::error!("Failed to decode ActuatorStateResponse {:?}", payload);
                         }
                     } else if topic.contains("/actuator/command") {
-                        if let Ok(command) = ActuatorCommand::decode(payload.as_ref()) {
-                            frame.inference_step = *current_step.lock().await + 1;
-                            frame.actuator_commands.push(ActuatorCommand {
-                                actuator_id: command.actuator_id,
-                                position: command.position as f32,
-                                velocity: command.velocity as f32,
-                                torque: command.torque as f32,
-                            });
+                        match serde_json::from_slice::<ActuatorCommandData>(&payload) {
+                            Ok(command_data) => {
+                                frame.inference_step = command_data.inference_step;
+                                for item in command_data.data {
+                                    frame.actuator_commands.push(ActuatorCommand {
+                                        actuator_id: item.actuator_id,
+                                        position: item.position.unwrap_or_default() as f32,
+                                        velocity: item.velocity.unwrap_or_default() as f32,
+                                        torque: item.torque.unwrap_or_default() as f32,
+                                    });
+                                }
+                                tracing::debug!("Parsed actuator command: {:?}", frame);
+                            }
+                            Err(e) => {
+                                tracing::error!("Failed to parse actuator command JSON: {:?}", e);
+                            }
                         }
                     }
 
@@ -166,19 +196,15 @@ impl TelemetryLogger {
                     let mut current = current_step.lock().await;
                     if frame.inference_step > *current {
                         // Add frame to KRec
-                        if let Ok(mut krec) = krec_clone.try_lock() {
-                            krec.add_frame(frame.clone());
+                        let mut krec = krec_clone.lock().await;
+                        krec.add_frame(frame.clone());
 
-                            // Save every 500 frames
-                            if krec.frames.len() % 500 == 0 {
-                                if let Err(e) = krec.save(&output_path) {
-                                    tracing::warn!("Failed to save KRec file: {}", e);
-                                } else {
-                                    tracing::debug!(
-                                        "Saved {} frames to KRec file",
-                                        krec.frames.len()
-                                    );
-                                }
+                        // Save every 500 frames
+                        if krec.frames.len() % 500 == 0 {
+                            if let Err(e) = krec.save(&output_path) {
+                                tracing::warn!("Failed to save KRec file: {}", e);
+                            } else {
+                                tracing::debug!("Saved {} frames to KRec file", krec.frames.len());
                             }
                         }
                         // Reset frame for next step

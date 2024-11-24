@@ -90,7 +90,7 @@ class ActuatorServiceClient:
         request = actuator_pb2.ConfigureActuatorRequest(**config)
         return self.stub.ConfigureActuator(request)
 
-    def get_actuators_state(self, actuator_ids: List[int] = None) -> List[common_pb2.ActionResult]:
+    def get_actuators_state(self, actuator_ids: Optional[List[int]] = None) -> List[common_pb2.ActionResult]:
         """Get the state of multiple actuators.
 
         Args:

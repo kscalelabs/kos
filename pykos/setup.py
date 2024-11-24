@@ -37,7 +37,7 @@ setup(
     install_requires=requirements,
     tests_require=requirements_dev,
     extras_require={"dev": requirements_dev},
-    packages=["pykos"],
+    packages=["pykos", "kos"],
     package_data={
         "pykos": ["py.typed"],
     },

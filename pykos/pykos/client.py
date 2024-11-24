@@ -6,6 +6,7 @@ from pykos.services.actuator import ActuatorServiceClient
 from pykos.services.imu import IMUServiceClient
 from pykos.services.process_manager import ProcessManagerServiceClient
 
+
 class KOS:
     """KOS client.
 
