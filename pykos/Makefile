@@ -40,8 +40,16 @@ generate-proto:
 	touch kos_protos/__init__.py
 
 	# Fix imports in all generated files
-	find kos_protos -type f -name "*.py" -exec sed -i '' 's/from kos/from kos_protos/g' {} +
-	find kos_protos -type f -name "*.py" -exec sed -i '' 's/import kos/import kos_protos/g' {} +
+	case "$$(uname)" in \
+		Darwin) \
+			find kos_protos -type f -name "*.py" -exec sed -i '' 's/from kos/from kos_protos/g' {} + && \
+			find kos_protos -type f -name "*.py" -exec sed -i '' 's/import kos/import kos_protos/g' {} + \
+			;; \
+		*) \
+			find kos_protos -type f -name "*.py" -exec sed -i 's/from kos/from kos_protos/g' {} + && \
+			find kos_protos -type f -name "*.py" -exec sed -i 's/import kos/import kos_protos/g' {} + \
+			;; \
+	esac
 .PHONY: generate-proto
 
 
