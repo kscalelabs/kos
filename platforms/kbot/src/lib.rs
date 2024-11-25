@@ -75,12 +75,19 @@ impl Platform for KbotPlatform {
                         KBotActuator::new(
                             operations_service,
                             HashMap::from([
-                                ("/dev/ttyCH341USB1", HashMap::from([
+                                ("/dev/ttyCH341USB0", HashMap::from([
                                     (1, MotorType::Type03),
                                     (2, MotorType::Type03),
                                     (3, MotorType::Type01),
                                     (4, MotorType::Type01),
                                     (5, MotorType::Type01),
+                                ])),
+                                ("/dev/ttyCH341USB1", HashMap::from([
+                                    (6, MotorType::Type03),
+                                    (7, MotorType::Type03),
+                                    (8, MotorType::Type01),
+                                    (9, MotorType::Type01),
+                                    (10, MotorType::Type01),
                                 ])),
                             ]),
                             None,
