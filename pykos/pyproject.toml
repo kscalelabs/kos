@@ -65,10 +65,9 @@ target-version = "py310"
 
 [tool.ruff.lint]
 
-select = ["ANN", "D", "E", "F", "I", "N", "PGH", "PLC", "PLE", "PLR", "PLW", "W"]
+select = ["ANN", "D", "E", "F", "G", "I", "N", "PGH", "PLC", "PLE", "PLR", "PLW", "TID", "W"]
 
 ignore = [
-    "ANN101", "ANN102",
     "D101", "D102", "D103", "D104", "D105", "D106", "D107",
     "N812", "N817",
     "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004",
@@ -83,7 +82,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.isort]
 
-known-first-party = ["pykos", "tests"]
+known-first-party = ["pykos", "kos_protos", "tests"]
 combine-as-imports = true
 
 [tool.ruff.lint.pydocstyle]
