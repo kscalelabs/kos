@@ -92,7 +92,7 @@ impl Platform for KbotPlatform {
                             ]),
                             None,
                             None,
-                            None,
+                            True,
                         )
                         .wrap_err("Failed to create actuator")?,
                     ),
