@@ -31,6 +31,17 @@ You can specify logging levels for individual modules by adding `module_name=log
 RUST_LOG=debug,krec=warn cargo run --features stub
 ```
 
+### List of features (--features / -F flag)
+Features are how you specify the specific platform to run K-OS on (e.g. -F kos-kbot when running on K-Bot)
+- kos-kbot
+- zeroth-01 (not finished)
+- sim (not finished)
+
+## Adding a new embodiment
+Reference the existing platforms / features in [platforms](platforms).
+
+You essentially create another package (Cargo.toml, lib.rs, etc) with the necessary actuator and imu implementations according to the specifications in [kos-core](kos-core/src/services)
+
 ## Contributing
 - Use `cargo fmt --all` to format the code.
 - Use `cargo clippy` to check for lint errors.
