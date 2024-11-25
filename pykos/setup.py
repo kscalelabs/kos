@@ -68,7 +68,7 @@ setup(
     python_requires=">=3.8",
     install_requires=requirements,
     extras_require={"dev": requirements_dev},
-    packages=["pykos", "kos_protos"],
+    packages=["pykos", "pykos.services", "kos_protos"],
     package_data={
         "pykos": ["py.typed"],
         "kos_protos": ["py.typed"],
