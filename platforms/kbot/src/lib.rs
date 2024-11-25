@@ -74,17 +74,25 @@ impl Platform for KbotPlatform {
                     Arc::new(
                         KBotActuator::new(
                             operations_service,
-                            "/dev/ttyCH341USB1",
                             HashMap::from([
-                                (1, MotorType::Type03),
-                                (2, MotorType::Type03),
-                                (3, MotorType::Type01),
-                                (4, MotorType::Type01),
-                                (5, MotorType::Type01),
+                                ("/dev/ttyCH341USB0", HashMap::from([
+                                    (1, MotorType::Type03),
+                                    (2, MotorType::Type03),
+                                    (3, MotorType::Type01),
+                                    (4, MotorType::Type01),
+                                    (5, MotorType::Type01),
+                                ])),
+                                ("/dev/ttyCH341USB1", HashMap::from([
+                                    (11, MotorType::Type03),
+                                    (12, MotorType::Type03),
+                                    (13, MotorType::Type01),
+                                    (14, MotorType::Type01),
+                                    (15, MotorType::Type01),
+                                ])),
                             ]),
                             None,
                             None,
-                            None,
+                            True,
                         )
                         .wrap_err("Failed to create actuator")?,
                     ),
@@ -98,14 +106,15 @@ impl Platform for KbotPlatform {
                 ActuatorServiceImpl::new(Arc::new(
                     KBotActuator::new(
                         operations_service,
-                        "/dev/ttyCH341USB0",
                         HashMap::from([
-                            (1, MotorType::Type04),
-                            (2, MotorType::Type04),
-                            (3, MotorType::Type04),
-                            (4, MotorType::Type04),
-                            (5, MotorType::Type04),
-                            (6, MotorType::Type01),
+                            ("/dev/ttyCH341USB0", HashMap::from([
+                                (1, MotorType::Type04),
+                                (2, MotorType::Type04), 
+                                (3, MotorType::Type04),
+                                (4, MotorType::Type04),
+                                (5, MotorType::Type04),
+                                (6, MotorType::Type01),
+                            ])),
                         ]),
                         None,
                         None,
