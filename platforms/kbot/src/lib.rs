@@ -99,14 +99,15 @@ impl Platform for KbotPlatform {
                 ActuatorServiceImpl::new(Arc::new(
                     KBotActuator::new(
                         operations_service,
-                        "/dev/ttyCH341USB0",
                         HashMap::from([
-                            (1, MotorType::Type04),
-                            (2, MotorType::Type04),
-                            (3, MotorType::Type04),
-                            (4, MotorType::Type04),
-                            (5, MotorType::Type04),
-                            (6, MotorType::Type01),
+                            ("/dev/ttyCH341USB0", HashMap::from([
+                                (1, MotorType::Type04),
+                                (2, MotorType::Type04), 
+                                (3, MotorType::Type04),
+                                (4, MotorType::Type04),
+                                (5, MotorType::Type04),
+                                (6, MotorType::Type01),
+                            ])),
                         ]),
                         None,
                         None,
