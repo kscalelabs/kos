@@ -14,37 +14,67 @@ use std::collections::HashMap;
 use robstride::{MotorType, MotorsSupervisor};
 
 pub struct KBotActuator {
-    motors_supervisor: MotorsSupervisor,
+    motors_supervisors: HashMap<String, MotorsSupervisor>,
+    motor_id_map: HashMap<u32, (String, u8)>,
 }
 
 impl KBotActuator {
     pub fn new(
         _operations_service: Arc<OperationsServiceImpl>,
-        port: &str,
-        motor_infos: HashMap<u32, MotorType>,
+        port_motor_map: HashMap<&str, HashMap<u32, MotorType>>,
         verbose: Option<bool>,
         max_update_rate: Option<u32>,
         zero_on_init: Option<bool>,
     ) -> Result<Self> {
-        let motor_infos_u8 = motor_infos
+        let mut motor_id_map = HashMap::new();
+        
+        let motors_supervisors = port_motor_map
             .into_iter()
-            .map(|(k, v)| {
-                let id =
-                    u8::try_from(k).wrap_err_with(|| format!("Motor ID {} too large for u8", k))?;
-                Ok((id, v))
+            .map(|(port, motor_infos)| {
+                for motor_id in motor_infos.keys() {
+                    if motor_id_map.insert(*motor_id, (port.to_string(), *motor_id as u8)).is_some() {
+                        return Err(eyre::eyre!("Duplicate motor ID: {}", motor_id));
+                    }
+                }
+
+                let motor_infos_u8 = motor_infos
+                    .into_iter()
+                    .map(|(k, v)| {
+                        let id = u8::try_from(k)
+                            .wrap_err_with(|| format!("Motor ID {} too large for u8", k))?;
+                        Ok((id, v))
+                    })
+                    .collect::<Result<HashMap<_, _>>>()?;
+
+                let supervisor = MotorsSupervisor::new(
+                    port,
+                    &motor_infos_u8,
+                    verbose.unwrap_or(false),
+                    max_update_rate.unwrap_or(100000) as f64,
+                    zero_on_init.unwrap_or(false),
+                )
+                .map_err(|e| eyre::eyre!("Failed to create motors supervisor for port {}: {}", port, e))?;
+
+                Ok((port.to_string(), supervisor))
             })
             .collect::<Result<HashMap<_, _>>>()?;
 
-        let motors_supervisor = MotorsSupervisor::new(
-            port,
-            &motor_infos_u8,
-            verbose.unwrap_or(false),
-            max_update_rate.unwrap_or(100000) as f64,
-            zero_on_init.unwrap_or(false),
-        )
-        .map_err(|e| eyre::eyre!("Failed to create motors supervisor: {}", e))?;
+        Ok(KBotActuator { 
+            motors_supervisors,
+            motor_id_map,
+        })
+    }
 
-        Ok(KBotActuator { motors_supervisor })
+    pub fn get_supervisor_for_motor(&self, motor_id: u32) -> Result<(&MotorsSupervisor, u8)> {
+        let (port, local_id) = self.motor_id_map
+            .get(&motor_id)
+            .ok_or_else(|| eyre::eyre!("Motor ID {} not found", motor_id))?;
+            
+        let supervisor = self.motors_supervisors
+            .get(port)
+            .ok_or_else(|| eyre::eyre!("Supervisor for port {} not found", port))?;
+
+        Ok((supervisor, *local_id))
     }
 }
 
@@ -53,23 +83,33 @@ impl Actuator for KBotActuator {
     async fn command_actuators(&self, commands: Vec<ActuatorCommand>) -> Result<Vec<ActionResult>> {
         let mut results = vec![];
         for command in commands {
+            let motor_id = command.actuator_id as u32;
+            let (supervisor, local_id) = match self.get_supervisor_for_motor(motor_id) {
+                Ok(supervisor_info) => supervisor_info,
+                Err(e) => {
+                    results.push(ActionResult {
+                        actuator_id: command.actuator_id,
+                        success: false,
+                        error: Some(KosError {
+                            code: ErrorCode::InvalidArgument as i32,
+                            message: e.to_string(),
+                        }),
+                    });
+                    continue;
+                }
+            };
+
             let mut motor_result = vec![];
             if let Some(position) = command.position {
-                let result = self
-                    .motors_supervisor
-                    .set_position(command.actuator_id as u8, position.to_radians() as f32);
+                let result = supervisor.set_position(local_id, position.to_radians() as f32);
                 motor_result.push(result);
             }
             if let Some(velocity) = command.velocity {
-                let result = self
-                    .motors_supervisor
-                    .set_velocity(command.actuator_id as u8, velocity as f32);
+                let result = supervisor.set_velocity(local_id, velocity as f32);
                 motor_result.push(result);
             }
             if let Some(torque) = command.torque {
-                let result = self
-                    .motors_supervisor
-                    .set_torque(command.actuator_id as u8, torque as f32);
+                let result = supervisor.set_torque(local_id, torque as f32);
                 motor_result.push(result);
             }
 
@@ -105,18 +145,24 @@ impl Actuator for KBotActuator {
     }
 
     async fn configure_actuator(&self, config: ConfigureActuatorRequest) -> Result<ActionResponse> {
-        let motor_id = config.actuator_id as u8;
-        let mut results = vec![];
+        let (supervisor, local_id) = match self.get_supervisor_for_motor(config.actuator_id as u32) {
+            Ok(supervisor_info) => supervisor_info,
+            Err(e) => return Ok(ActionResponse {
+                success: false,
+                error: Some(KosError {
+                    code: ErrorCode::InvalidArgument as i32,
+                    message: e.to_string(),
+                }),
+            }),
+        };
 
-        // Configure KP if provided
+        let mut results = vec![];
         if let Some(kp) = config.kp {
-            let result = self.motors_supervisor.set_kp(motor_id, kp as f32);
+            let result = supervisor.set_kp(local_id, kp as f32);
             results.push(result);
         }
-
-        // Configure KD if provided
         if let Some(kd) = config.kd {
-            let result = self.motors_supervisor.set_kd(motor_id, kd as f32);
+            let result = supervisor.set_kd(local_id, kd as f32);
             results.push(result);
         }
 
@@ -153,7 +199,10 @@ impl Actuator for KBotActuator {
         &self,
         _actuator_ids: Vec<u32>,
     ) -> Result<Vec<ActuatorStateResponse>> {
-        let feedback = self.motors_supervisor.get_latest_feedback();
+        let feedback = self.motors_supervisors
+            .values()
+            .flat_map(|supervisor| supervisor.get_latest_feedback())
+            .collect::<HashMap<_, _>>();
         Ok(feedback
             .iter()
             .map(|(id, state)| ActuatorStateResponse {
