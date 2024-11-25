@@ -176,6 +176,9 @@ impl TelemetryLogger {
                         match serde_json::from_slice::<ActuatorCommandData>(&payload) {
                             Ok(command_data) => {
                                 frame.inference_step = command_data.inference_step;
+                                frame.video_timestamp = command_data.video_timestamp;
+                                frame.frame_number = command_data.frame_number;
+
                                 for item in command_data.data {
                                     frame.actuator_commands.push(ActuatorCommand {
                                         actuator_id: item.actuator_id,
@@ -197,6 +200,7 @@ impl TelemetryLogger {
                     if frame.inference_step > *current {
                         // Add frame to KRec
                         let mut krec = krec_clone.lock().await;
+
                         krec.add_frame(frame.clone());
 
                         // Save every 500 frames
