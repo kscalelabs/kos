@@ -42,10 +42,13 @@ module = [
     "google.longrunning.*",
     "kos.*",
     "pykos.*",
-    "kos.actuator_pb2_grpc",
-    "kos.imu_pb2_grpc",
-    "kos.actuator_pb2",
-    "kos.imu_pb2"
+    "kos_protos.actuator_pb2_grpc",
+    "kos_protos.process_manager_pb2_grpc",
+    "kos_protos.imu_pb2_grpc",
+    "kos_protos.common_pb2",
+    "kos_protos.actuator_pb2",
+    "kos_protos.process_manager_pb2",
+    "kos_protos.imu_pb2"
 ]
 ignore_missing_imports = true
 follow_imports = "skip"
