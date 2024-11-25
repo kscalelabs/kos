@@ -4,9 +4,9 @@ from typing import Optional, Tuple
 
 import grpc
 from google.protobuf.empty_pb2 import Empty
-from kos import process_manager_pb2_grpc
-from kos.common_pb2 import Error
-from kos.process_manager_pb2 import KClipStartRequest
+from kos_protos import process_manager_pb2_grpc
+from kos_protos.common_pb2 import Error
+from kos_protos.process_manager_pb2 import KClipStartRequest
 
 
 class ProcessManagerServiceClient:
