@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 import grpc
 from google.longrunning import operations_pb2, operations_pb2_grpc
 from google.protobuf.any_pb2 import Any as AnyPb2
+
 from kos_protos import actuator_pb2, actuator_pb2_grpc, common_pb2
 from kos_protos.actuator_pb2 import CalibrateActuatorMetadata
 
