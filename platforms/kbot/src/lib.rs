@@ -11,7 +11,7 @@ pub use hexmove::*;
 pub use process_manager::*;
 
 use async_trait::async_trait;
-use eyre::{Result, WrapErr};
+use eyre::WrapErr;
 use kos_core::hal::Operation;
 use kos_core::kos_proto::actuator::actuator_service_server::ActuatorServiceServer;
 use kos_core::kos_proto::process_manager::process_manager_service_server::ProcessManagerServiceServer;
@@ -19,7 +19,6 @@ use kos_core::{
     services::{ActuatorServiceImpl, OperationsServiceImpl, ProcessManagerServiceImpl},
     Platform, ServiceEnum,
 };
-use std::collections::HashMap;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;

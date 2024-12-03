@@ -115,6 +115,16 @@ impl Actuator for KBotActuator {
             }
         }
 
+        if let Some(zero_position) = config.zero_position {
+            if zero_position {
+                supervisor.zero(motor_id).await?;
+            }
+        }
+
+        if let Some(new_actuator_id) = config.new_actuator_id {
+            supervisor.change_id(motor_id, new_actuator_id as u8).await?;
+        }
+
         let success = result.is_ok();
         let error = result.err().map(|e| KosError {
             code: ErrorCode::HardwareFailure as i32,
