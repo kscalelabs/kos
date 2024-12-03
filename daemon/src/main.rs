@@ -46,7 +46,7 @@ async fn run_server(
     let addr = "0.0.0.0:50051".parse()?;
     let mut server_builder = Server::builder();
 
-    let services = platform.create_services(operations_service.clone())?;
+    let services = platform.create_services(operations_service.clone()).await?;
 
     let operations_service = OperationsServer::new(operations_service);
 
@@ -72,7 +72,9 @@ async fn main() -> Result<()> {
                 .add_directive("h2=error".parse().unwrap())
                 .add_directive("grpc=error".parse().unwrap())
                 .add_directive("rumqttc=error".parse().unwrap())
-                .add_directive("kos_core::telemetry=error".parse().unwrap()),
+                .add_directive("kos_core::telemetry=error".parse().unwrap())
+                .add_directive("polling=error".parse().unwrap())
+                .add_directive("async_io=error".parse().unwrap()),
         )
         .init();
 

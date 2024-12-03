@@ -1,6 +1,6 @@
 use crate::{Arc, Operation, OperationsServiceImpl};
 use async_trait::async_trait;
-use eyre::{Result, WrapErr};
+use eyre::Result;
 use kos_core::{
     hal::{ActionResponse, Actuator, ActuatorCommand, CalibrateActuatorRequest},
     kos_proto::{
@@ -9,42 +9,53 @@ use kos_core::{
         common::{ActionResult, ErrorCode},
     },
 };
-use std::collections::HashMap;
 
-use robstride::{MotorType, MotorsSupervisor};
+use robstridev2::{CH341Transport, ControlConfig, SocketCanTransport, Supervisor, TransportType};
+use std::time::Duration;
+use tokio::sync::Mutex;
 
 pub struct KBotActuator {
-    motors_supervisor: MotorsSupervisor,
+    supervisor: Arc<Mutex<Supervisor>>,
 }
 
 impl KBotActuator {
-    pub fn new(
+    pub async fn new(
         _operations_service: Arc<OperationsServiceImpl>,
-        port: &str,
-        motor_infos: HashMap<u32, MotorType>,
-        verbose: Option<bool>,
-        max_update_rate: Option<u32>,
-        zero_on_init: Option<bool>,
+        ports: Vec<&str>,
+        motors_timeout: Duration,
     ) -> Result<Self> {
-        let motor_infos_u8 = motor_infos
-            .into_iter()
-            .map(|(k, v)| {
-                let id =
-                    u8::try_from(k).wrap_err_with(|| format!("Motor ID {} too large for u8", k))?;
-                Ok((id, v))
-            })
-            .collect::<Result<HashMap<_, _>>>()?;
+        let mut supervisor = Supervisor::new(motors_timeout)?;
 
-        let motors_supervisor = MotorsSupervisor::new(
-            port,
-            &motor_infos_u8,
-            verbose.unwrap_or(false),
-            max_update_rate.unwrap_or(100000) as f64,
-            zero_on_init.unwrap_or(false),
-        )
-        .map_err(|e| eyre::eyre!("Failed to create motors supervisor: {}", e))?;
+        for port in ports.clone() {
+            if port.starts_with("/dev/tty") {
+                let serial = CH341Transport::new(port.to_string()).await?;
+                supervisor
+                    .add_transport(format!("{}", port), TransportType::CH341(serial))
+                    .await?;
+            } else if port.starts_with("can") {
+                let can = SocketCanTransport::new(port.to_string()).await?;
+                supervisor
+                    .add_transport(format!("{}", port), TransportType::SocketCAN(can))
+                    .await?;
+            } else {
+                return Err(eyre::eyre!("Invalid port: {}", port));
+            }
+        }
 
-        Ok(KBotActuator { motors_supervisor })
+        let mut supervisor_runner = supervisor.clone_controller();
+        let _supervisor_handle = tokio::spawn(async move {
+            if let Err(e) = supervisor_runner.run().await {
+                tracing::error!("Supervisor task failed: {}", e);
+            }
+        });
+
+        for port in ports.clone() {
+            supervisor.scan_bus(0xFD, port).await?;
+        }
+
+        Ok(KBotActuator {
+            supervisor: Arc::new(Mutex::new(supervisor)),
+        })
     }
 }
 
@@ -53,47 +64,25 @@ impl Actuator for KBotActuator {
     async fn command_actuators(&self, commands: Vec<ActuatorCommand>) -> Result<Vec<ActionResult>> {
         let mut results = vec![];
         for command in commands {
-            let mut motor_result = vec![];
-            if let Some(position) = command.position {
-                let result = self
-                    .motors_supervisor
-                    .set_position(command.actuator_id as u8, position.to_radians() as f32);
-                motor_result.push(result);
-            }
-            if let Some(velocity) = command.velocity {
-                let result = self
-                    .motors_supervisor
-                    .set_velocity(command.actuator_id as u8, velocity as f32);
-                motor_result.push(result);
-            }
-            if let Some(torque) = command.torque {
-                let result = self
-                    .motors_supervisor
-                    .set_torque(command.actuator_id as u8, torque as f32);
-                motor_result.push(result);
-            }
+            let motor_id = command.actuator_id as u8;
+            let mut supervisor = self.supervisor.lock().await;
+            let result = supervisor
+                .command(
+                    motor_id,
+                    command
+                        .position
+                        .map(|p| p.to_radians() as f32)
+                        .unwrap_or(0.0),
+                    command.velocity.map(|v| v as f32).unwrap_or(0.0),
+                    command.torque.map(|t| t as f32).unwrap_or(0.0),
+                )
+                .await;
 
-            let success = motor_result.iter().all(|r| r.is_ok());
-            let error = if !success {
-                Some(KosError {
-                    code: if motor_result
-                        .iter()
-                        .any(|r| matches!(r, Err(e) if e.kind() == std::io::ErrorKind::NotFound))
-                    {
-                        ErrorCode::InvalidArgument as i32
-                    } else {
-                        ErrorCode::HardwareFailure as i32
-                    },
-                    message: motor_result
-                        .iter()
-                        .filter_map(|r| r.as_ref().err())
-                        .map(|e| e.to_string())
-                        .collect::<Vec<_>>()
-                        .join("; "),
-                })
-            } else {
-                None
-            };
+            let success = result.is_ok();
+            let error = result.err().map(|e| KosError {
+                code: ErrorCode::HardwareFailure as i32,
+                message: e.to_string(),
+            });
 
             results.push(ActionResult {
                 actuator_id: command.actuator_id,
@@ -106,41 +95,31 @@ impl Actuator for KBotActuator {
 
     async fn configure_actuator(&self, config: ConfigureActuatorRequest) -> Result<ActionResponse> {
         let motor_id = config.actuator_id as u8;
-        let mut results = vec![];
 
-        // Configure KP if provided
-        if let Some(kp) = config.kp {
-            let result = self.motors_supervisor.set_kp(motor_id, kp as f32);
-            results.push(result);
-        }
-
-        // Configure KD if provided
-        if let Some(kd) = config.kd {
-            let result = self.motors_supervisor.set_kd(motor_id, kd as f32);
-            results.push(result);
-        }
-
-        let success = results.iter().all(|r| r.is_ok());
-        let error = if !success {
-            Some(kos_core::kos_proto::common::Error {
-                code: if results
-                    .iter()
-                    .any(|r| matches!(r, Err(e) if e.kind() == std::io::ErrorKind::NotFound))
-                {
-                    ErrorCode::InvalidArgument as i32
-                } else {
-                    ErrorCode::HardwareFailure as i32
-                },
-                message: results
-                    .iter()
-                    .filter_map(|r| r.as_ref().err())
-                    .map(|e| e.to_string())
-                    .collect::<Vec<_>>()
-                    .join("; "),
-            })
-        } else {
-            None
+        let control_config = ControlConfig {
+            kp: config.kp.unwrap_or(0.0) as f32,
+            kd: config.kd.unwrap_or(0.0) as f32,
+            max_torque: Some(2.0),
+            max_velocity: Some(5.0),
+            max_current: Some(10.0),
         };
+
+        let mut supervisor = self.supervisor.lock().await;
+        let result = supervisor.configure(motor_id, control_config).await;
+
+        if let Some(torque_enabled) = config.torque_enabled {
+            if torque_enabled {
+                supervisor.enable(motor_id).await?;
+            } else {
+                supervisor.disable(motor_id, true).await?;
+            }
+        }
+
+        let success = result.is_ok();
+        let error = result.err().map(|e| KosError {
+            code: ErrorCode::HardwareFailure as i32,
+            message: e.to_string(),
+        });
 
         Ok(ActionResponse { success, error })
     }
@@ -151,21 +130,24 @@ impl Actuator for KBotActuator {
 
     async fn get_actuators_state(
         &self,
-        _actuator_ids: Vec<u32>,
+        actuator_ids: Vec<u32>,
     ) -> Result<Vec<ActuatorStateResponse>> {
-        let feedback = self.motors_supervisor.get_latest_feedback();
-        Ok(feedback
-            .iter()
-            .map(|(id, state)| ActuatorStateResponse {
-                actuator_id: u32::from(*id),
-                online: matches!(state.mode, robstride::MotorMode::Motor),
-                position: Some(state.position.to_degrees() as f64),
-                velocity: Some(state.velocity as f64),
-                torque: Some(state.torque as f64),
-                temperature: None,
-                voltage: None,
-                current: None,
-            })
-            .collect())
+        let mut responses = vec![];
+        for id in actuator_ids {
+            let supervisor = self.supervisor.lock().await;
+            if let Ok(Some((feedback, ts))) = supervisor.get_feedback(id as u8).await {
+                responses.push(ActuatorStateResponse {
+                    actuator_id: id,
+                    online: ts.elapsed().unwrap_or(Duration::from_secs(1)) < Duration::from_secs(1),
+                    position: Some(feedback.angle as f64),
+                    velocity: Some(feedback.velocity as f64),
+                    torque: Some(feedback.torque as f64),
+                    temperature: Some(feedback.temperature as f64),
+                    voltage: None,
+                    current: None,
+                });
+            }
+        }
+        Ok(responses)
     }
 }

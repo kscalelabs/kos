@@ -11,12 +11,16 @@ pub mod telemetry_types;
 pub use grpc_interface::google as google_proto;
 pub use grpc_interface::kos as kos_proto;
 
+use async_trait::async_trait;
+use eyre::Result;
 use hal::actuator_service_server::ActuatorServiceServer;
 use hal::imu_service_server::ImuServiceServer;
 use hal::process_manager_service_server::ProcessManagerServiceServer;
 use services::OperationsServiceImpl;
 use services::{ActuatorServiceImpl, IMUServiceImpl, ProcessManagerServiceImpl};
 use std::fmt::Debug;
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 
 impl Debug for ActuatorServiceImpl {
@@ -42,14 +46,15 @@ pub enum ServiceEnum {
     ProcessManager(ProcessManagerServiceServer<ProcessManagerServiceImpl>),
 }
 
-pub trait Platform {
+#[async_trait]
+pub trait Platform: Send + Sync {
     fn name(&self) -> &'static str;
     fn serial(&self) -> String;
     fn initialize(&mut self, operations_service: Arc<OperationsServiceImpl>) -> eyre::Result<()>;
-    fn create_services(
-        &self,
+    fn create_services<'a>(
+        &'a self,
         operations_service: Arc<OperationsServiceImpl>,
-    ) -> eyre::Result<Vec<ServiceEnum>>;
+    ) -> Pin<Box<dyn Future<Output = eyre::Result<Vec<ServiceEnum>>> + Send + 'a>>;
     fn shutdown(&mut self) -> eyre::Result<()>;
 }
 
