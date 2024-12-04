@@ -74,7 +74,8 @@ async fn main() -> Result<()> {
                 .add_directive("rumqttc=error".parse().unwrap())
                 .add_directive("kos_core::telemetry=error".parse().unwrap())
                 .add_directive("polling=error".parse().unwrap())
-                .add_directive("async_io=error".parse().unwrap()),
+                .add_directive("async_io=error".parse().unwrap())
+                .add_directive("krec=error".parse().unwrap()),
         )
         .init();
 

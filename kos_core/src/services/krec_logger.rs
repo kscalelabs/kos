@@ -29,6 +29,26 @@ struct ActuatorCommandItem {
     torque: Option<f64>,
 }
 
+#[derive(Deserialize, Debug)]
+struct ActuatorStateData {
+    actuator_id: u32,
+    online: bool,
+    position: Option<f64>,
+    velocity: Option<f64>,
+    torque: Option<f64>,
+    temperature: Option<f64>,
+    voltage: Option<f32>,
+    current: Option<f32>,
+}
+
+#[derive(Deserialize, Debug)]
+struct ActuatorStateList {
+    frame_number: u64,
+    video_timestamp: u64,
+    inference_step: u64,
+    data: Vec<ActuatorStateData>,
+}
+
 pub struct TelemetryLogger {
     krec: Arc<Mutex<KRec>>,
     _mqtt_client: AsyncClient,
@@ -158,19 +178,24 @@ impl TelemetryLogger {
                             tracing::error!("Failed to decode QuaternionResponse {:?}", payload);
                         }
                     } else if topic.contains("/actuator/state") {
-                        if let Ok(state) = ActuatorStateResponse::decode(payload.as_ref()) {
-                            frame.actuator_states.push(ActuatorState {
-                                actuator_id: state.actuator_id,
-                                online: state.online,
-                                position: state.position,
-                                velocity: state.velocity,
-                                torque: state.torque,
-                                temperature: state.temperature,
-                                voltage: state.voltage,
-                                current: state.current,
-                            });
-                        } else {
-                            tracing::error!("Failed to decode ActuatorStateResponse {:?}", payload);
+                        match serde_json::from_slice::<ActuatorStateList>(&payload) {
+                            Ok(state_list) => {
+                                for state in state_list.data {
+                                    frame.actuator_states.push(ActuatorState {
+                                        actuator_id: state.actuator_id,
+                                        online: state.online,
+                                        position: state.position,
+                                        velocity: state.velocity,
+                                        torque: state.torque,
+                                        temperature: state.temperature,
+                                        voltage: state.voltage,
+                                        current: state.current,
+                                    });
+                                }
+                            }
+                            Err(e) => {
+                                tracing::error!("Failed to parse actuator state JSON: {:?}", e);
+                            }
                         }
                     } else if topic.contains("/actuator/command") {
                         match serde_json::from_slice::<ActuatorCommandData>(&payload) {
@@ -187,7 +212,6 @@ impl TelemetryLogger {
                                         torque: item.torque.unwrap_or_default() as f32,
                                     });
                                 }
-                                tracing::debug!("Parsed actuator command: {:?}", frame);
                             }
                             Err(e) => {
                                 tracing::error!("Failed to parse actuator command JSON: {:?}", e);
