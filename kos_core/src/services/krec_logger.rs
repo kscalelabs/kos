@@ -202,7 +202,12 @@ impl TelemetryLogger {
                             Ok(command_data) => {
                                 frame.inference_step = command_data.inference_step;
                                 frame.video_timestamp = command_data.video_timestamp;
-                                frame.frame_number = command_data.frame_number;
+                                frame.video_frame_number = command_data.frame_number;
+                                frame.real_timestamp = std::time::SystemTime::now()
+                                    .duration_since(std::time::UNIX_EPOCH)
+                                    .unwrap_or_default()
+                                    .as_nanos()
+                                    as u64;
 
                                 for item in command_data.data {
                                     frame.actuator_commands.push(ActuatorCommand {
