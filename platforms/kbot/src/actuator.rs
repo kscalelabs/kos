@@ -52,7 +52,9 @@ impl KBotActuator {
         });
 
         for port in ports.clone() {
-            supervisor.scan_bus(0xFD, port, desired_actuator_types).await?;
+            supervisor
+                .scan_bus(0xFD, port, desired_actuator_types)
+                .await?;
         }
 
         Ok(KBotActuator {
@@ -75,7 +77,10 @@ impl Actuator for KBotActuator {
                         .position
                         .map(|p| p.to_radians() as f32)
                         .unwrap_or(0.0),
-                    command.velocity.map(|v| v.to_radians() as f32).unwrap_or(0.0),
+                    command
+                        .velocity
+                        .map(|v| v.to_radians() as f32)
+                        .unwrap_or(0.0),
                     command.torque.map(|t| t as f32).unwrap_or(0.0),
                 )
                 .await;
@@ -124,7 +129,9 @@ impl Actuator for KBotActuator {
         }
 
         if let Some(new_actuator_id) = config.new_actuator_id {
-            supervisor.change_id(motor_id, new_actuator_id as u8).await?;
+            supervisor
+                .change_id(motor_id, new_actuator_id as u8)
+                .await?;
         }
 
         let success = result.is_ok();
