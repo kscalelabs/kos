@@ -75,7 +75,7 @@ impl Actuator for KBotActuator {
                         .position
                         .map(|p| p.to_radians() as f32)
                         .unwrap_or(0.0),
-                    command.velocity.map(|v| v as f32).unwrap_or(0.0),
+                    command.velocity.map(|v| v.to_radians() as f32).unwrap_or(0.0),
                     command.torque.map(|t| t as f32).unwrap_or(0.0),
                 )
                 .await;
@@ -151,8 +151,8 @@ impl Actuator for KBotActuator {
                 responses.push(ActuatorStateResponse {
                     actuator_id: id,
                     online: ts.elapsed().unwrap_or(Duration::from_secs(1)) < Duration::from_secs(1),
-                    position: Some(feedback.angle as f64),
-                    velocity: Some(feedback.velocity as f64),
+                    position: Some(feedback.angle.to_degrees() as f64),
+                    velocity: Some(feedback.velocity.to_degrees() as f64),
                     torque: Some(feedback.torque as f64),
                     temperature: Some(feedback.temperature as f64),
                     voltage: None,
