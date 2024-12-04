@@ -22,9 +22,11 @@ impl KBotActuator {
     pub async fn new(
         _operations_service: Arc<OperationsServiceImpl>,
         ports: Vec<&str>,
-        motors_timeout: Duration,
+        actuator_timeout: Duration,
+        polling_interval: Duration,
+        desired_actuator_types: &[(u8, robstridev2::ActuatorType)],
     ) -> Result<Self> {
-        let mut supervisor = Supervisor::new(motors_timeout)?;
+        let mut supervisor = Supervisor::new(actuator_timeout)?;
 
         for port in ports.clone() {
             if port.starts_with("/dev/tty") {
@@ -44,13 +46,15 @@ impl KBotActuator {
 
         let mut supervisor_runner = supervisor.clone_controller();
         let _supervisor_handle = tokio::spawn(async move {
-            if let Err(e) = supervisor_runner.run().await {
+            if let Err(e) = supervisor_runner.run(polling_interval).await {
                 tracing::error!("Supervisor task failed: {}", e);
             }
         });
 
         for port in ports.clone() {
-            supervisor.scan_bus(0xFD, port).await?;
+            supervisor
+                .scan_bus(0xFD, port, desired_actuator_types)
+                .await?;
         }
 
         Ok(KBotActuator {
@@ -73,7 +77,10 @@ impl Actuator for KBotActuator {
                         .position
                         .map(|p| p.to_radians() as f32)
                         .unwrap_or(0.0),
-                    command.velocity.map(|v| v as f32).unwrap_or(0.0),
+                    command
+                        .velocity
+                        .map(|v| v.to_radians() as f32)
+                        .unwrap_or(0.0),
                     command.torque.map(|t| t as f32).unwrap_or(0.0),
                 )
                 .await;
@@ -115,6 +122,18 @@ impl Actuator for KBotActuator {
             }
         }
 
+        if let Some(zero_position) = config.zero_position {
+            if zero_position {
+                supervisor.zero(motor_id).await?;
+            }
+        }
+
+        if let Some(new_actuator_id) = config.new_actuator_id {
+            supervisor
+                .change_id(motor_id, new_actuator_id as u8)
+                .await?;
+        }
+
         let success = result.is_ok();
         let error = result.err().map(|e| KosError {
             code: ErrorCode::HardwareFailure as i32,
@@ -139,8 +158,8 @@ impl Actuator for KBotActuator {
                 responses.push(ActuatorStateResponse {
                     actuator_id: id,
                     online: ts.elapsed().unwrap_or(Duration::from_secs(1)) < Duration::from_secs(1),
-                    position: Some(feedback.angle as f64),
-                    velocity: Some(feedback.velocity as f64),
+                    position: Some(feedback.angle.to_degrees() as f64),
+                    velocity: Some(feedback.velocity.to_degrees() as f64),
                     torque: Some(feedback.torque as f64),
                     temperature: Some(feedback.temperature as f64),
                     voltage: None,
