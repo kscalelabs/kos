@@ -22,9 +22,11 @@ impl KBotActuator {
     pub async fn new(
         _operations_service: Arc<OperationsServiceImpl>,
         ports: Vec<&str>,
-        motors_timeout: Duration,
+        actuator_timeout: Duration,
+        polling_interval: Duration,
+        desired_actuator_types: &[(u8, robstridev2::ActuatorType)],
     ) -> Result<Self> {
-        let mut supervisor = Supervisor::new(motors_timeout)?;
+        let mut supervisor = Supervisor::new(actuator_timeout)?;
 
         for port in ports.clone() {
             if port.starts_with("/dev/tty") {
@@ -44,13 +46,13 @@ impl KBotActuator {
 
         let mut supervisor_runner = supervisor.clone_controller();
         let _supervisor_handle = tokio::spawn(async move {
-            if let Err(e) = supervisor_runner.run().await {
+            if let Err(e) = supervisor_runner.run(polling_interval).await {
                 tracing::error!("Supervisor task failed: {}", e);
             }
         });
 
         for port in ports.clone() {
-            supervisor.scan_bus(0xFD, port).await?;
+            supervisor.scan_bus(0xFD, port, desired_actuator_types).await?;
         }
 
         Ok(KBotActuator {

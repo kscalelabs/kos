@@ -13,7 +13,7 @@ eyre = "0.6"
 krec = "0.2"
 tracing = "0.1"
 async-trait = "0.1"
-robstridev2 = "0.1"
+robstridev2 = { version = "0.1", path = "../../../robstride" }
 gstreamer = "0.20"
 gstreamer-app = "0.20"
 gstreamer-video = "0.20"

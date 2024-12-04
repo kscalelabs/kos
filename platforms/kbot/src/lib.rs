@@ -5,6 +5,7 @@ mod process_manager;
 mod hexmove;
 
 pub use actuator::*;
+pub use robstridev2::ActuatorType;
 
 #[cfg(target_os = "linux")]
 pub use hexmove::*;
@@ -65,9 +66,21 @@ impl Platform for KbotPlatform {
                         .wrap_err("Failed to initialize GStreamer process manager")?;
 
                 let actuator =
-                    KBotActuator::new(operations_service, vec!["can0"], Duration::from_secs(1))
-                        .await
-                        .wrap_err("Failed to create actuator")?;
+                    KBotActuator::new(
+                        operations_service,
+                        vec!["can0"],
+                        Duration::from_secs(1),
+                        Duration::from_nanos(3_333_333),
+                        &[(1, robstridev2::ActuatorType::RobStride04),
+                        (1, ActuatorType::RobStride04),  // Left Hip
+                        (2, robstridev2::ActuatorType::RobStride03),  // Left Knee
+                        (3, robstridev2::ActuatorType::RobStride03),  // Right Hip
+                        (4, robstridev2::ActuatorType::RobStride04),  // Right Knee
+                        (5, robstridev2::ActuatorType::RobStride02),  // Torso
+                    ],
+                )
+                .await
+                    .wrap_err("Failed to create actuator")?;
 
                 Ok(vec![
                     ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
@@ -79,9 +92,15 @@ impl Platform for KbotPlatform {
                 ])
             } else {
                 let actuator =
-                    KBotActuator::new(operations_service, vec!["can0"], Duration::from_secs(1))
-                        .await
-                        .wrap_err("Failed to create actuator")?;
+                    KBotActuator::new(
+                        operations_service,
+                        vec!["can0"],
+                        Duration::from_secs(1),
+                        Duration::from_nanos(3_333_333),
+                        &[(1, robstridev2::ActuatorType::RobStride04)],
+                    )
+                    .await
+                    .wrap_err("Failed to create actuator")?;
 
                 Ok(vec![ServiceEnum::Actuator(ActuatorServiceServer::new(
                     ActuatorServiceImpl::new(Arc::new(actuator)),
