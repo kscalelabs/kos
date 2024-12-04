@@ -27,6 +27,7 @@ impl KBotActuator {
         desired_actuator_types: &[(u8, robstridev2::ActuatorType)],
     ) -> Result<Self> {
         let mut supervisor = Supervisor::new(actuator_timeout)?;
+        let mut found_motors = vec![false; desired_actuator_types.len()];
 
         for port in ports.clone() {
             if port.starts_with("/dev/tty") {
@@ -52,9 +53,25 @@ impl KBotActuator {
         });
 
         for port in ports.clone() {
-            supervisor
+            let discovered_ids = supervisor
                 .scan_bus(0xFD, port, desired_actuator_types)
                 .await?;
+            
+            for (idx, (motor_id, _)) in desired_actuator_types.iter().enumerate() {
+                if discovered_ids.contains(motor_id) {
+                    found_motors[idx] = true;
+                }
+            }
+        }
+
+        for (idx, (motor_id, motor_type)) in desired_actuator_types.iter().enumerate() {
+            if !found_motors[idx] {
+                tracing::warn!(
+                    "Configured motor not found - ID: {}, Type: {:?}",
+                    motor_id,
+                    motor_type
+                );
+            }
         }
 
         Ok(KBotActuator {

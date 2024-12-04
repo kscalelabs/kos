@@ -80,7 +80,7 @@ impl Platform for KbotPlatform {
                     ],
                     Duration::from_secs(1),
                     // Duration::from_nanos(3_333_333),
-                    Duration::from_millis(10),
+                    Duration::from_millis(5),
                     &[
                         // Left Arm
                         (1, ActuatorType::RobStride03),
@@ -96,18 +96,18 @@ impl Platform for KbotPlatform {
                         (14, ActuatorType::RobStride02),
                         (15, ActuatorType::RobStride02),
                         (16, ActuatorType::RobStride00),
-                        // // Left Leg
-                        // (21, ActuatorType::RobStride04),
-                        // (22, ActuatorType::RobStride03),
-                        // (23, ActuatorType::RobStride03),
-                        // (24, ActuatorType::RobStride04),
-                        // (25, ActuatorType::RobStride02),
-                        // // Right Leg
-                        // (31, ActuatorType::RobStride04),
-                        // (32, ActuatorType::RobStride03),
-                        // (33, ActuatorType::RobStride03),
-                        // (34, ActuatorType::RobStride04),
-                        // (35, ActuatorType::RobStride02),
+                        // Left Leg
+                        (21, ActuatorType::RobStride04),
+                        (22, ActuatorType::RobStride03),
+                        (23, ActuatorType::RobStride03),
+                        (24, ActuatorType::RobStride04),
+                        (25, ActuatorType::RobStride02),
+                        // Right Leg
+                        (31, ActuatorType::RobStride04),
+                        (32, ActuatorType::RobStride03),
+                        (33, ActuatorType::RobStride03),
+                        (34, ActuatorType::RobStride04),
+                        (35, ActuatorType::RobStride02),
                     ],
                 )
                 .await
