@@ -67,36 +67,41 @@ impl Platform for KbotPlatform {
 
                 let actuator = KBotActuator::new(
                     operations_service,
-                    vec!["can0"],
+                    vec![
+                        "/dev/ttyCH341USB0",
+                        "/dev/ttyCH341USB1",
+                        "/dev/ttyCH341USB2",
+                        "/dev/ttyCH341USB3",
+                    ],
                     Duration::from_secs(1),
                     Duration::from_nanos(3_333_333),
                     &[
-                        // Right Leg
-                        (10, ActuatorType::RobStride04),
+                        // Left Arm
+                        (1, ActuatorType::RobStride03),
+                        (2, ActuatorType::RobStride03),
+                        (3, ActuatorType::RobStride02),
+                        (4, ActuatorType::RobStride02),
+                        (5, ActuatorType::RobStride02),
+                        (6, ActuatorType::RobStride00),
+                        // Right Arm
                         (11, ActuatorType::RobStride03),
                         (12, ActuatorType::RobStride03),
-                        (13, ActuatorType::RobStride04),
+                        (13, ActuatorType::RobStride02),
                         (14, ActuatorType::RobStride02),
+                        (15, ActuatorType::RobStride02),
+                        (16, ActuatorType::RobStride00),
                         // Left Leg
-                        (20, ActuatorType::RobStride04),
-                        (21, ActuatorType::RobStride03),
+                        (21, ActuatorType::RobStride04),
                         (22, ActuatorType::RobStride03),
-                        (23, ActuatorType::RobStride04),
-                        (24, ActuatorType::RobStride02),
-                        // Right Arm
-                        (30, ActuatorType::RobStride03),
-                        (31, ActuatorType::RobStride03),
-                        (32, ActuatorType::RobStride02),
-                        (33, ActuatorType::RobStride02),
-                        (34, ActuatorType::RobStride02),
-                        (35, ActuatorType::RobStride00),
-                        // Left Arm
-                        (40, ActuatorType::RobStride03),
-                        (41, ActuatorType::RobStride03),
-                        (42, ActuatorType::RobStride02),
-                        (43, ActuatorType::RobStride02),
-                        (44, ActuatorType::RobStride02),
-                        (45, ActuatorType::RobStride00),
+                        (23, ActuatorType::RobStride03),
+                        (24, ActuatorType::RobStride04),
+                        (25, ActuatorType::RobStride02),
+                        // Right Leg
+                        (31, ActuatorType::RobStride04),
+                        (32, ActuatorType::RobStride03),
+                        (33, ActuatorType::RobStride03),
+                        (34, ActuatorType::RobStride04),
+                        (35, ActuatorType::RobStride02),
                     ],
                 )
                 .await
