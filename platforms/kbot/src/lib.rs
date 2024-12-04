@@ -80,7 +80,7 @@ impl Platform for KbotPlatform {
                     ],
                     Duration::from_secs(1),
                     // Duration::from_nanos(3_333_333),
-                    Duration::from_millis(5),
+                    Duration::from_millis(7),
                     &[
                         // Left Arm
                         (1, ActuatorType::RobStride03),
@@ -88,14 +88,14 @@ impl Platform for KbotPlatform {
                         (3, ActuatorType::RobStride02),
                         (4, ActuatorType::RobStride02),
                         (5, ActuatorType::RobStride02),
-                        (6, ActuatorType::RobStride00),
+                        // (6, ActuatorType::RobStride00),
                         // Right Arm
                         (11, ActuatorType::RobStride03),
                         (12, ActuatorType::RobStride03),
                         (13, ActuatorType::RobStride02),
                         (14, ActuatorType::RobStride02),
                         (15, ActuatorType::RobStride02),
-                        (16, ActuatorType::RobStride00),
+                        // (16, ActuatorType::RobStride00),
                         // Left Leg
                         (21, ActuatorType::RobStride04),
                         (22, ActuatorType::RobStride03),
