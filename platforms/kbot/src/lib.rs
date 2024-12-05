@@ -83,31 +83,31 @@ impl Platform for KbotPlatform {
                     Duration::from_millis(7),
                     &[
                         // Left Arm
-                        (1, ActuatorType::RobStride03),
-                        (2, ActuatorType::RobStride03),
-                        (3, ActuatorType::RobStride02),
-                        (4, ActuatorType::RobStride02),
-                        (5, ActuatorType::RobStride02),
-                        // (6, ActuatorType::RobStride00),
-                        // Right Arm
                         (11, ActuatorType::RobStride03),
                         (12, ActuatorType::RobStride03),
                         (13, ActuatorType::RobStride02),
                         (14, ActuatorType::RobStride02),
                         (15, ActuatorType::RobStride02),
-                        // (16, ActuatorType::RobStride00),
-                        // Left Leg
-                        (21, ActuatorType::RobStride04),
+                        (16, ActuatorType::RobStride00),
+                        // Right Arm
+                        (21, ActuatorType::RobStride03),
                         (22, ActuatorType::RobStride03),
-                        (23, ActuatorType::RobStride03),
-                        (24, ActuatorType::RobStride04),
+                        (23, ActuatorType::RobStride02),
+                        (24, ActuatorType::RobStride02),
                         (25, ActuatorType::RobStride02),
-                        // Right Leg
+                        (26, ActuatorType::RobStride00),
+                        // Left Leg
                         (31, ActuatorType::RobStride04),
                         (32, ActuatorType::RobStride03),
                         (33, ActuatorType::RobStride03),
                         (34, ActuatorType::RobStride04),
                         (35, ActuatorType::RobStride02),
+                        // Right Leg
+                        (41, ActuatorType::RobStride04),
+                        (42, ActuatorType::RobStride03),
+                        (43, ActuatorType::RobStride03),
+                        (44, ActuatorType::RobStride04),
+                        (45, ActuatorType::RobStride02),
                     ],
                 )
                 .await
