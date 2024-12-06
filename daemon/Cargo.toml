@@ -20,6 +20,10 @@ tower = "0.5"
 gstreamer = "0.23"
 gstreamer-base = "0.23"
 glib = "0.17"
+tracing-appender = "0.2"
+clap = { version = "4.0", features = ["derive"] }
+chrono = "0.4"
+directories = "5.0"
 
 kos-sim = { version = "0.1.0", path = "../platforms/sim", optional = true }
 kos-stub = { version = "0.1.0", path = "../platforms/stub", optional = true }
