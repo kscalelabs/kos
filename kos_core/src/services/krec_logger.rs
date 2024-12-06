@@ -1,7 +1,4 @@
-use crate::kos_proto::{
-    actuator::ActuatorStateResponse,
-    imu::{ImuValuesResponse, QuaternionResponse},
-};
+use crate::kos_proto::imu::{ImuValuesResponse, QuaternionResponse};
 use eyre::Result;
 use krec::{
     ActuatorCommand, ActuatorState, ImuQuaternion, ImuValues, KRec, KRecFrame, KRecHeader, Vec3,
@@ -178,7 +175,7 @@ impl TelemetryLogger {
                             tracing::error!("Failed to decode QuaternionResponse {:?}", payload);
                         }
                     } else if topic.contains("/actuator/state") {
-                        match serde_json::from_slice::<ActuatorStateList>(&payload) {
+                        match serde_json::from_slice::<ActuatorStateList>(payload) {
                             Ok(state_list) => {
                                 for state in state_list.data {
                                     frame.actuator_states.push(ActuatorState {
@@ -198,7 +195,7 @@ impl TelemetryLogger {
                             }
                         }
                     } else if topic.contains("/actuator/command") {
-                        match serde_json::from_slice::<ActuatorCommandData>(&payload) {
+                        match serde_json::from_slice::<ActuatorCommandData>(payload) {
                             Ok(command_data) => {
                                 frame.inference_step = command_data.inference_step;
                                 frame.video_timestamp = command_data.video_timestamp;

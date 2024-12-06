@@ -211,7 +211,7 @@ async fn main() -> Result<()> {
 
         let timestamp = Local::now().format("%Y%m%d_%H%M%S");
         let temp_name = format!("kos-daemon_{}.log", timestamp);
-        let final_name = format!("kos-daemon_{}.log.gz", timestamp);
+        let final_name = format!("{}.gz", temp_name);
         let log_path = log_dir.join(&final_name);
 
         info!("Writing compressed logs to: {}", log_path.display());
@@ -240,7 +240,7 @@ async fn main() -> Result<()> {
     };
 
     // Setup signal handler
-    let (shutdown_tx, mut shutdown_rx) = tokio::sync::oneshot::channel();
+    let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel();
 
     tokio::spawn(async move {
         if let Ok(()) = signal::ctrl_c().await {
