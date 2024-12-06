@@ -74,7 +74,7 @@ impl Platform for KbotPlatform {
                         // "/dev/ttyCH341USB1",
                         // "/dev/ttyCH341USB2",
                         // "/dev/ttyCH341USB3",
-                        "can0", "can1", "can2",
+                        "can1", "can2",
                     ],
                     Duration::from_secs(1),
                     // Duration::from_nanos(3_333_333),
