@@ -61,42 +61,51 @@ impl Platform for KbotPlatform {
     ) -> Pin<Box<dyn Future<Output = eyre::Result<Vec<ServiceEnum>>> + Send + 'a>> {
         Box::pin(async move {
             if cfg!(target_os = "linux") {
+                tracing::debug!("Initializing KBot services for Linux");
+
                 let process_manager =
                     KBotProcessManager::new(self.name().to_string(), self.serial())
                         .wrap_err("Failed to initialize GStreamer process manager")?;
 
                 let actuator = KBotActuator::new(
                     operations_service,
-                    vec!["can0"],
+                    vec![
+                        // "/dev/ttyCH341USB0",
+                        // "/dev/ttyCH341USB1",
+                        // "/dev/ttyCH341USB2",
+                        // "/dev/ttyCH341USB3",
+                        "can1", "can2",
+                    ],
                     Duration::from_secs(1),
-                    Duration::from_nanos(3_333_333),
+                    // Duration::from_nanos(3_333_333),
+                    Duration::from_millis(7),
                     &[
-                        // Right Leg
-                        (10, ActuatorType::RobStride04),
+                        // Left Arm
                         (11, ActuatorType::RobStride03),
                         (12, ActuatorType::RobStride03),
-                        (13, ActuatorType::RobStride04),
+                        (13, ActuatorType::RobStride02),
                         (14, ActuatorType::RobStride02),
-                        // Left Leg
-                        (20, ActuatorType::RobStride04),
+                        (15, ActuatorType::RobStride02),
+                        (16, ActuatorType::RobStride00),
+                        // Right Arm
                         (21, ActuatorType::RobStride03),
                         (22, ActuatorType::RobStride03),
-                        (23, ActuatorType::RobStride04),
+                        (23, ActuatorType::RobStride02),
                         (24, ActuatorType::RobStride02),
-                        // Right Arm
-                        (30, ActuatorType::RobStride03),
-                        (31, ActuatorType::RobStride03),
-                        (32, ActuatorType::RobStride02),
-                        (33, ActuatorType::RobStride02),
-                        (34, ActuatorType::RobStride02),
-                        (35, ActuatorType::RobStride00),
-                        // Left Arm
-                        (40, ActuatorType::RobStride03),
-                        (41, ActuatorType::RobStride03),
-                        (42, ActuatorType::RobStride02),
-                        (43, ActuatorType::RobStride02),
-                        (44, ActuatorType::RobStride02),
-                        (45, ActuatorType::RobStride00),
+                        (25, ActuatorType::RobStride02),
+                        (26, ActuatorType::RobStride00),
+                        // Left Leg
+                        (31, ActuatorType::RobStride04),
+                        (32, ActuatorType::RobStride03),
+                        (33, ActuatorType::RobStride03),
+                        (34, ActuatorType::RobStride04),
+                        (35, ActuatorType::RobStride02),
+                        // Right Leg
+                        (41, ActuatorType::RobStride04),
+                        (42, ActuatorType::RobStride03),
+                        (43, ActuatorType::RobStride03),
+                        (44, ActuatorType::RobStride04),
+                        (45, ActuatorType::RobStride02),
                     ],
                 )
                 .await

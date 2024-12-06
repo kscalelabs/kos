@@ -9,6 +9,12 @@ pub struct StubProcessManager {
     kclip_uuid: Mutex<Option<String>>,
 }
 
+impl Default for StubProcessManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl StubProcessManager {
     pub fn new() -> Self {
         StubProcessManager {
