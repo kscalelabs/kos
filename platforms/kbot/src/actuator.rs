@@ -56,7 +56,7 @@ impl KBotActuator {
             let discovered_ids = supervisor
                 .scan_bus(0xFD, port, desired_actuator_types)
                 .await?;
-            
+
             for (idx, (motor_id, _)) in desired_actuator_types.iter().enumerate() {
                 if discovered_ids.contains(motor_id) {
                     found_motors[idx] = true;

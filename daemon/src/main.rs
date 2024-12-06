@@ -2,29 +2,29 @@
 // This will run the gRPC server and, if applicable, a runtime loop
 // (e.g., actuator polling, loaded model inference).
 
+use chrono::Local;
+use clap::Parser;
+use directories::BaseDirs;
 use eyre::Result;
+use flate2::write::GzEncoder;
+use flate2::Compression;
 use kos_core::google_proto::longrunning::operations_server::OperationsServer;
 use kos_core::services::OperationsServiceImpl;
 use kos_core::telemetry::Telemetry;
 use kos_core::Platform;
 use kos_core::ServiceEnum;
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{self, BufWriter, Write};
+use std::path::PathBuf;
 use std::sync::Arc;
+use tokio::signal;
 use tokio::sync::Mutex;
 use tonic::transport::Server;
 use tracing::{debug, error, info};
 use tracing_subscriber::filter::EnvFilter;
-use tracing_subscriber::Layer;
 use tracing_subscriber::prelude::*;
-use chrono::Local;
-use clap::Parser;
-use directories::BaseDirs;
-use std::path::PathBuf;
-use std::io::{self, Write, BufWriter};
-use flate2::write::GzEncoder;
-use flate2::Compression;
-use std::fs::File;
-use tokio::signal;
+use tracing_subscriber::Layer;
 
 #[cfg(not(any(feature = "kos-sim", feature = "kos-zeroth-01", feature = "kos-kbot")))]
 use kos_stub::StubPlatform as PlatformImpl;
@@ -92,6 +92,7 @@ struct CompressedWriter {
     path: PathBuf,
 }
 
+// TODO: The encoder doesn't close properly, so this needs to be fixed later.
 impl CompressedWriter {
     fn new(path: impl AsRef<std::path::Path>) -> io::Result<Self> {
         let file = File::create(path.as_ref())?;
@@ -139,13 +140,23 @@ impl Write for CompressedWriter {
                     Ok(size)
                 }
                 Err(e) => {
-                    error!("Failed to write to compressed log {}: {}", self.path.display(), e);
+                    error!(
+                        "Failed to write to compressed log {}: {}",
+                        self.path.display(),
+                        e
+                    );
                     Err(e)
                 }
             }
         } else {
-            error!("Attempted to write to finalized log {}", self.path.display());
-            Err(io::Error::new(io::ErrorKind::Other, "Writer has been finalized"))
+            error!(
+                "Attempted to write to finalized log {}",
+                self.path.display()
+            );
+            Err(io::Error::new(
+                io::ErrorKind::Other,
+                "Writer has been finalized",
+            ))
         }
     }
 
@@ -157,7 +168,11 @@ impl Write for CompressedWriter {
 impl Drop for CompressedWriter {
     fn drop(&mut self) {
         if let Err(e) = self.finalize() {
-            error!("Failed to finalize compressed log {}: {}", self.path.display(), e);
+            error!(
+                "Failed to finalize compressed log {}: {}",
+                self.path.display(),
+                e
+            );
         }
     }
 }
@@ -168,7 +183,7 @@ async fn main() -> Result<()> {
 
     // tracing
     let subscriber = tracing_subscriber::registry();
-    
+
     // Always add stdout layer
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_writer(std::io::stdout)
@@ -187,9 +202,7 @@ async fn main() -> Result<()> {
 
     let guard = if args.log {
         let log_dir = if let Some(base_dirs) = BaseDirs::new() {
-            base_dirs.data_local_dir()
-                .join("kos")
-                .join("logs")
+            base_dirs.data_local_dir().join("kos").join("logs")
         } else {
             PathBuf::from("~/.local/share/kos/logs")
         };
@@ -202,7 +215,7 @@ async fn main() -> Result<()> {
         let log_path = log_dir.join(&final_name);
 
         info!("Writing compressed logs to: {}", log_path.display());
-        
+
         let compressed_writer = CompressedWriter::new(&log_path)?;
         let (non_blocking, guard) = tracing_appender::non_blocking(compressed_writer);
 
@@ -228,7 +241,7 @@ async fn main() -> Result<()> {
 
     // Setup signal handler
     let (shutdown_tx, mut shutdown_rx) = tokio::sync::oneshot::channel();
-    
+
     tokio::spawn(async move {
         if let Ok(()) = signal::ctrl_c().await {
             let _ = shutdown_tx.send(());
