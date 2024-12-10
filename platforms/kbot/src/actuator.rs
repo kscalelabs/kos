@@ -13,6 +13,7 @@ use kos_core::{
 use robstridev2::{CH341Transport, ControlConfig, SocketCanTransport, Supervisor, TransportType};
 use std::time::Duration;
 use tokio::sync::Mutex;
+use tracing::debug;
 
 pub struct KBotActuator {
     supervisor: Arc<Mutex<Supervisor>>,
@@ -24,10 +25,10 @@ impl KBotActuator {
         ports: Vec<&str>,
         actuator_timeout: Duration,
         polling_interval: Duration,
-        desired_actuator_types: &[(u8, robstridev2::ActuatorType)],
+        actuators_config: &[(u8, robstridev2::ActuatorConfiguration)],
     ) -> Result<Self> {
         let mut supervisor = Supervisor::new(actuator_timeout)?;
-        let mut found_motors = vec![false; desired_actuator_types.len()];
+        let mut found_motors = vec![false; actuators_config.len()];
 
         for port in ports.clone() {
             if port.starts_with("/dev/tty") {
@@ -53,23 +54,21 @@ impl KBotActuator {
         });
 
         for port in ports.clone() {
-            let discovered_ids = supervisor
-                .scan_bus(0xFD, port, desired_actuator_types)
-                .await?;
+            let discovered_ids = supervisor.scan_bus(0xFD, port, actuators_config).await?;
 
-            for (idx, (motor_id, _)) in desired_actuator_types.iter().enumerate() {
+            for (idx, (motor_id, _)) in actuators_config.iter().enumerate() {
                 if discovered_ids.contains(motor_id) {
                     found_motors[idx] = true;
                 }
             }
         }
 
-        for (idx, (motor_id, motor_type)) in desired_actuator_types.iter().enumerate() {
+        for (idx, (motor_id, _)) in actuators_config.iter().enumerate() {
             if !found_motors[idx] {
                 tracing::warn!(
                     "Configured motor not found - ID: {}, Type: {:?}",
                     motor_id,
-                    motor_type
+                    actuators_config[idx].1.actuator_type
                 );
             }
         }

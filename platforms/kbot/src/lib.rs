@@ -5,7 +5,7 @@ mod process_manager;
 mod hexmove;
 
 pub use actuator::*;
-pub use robstridev2::ActuatorType;
+pub use robstridev2::{ActuatorConfiguration, ActuatorType};
 
 #[cfg(target_os = "linux")]
 pub use hexmove::*;
@@ -74,6 +74,7 @@ impl Platform for KbotPlatform {
                         // "/dev/ttyCH341USB1",
                         // "/dev/ttyCH341USB2",
                         // "/dev/ttyCH341USB3",
+                        // "can0",
                         "can1", "can2",
                     ],
                     Duration::from_secs(1),
@@ -81,31 +82,185 @@ impl Platform for KbotPlatform {
                     Duration::from_millis(7),
                     &[
                         // Left Arm
-                        (11, ActuatorType::RobStride03),
-                        (12, ActuatorType::RobStride03),
-                        (13, ActuatorType::RobStride02),
-                        (14, ActuatorType::RobStride02),
-                        (15, ActuatorType::RobStride02),
-                        (16, ActuatorType::RobStride00),
+                        (
+                            11,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            12,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            13,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            14,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            15,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            16,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride00,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
                         // Right Arm
-                        (21, ActuatorType::RobStride03),
-                        (22, ActuatorType::RobStride03),
-                        (23, ActuatorType::RobStride02),
-                        (24, ActuatorType::RobStride02),
-                        (25, ActuatorType::RobStride02),
-                        (26, ActuatorType::RobStride00),
+                        (
+                            21,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            22,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            23,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            24,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            25,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            26,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride00,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
                         // Left Leg
-                        (31, ActuatorType::RobStride04),
-                        (32, ActuatorType::RobStride03),
-                        (33, ActuatorType::RobStride03),
-                        (34, ActuatorType::RobStride04),
-                        (35, ActuatorType::RobStride02),
+                        (
+                            31,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride04,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            32,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            33,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            34,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride04,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            35,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
                         // Right Leg
-                        (41, ActuatorType::RobStride04),
-                        (42, ActuatorType::RobStride03),
-                        (43, ActuatorType::RobStride03),
-                        (44, ActuatorType::RobStride04),
-                        (45, ActuatorType::RobStride02),
+                        (
+                            41,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride04,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            42,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            43,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            44,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride04,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            45,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
                     ],
                 )
                 .await
@@ -125,7 +280,14 @@ impl Platform for KbotPlatform {
                     vec!["can0"],
                     Duration::from_secs(1),
                     Duration::from_nanos(3_333_333),
-                    &[(1, robstridev2::ActuatorType::RobStride04)],
+                    &[(
+                        1,
+                        robstridev2::ActuatorConfiguration {
+                            actuator_type: ActuatorType::RobStride04,
+                            max_angle_change: Some(2.0f32.to_radians()),
+                            max_velocity: Some(10.0f32.to_radians()),
+                        },
+                    )],
                 )
                 .await
                 .wrap_err("Failed to create actuator")?;
