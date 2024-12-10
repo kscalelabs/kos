@@ -39,6 +39,7 @@ struct ActuatorStateData {
 }
 
 #[derive(Deserialize, Debug)]
+#[allow(unused)]
 struct ActuatorStateList {
     frame_number: u64,
     video_timestamp: u64,
