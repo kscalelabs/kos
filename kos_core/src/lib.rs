@@ -12,7 +12,6 @@ pub use grpc_interface::google as google_proto;
 pub use grpc_interface::kos as kos_proto;
 
 use async_trait::async_trait;
-use eyre::Result;
 use hal::actuator_service_server::ActuatorServiceServer;
 use hal::imu_service_server::ImuServiceServer;
 use hal::process_manager_service_server::ProcessManagerServiceServer;

@@ -14,14 +14,18 @@ class ProcessManagerServiceClient:
     def __init__(self, channel: grpc.Channel) -> None:
         self.stub = process_manager_pb2_grpc.ProcessManagerServiceStub(channel)
 
-    def start_kclip(self, request: KClipStartRequest) -> Tuple[Optional[str], Optional[Error]]:
+    def start_kclip(self, action: str) -> Tuple[Optional[str], Optional[Error]]:
         """Start KClip recording.
+
+        Args:
+            action: The action string for the KClip request
 
         Returns:
             Tuple containing:
             - clip_uuid (str): UUID of the started clip, if successful
             - error (Error): Error details if the operation failed
         """
+        request = KClipStartRequest(action=action)
         response = self.stub.StartKClip(request)
         return response.clip_uuid, response.error if response.HasField("error") else None
 
