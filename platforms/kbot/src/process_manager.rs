@@ -245,10 +245,10 @@ impl ProcessManager for KBotProcessManager {
         *kclip_uuid = Some(new_uuid.clone());
         drop(kclip_uuid);
 
-        let (pipeline, _sink) = Self::create_pipeline(&video_path)?;
+        // let (pipeline, _sink) = Self::create_pipeline(&video_path)?;
 
         // Start the pipeline
-        pipeline.set_state(gst::State::Playing)?;
+        // pipeline.set_state(gst::State::Playing)?;
 
         // Start telemetry logger
         let logger = TelemetryLogger::new(
@@ -265,7 +265,7 @@ impl ProcessManager for KBotProcessManager {
         drop(telemetry_logger);
 
         let mut pipeline_guard = self.pipeline.lock().await;
-        *pipeline_guard = Some(pipeline);
+        *pipeline_guard = None;
 
         Ok(KClipStartResponse {
             clip_uuid: Some(new_uuid),
