@@ -86,48 +86,48 @@ impl Platform for KbotPlatform {
                             11,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride03,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             12,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride03,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             13,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride02,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             14,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride02,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             15,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride02,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             16,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride00,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         // Right Arm
@@ -135,48 +135,48 @@ impl Platform for KbotPlatform {
                             21,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride03,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             22,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride03,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             23,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride02,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             24,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride02,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             25,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride02,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             26,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride00,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         // Left Leg
@@ -184,40 +184,40 @@ impl Platform for KbotPlatform {
                             31,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride04,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             32,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride03,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             33,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride03,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             34,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride04,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             35,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride02,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         // Right Leg
@@ -225,40 +225,40 @@ impl Platform for KbotPlatform {
                             41,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride04,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             42,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride03,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             43,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride03,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             44,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride04,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                         (
                             45,
                             ActuatorConfiguration {
                                 actuator_type: ActuatorType::RobStride02,
-                                max_angle_change: Some(4.0f32.to_radians()),
-                                max_velocity: Some(10.0f32.to_radians()),
+                                max_angle_change: Some(15.0f32),
+                                max_velocity: Some(10.0f32),
                             },
                         ),
                     ],
@@ -284,8 +284,8 @@ impl Platform for KbotPlatform {
                         1,
                         robstridev2::ActuatorConfiguration {
                             actuator_type: ActuatorType::RobStride04,
-                            max_angle_change: Some(2.0f32.to_radians()),
-                            max_velocity: Some(10.0f32.to_radians()),
+                            max_angle_change: Some(2.0f32),
+                            max_velocity: Some(10.0f32),
                         },
                     )],
                 )
