@@ -13,7 +13,6 @@ use kos_core::{
 use robstridev2::{CH341Transport, ControlConfig, SocketCanTransport, Supervisor, TransportType};
 use std::time::Duration;
 use tokio::sync::Mutex;
-use tracing::debug;
 
 pub struct KBotActuator {
     supervisor: Arc<Mutex<Supervisor>>,
