@@ -5,7 +5,7 @@ mod process_manager;
 mod hexmove;
 
 pub use actuator::*;
-pub use robstridev2::{ActuatorConfiguration, ActuatorType};
+pub use robstride::{ActuatorConfiguration, ActuatorType};
 
 #[cfg(target_os = "linux")]
 pub use hexmove::*;
@@ -282,7 +282,7 @@ impl Platform for KbotPlatform {
                     Duration::from_nanos(3_333_333),
                     &[(
                         1,
-                        robstridev2::ActuatorConfiguration {
+                        robstride::ActuatorConfiguration {
                             actuator_type: ActuatorType::RobStride04,
                             max_angle_change: Some(2.0f32.to_radians()),
                             max_velocity: Some(10.0f32.to_radians()),
