@@ -10,7 +10,7 @@ use kos_core::{
     },
 };
 
-use robstridev2::{CH341Transport, ControlConfig, SocketCanTransport, Supervisor, TransportType};
+use robstride::{CH341Transport, ControlConfig, SocketCanTransport, Supervisor, TransportType};
 use std::time::Duration;
 use tokio::sync::Mutex;
 
@@ -24,7 +24,7 @@ impl KBotActuator {
         ports: Vec<&str>,
         actuator_timeout: Duration,
         polling_interval: Duration,
-        actuators_config: &[(u8, robstridev2::ActuatorConfiguration)],
+        actuators_config: &[(u8, robstride::ActuatorConfiguration)],
     ) -> Result<Self> {
         let mut supervisor = Supervisor::new(actuator_timeout)?;
         let mut found_motors = vec![false; actuators_config.len()];
