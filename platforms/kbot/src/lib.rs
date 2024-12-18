@@ -5,12 +5,14 @@ mod process_manager;
 mod hexmove;
 
 pub use actuator::*;
+pub use robstridev2::{ActuatorConfiguration, ActuatorType};
 
 #[cfg(target_os = "linux")]
 pub use hexmove::*;
 pub use process_manager::*;
 
-use eyre::{Result, WrapErr};
+use async_trait::async_trait;
+use eyre::WrapErr;
 use kos_core::hal::Operation;
 use kos_core::kos_proto::actuator::actuator_service_server::ActuatorServiceServer;
 use kos_core::kos_proto::process_manager::process_manager_service_server::ProcessManagerServiceServer;
@@ -18,9 +20,10 @@ use kos_core::{
     services::{ActuatorServiceImpl, OperationsServiceImpl, ProcessManagerServiceImpl},
     Platform, ServiceEnum,
 };
-use robstride::MotorType;
-use std::collections::HashMap;
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
+use std::time::Duration;
 
 pub struct KbotPlatform {}
 
@@ -36,6 +39,7 @@ impl Default for KbotPlatform {
     }
 }
 
+#[async_trait]
 impl Platform for KbotPlatform {
     fn name(&self) -> &'static str {
         "KBot"
@@ -51,70 +55,248 @@ impl Platform for KbotPlatform {
         Ok(())
     }
 
-    fn create_services(
-        &self,
+    fn create_services<'a>(
+        &'a self,
         operations_service: Arc<OperationsServiceImpl>,
-    ) -> Result<Vec<ServiceEnum>> {
-        if cfg!(target_os = "linux") {
-            // Create the process manager first and handle any errors
-            let process_manager = KBotProcessManager::new(self.name().to_string(), self.serial())
-                .wrap_err("Failed to initialize GStreamer process manager")?;
+    ) -> Pin<Box<dyn Future<Output = eyre::Result<Vec<ServiceEnum>>> + Send + 'a>> {
+        Box::pin(async move {
+            if cfg!(target_os = "linux") {
+                tracing::debug!("Initializing KBot services for Linux");
 
-            Ok(vec![
-                // ServiceEnum::Imu(
-                //     kos_core::kos_proto::imu::imu_service_server::ImuServiceServer::new(
-                //         kos_core::services::IMUServiceImpl::new(Arc::new(
-                //             KBotIMU::new(operations_service.clone(), "can0", 1, 1)
-                //                 .wrap_err("Failed to create IMU")?,
-                //         )),
-                //     ),
-                // ),
-                // TODO: fix config definition
-                ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
-                    Arc::new(
-                        KBotActuator::new(
-                            operations_service,
-                            "/dev/ttyCH341USB1",
-                            HashMap::from([
-                                (1, MotorType::Type03),
-                                (2, MotorType::Type03),
-                                (3, MotorType::Type01),
-                                (4, MotorType::Type01),
-                                (5, MotorType::Type01),
-                            ]),
-                            None,
-                            None,
-                            None,
-                        )
-                        .wrap_err("Failed to create actuator")?,
-                    ),
-                ))),
-                ServiceEnum::ProcessManager(ProcessManagerServiceServer::new(
-                    ProcessManagerServiceImpl::new(Arc::new(process_manager)),
-                )),
-            ])
-        } else {
-            Ok(vec![ServiceEnum::Actuator(ActuatorServiceServer::new(
-                ActuatorServiceImpl::new(Arc::new(
-                    KBotActuator::new(
-                        operations_service,
-                        "/dev/ttyCH341USB0",
-                        HashMap::from([
-                            (1, MotorType::Type04),
-                            (2, MotorType::Type04),
-                            (3, MotorType::Type04),
-                            (4, MotorType::Type04),
-                            (5, MotorType::Type04),
-                            (6, MotorType::Type01),
-                        ]),
-                        None,
-                        None,
-                        None,
-                    )
-                    .wrap_err("Failed to create actuator")?,
-                )),
-            ))])
-        }
+                let process_manager =
+                    KBotProcessManager::new(self.name().to_string(), self.serial())
+                        .wrap_err("Failed to initialize GStreamer process manager")?;
+
+                let actuator = KBotActuator::new(
+                    operations_service,
+                    vec![
+                        // "/dev/ttyCH341USB0",
+                        // "/dev/ttyCH341USB1",
+                        // "/dev/ttyCH341USB2",
+                        // "/dev/ttyCH341USB3",
+                        // "can0",
+                        "can1", "can2",
+                    ],
+                    Duration::from_secs(1),
+                    // Duration::from_nanos(3_333_333),
+                    Duration::from_millis(7),
+                    &[
+                        // Left Arm
+                        (
+                            11,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            12,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            13,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            14,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            15,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            16,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride00,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        // Right Arm
+                        (
+                            21,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            22,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            23,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            24,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            25,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            26,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride00,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        // Left Leg
+                        (
+                            31,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride04,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            32,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            33,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            34,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride04,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            35,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        // Right Leg
+                        (
+                            41,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride04,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            42,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            43,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride03,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            44,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride04,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                        (
+                            45,
+                            ActuatorConfiguration {
+                                actuator_type: ActuatorType::RobStride02,
+                                max_angle_change: Some(4.0f32.to_radians()),
+                                max_velocity: Some(10.0f32.to_radians()),
+                            },
+                        ),
+                    ],
+                )
+                .await
+                .wrap_err("Failed to create actuator")?;
+
+                Ok(vec![
+                    ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
+                        Arc::new(actuator),
+                    ))),
+                    ServiceEnum::ProcessManager(ProcessManagerServiceServer::new(
+                        ProcessManagerServiceImpl::new(Arc::new(process_manager)),
+                    )),
+                ])
+            } else {
+                let actuator = KBotActuator::new(
+                    operations_service,
+                    vec!["can0"],
+                    Duration::from_secs(1),
+                    Duration::from_nanos(3_333_333),
+                    &[(
+                        1,
+                        robstridev2::ActuatorConfiguration {
+                            actuator_type: ActuatorType::RobStride04,
+                            max_angle_change: Some(2.0f32.to_radians()),
+                            max_velocity: Some(10.0f32.to_radians()),
+                        },
+                    )],
+                )
+                .await
+                .wrap_err("Failed to create actuator")?;
+
+                Ok(vec![ServiceEnum::Actuator(ActuatorServiceServer::new(
+                    ActuatorServiceImpl::new(Arc::new(actuator)),
+                ))])
+            }
+        })
     }
 
     fn shutdown(&mut self) -> eyre::Result<()> {

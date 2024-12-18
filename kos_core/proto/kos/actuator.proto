@@ -59,6 +59,7 @@ message ConfigureActuatorRequest {
     optional float protection_time = 7;    // Protection time in seconds
     optional bool torque_enabled = 8;      // Torque enabled flag
     optional uint32 new_actuator_id = 9;   // New actuator ID
+    optional bool zero_position = 10;      // Instant zero position
 }
 
 // Request message for CalibrateActuator.

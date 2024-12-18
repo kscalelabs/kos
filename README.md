@@ -42,6 +42,12 @@ Reference the existing platforms / features in [platforms](platforms).
 
 You essentially create another package (Cargo.toml, lib.rs, etc) with the necessary actuator and imu implementations according to the specifications in [kos-core](kos-core/src/services)
 
+
+To save trace logs to a file, pass the `--log` flag:
+```bash
+cargo run --features stub -- --log
+
+
 ## Contributing
 - Use `cargo fmt --all` to format the code.
 - Use `cargo clippy` to check for lint errors.
