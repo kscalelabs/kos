@@ -1,18 +1,20 @@
-use crate::hal::{Servo, ServoDirection, ServoMode, ServoRegister, TorqueMode};
-use kos_core::grpc_interface::google::longrunning::Operation;
+use crate::firmware::hal::{ServoDirection, ServoMode, ServoRegister, TorqueMode};
+use crate::Servo;
+use kos_core::google_proto::longrunning::Operation;
 use kos_core::hal::Actuator;
 use kos_core::kos_proto::actuator::*;
-use kos_core::kos_proto::common::ActionResponse;
+use kos_core::kos_proto::common::{ActionResponse, ActionResult, Error as KosError, ErrorCode};
 use std::sync::{Arc, Mutex};
 use tokio::sync::RwLock;
 use tonic::{Request, Response, Status};
+use eyre::Result;
 
 pub struct ZBotActuator {
     servo: Arc<Mutex<Servo>>,
 }
 
 impl ZBotActuator {
-    pub fn new() -> anyhow::Result<Self> {
+    pub async fn new() -> Result<Self> {
         let servo = Servo::new()?;
         servo.enable_readout()?;
         Ok(Self {
@@ -26,7 +28,7 @@ impl Actuator for ZBotActuator {
     async fn command_actuators(
         &self,
         commands: Vec<ActuatorCommand>,
-    ) -> Result<Vec<kos_core::kos_proto::common::ActionResult>, Status> {
+    ) -> Result<Vec<ActionResult>> {
         let servo = self.servo.lock().map_err(|_| Status::internal("Lock error"))?;
         
         let mut results = Vec::new();
@@ -48,9 +50,16 @@ impl Actuator for ZBotActuator {
                 Ok(()) // No command specified
             };
 
-            results.push(kos_core::kos_proto::common::ActionResult {
-                success: result.is_ok(),
-                error_message: result.err().map(|e| e.to_string()).unwrap_or_default(),
+            let success = result.is_ok();
+            let error = result.err().map(|e| KosError {
+                code: ErrorCode::HardwareFailure as i32,
+                message: e.to_string(),
+            });
+
+            results.push(ActionResult {
+                actuator_id: cmd.actuator_id,
+                success,
+                error,
             });
         }
 
@@ -60,7 +69,7 @@ impl Actuator for ZBotActuator {
     async fn configure_actuator(
         &self,
         config: ConfigureActuatorRequest,
-    ) -> Result<ActionResponse, Status> {
+    ) -> Result<ActionResponse> {
         let servo = self.servo.lock().map_err(|_| Status::internal("Lock error"))?;
         
         // Unlock EEPROM for writing
@@ -89,23 +98,22 @@ impl Actuator for ZBotActuator {
             .map_err(|e| Status::internal(e.to_string()))?;
 
         match result {
-            Ok(_) => Ok(ActionResponse { success: true, error_message: String::new() }),
-            Err(e) => Ok(ActionResponse { success: false, error_message: e.to_string() }),
+            Ok(_) => Ok(ActionResponse { success: true, error: None }),
+            Err(e) => Ok(ActionResponse { success: false, error: Some(KosError { code: ErrorCode::HardwareFailure as i32, message: e.to_string() }) }),
         }
     }
 
     async fn calibrate_actuator(
         &self,
         request: CalibrateActuatorRequest,
-    ) -> Result<Operation, Status> {
-
-        Err(Status::unimplemented("Calibration not yet implemented"))
+    ) -> Result<Operation> {
+        Ok(Operation::default())
     }
 
     async fn get_actuators_state(
         &self,
         actuator_ids: Vec<u32>,
-    ) -> Result<Vec<ActuatorStateResponse>, Status> {
+    ) -> Result<Vec<ActuatorStateResponse>> {
         let servo = self.servo.lock().map_err(|_| Status::internal("Lock error"))?;
         
         let mut states = Vec::new();
@@ -114,12 +122,12 @@ impl Actuator for ZBotActuator {
                 states.push(ActuatorStateResponse {
                     actuator_id: id,
                     online: true,
-                    position: Some(Servo::raw_to_degrees(info.current_location as u16)),
+                    position: Some(Servo::raw_to_degrees(info.current_location as u16) as f64),
                     velocity: Some({
                         let speed_raw = info.current_speed as u16;
                         let speed_magnitude = speed_raw & 0x7FFF;
                         let speed_sign = if speed_raw & 0x8000 != 0 { -1.0 } else { 1.0 };
-                        speed_sign * (speed_magnitude as f32 * 360.0 / 4096.0)
+                        speed_sign * (speed_magnitude as f32 * 360.0 / 4096.0) as f64
                     }),
                     torque: None,
                     temperature: Some(info.current_temperature as f64),

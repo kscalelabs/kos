@@ -4,6 +4,15 @@ mod firmware;
 pub use actuator::*;
 pub use firmware::*;
 
+use kos_core::{Platform, ServiceEnum};
+use tonic::async_trait;
+use std::sync::Arc;
+use kos_core::services::{ActuatorServiceImpl, OperationsServiceImpl};
+use kos_core::kos_proto::actuator::actuator_service_server::ActuatorServiceServer;
+use std::future::Future;
+use std::pin::Pin;
+use std::time::Duration;
+
 pub struct ZBotPlatform {}
 
 impl ZBotPlatform {
@@ -33,12 +42,18 @@ impl Platform for ZBotPlatform {
     }
 
     fn create_services<'a>(
-        &'a mut self,
-        operations_service: Arc<OperationsServiceImpl>,
+        &'a self,
+        _operations_service: Arc<OperationsServiceImpl>,
     ) -> Pin<Box<dyn Future<Output = eyre::Result<Vec<ServiceEnum>>> + Send + 'a>> {
         Box::pin(async move {
-            let actuator = ZBotActuator::new(operations_service);
-            Ok(vec![ServiceEnum::Actuator(Box::new(actuator))])
+            let actuator = ZBotActuator::new().await?;
+            Ok(vec![ServiceEnum::Actuator(ActuatorServiceServer::new(
+                ActuatorServiceImpl::new(Arc::new(actuator))
+            ))])
         })
+    }
+
+    fn shutdown(&mut self) -> eyre::Result<()> {
+        Ok(())
     }
 }

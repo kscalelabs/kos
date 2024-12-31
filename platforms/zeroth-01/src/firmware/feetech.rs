@@ -1,4 +1,4 @@
-use anyhow::Result;
+use eyre::Result;
 use std::os::raw::{c_int, c_short, c_uchar, c_ushort, c_uint};
 use crate::hal::{ServoInfo, ServoData, ServoMultipleWriteCommand, ServoMode, ServoDirection, ServoRegister, MemoryLockState, TorqueMode, MAX_SERVOS};
 use std::sync::{Arc, Mutex};
@@ -31,7 +31,7 @@ impl Servo {
     pub fn new() -> Result<Self> {
         let result = unsafe { servo_init() };
         if result != 0 {
-            anyhow::bail!("Failed to initialize servo");
+            eyre::bail!("Failed to initialize servo");
         }
         Ok(Servo { _private: () })
     }
@@ -41,7 +41,7 @@ impl Servo {
         let result = unsafe { servo_write(id, register as u8, data.as_ptr(), data.len() as c_uchar) };
 
         if result != 0 {
-            anyhow::bail!("Failed to write to servo");
+            eyre::bail!("Failed to write to servo");
         }
         Ok(())
     }
@@ -50,7 +50,7 @@ impl Servo {
         let mut data = vec![0u8; length as usize];
         let result = unsafe { servo_read(id, register as u8, length, data.as_mut_ptr()) };
         if result != 0 {
-            anyhow::bail!("Failed to read from servo");
+            eyre::bail!("Failed to read from servo");
         }
         Ok(data)
     }
@@ -58,7 +58,7 @@ impl Servo {
     pub fn move_servo(&self, id: u8, position: i16, time: u16, speed: u16) -> Result<()> {
         let result = unsafe { servo_move(id, position, time, speed) };
         if result != 0 {
-            anyhow::bail!("Failed to move servo");
+            eyre::bail!("Failed to move servo");
         }
         Ok(())
     }
@@ -66,7 +66,7 @@ impl Servo {
     pub fn enable_readout(&self) -> Result<()> {
         let result = unsafe { enable_servo_readout() };
         if result != 0 {
-            anyhow::bail!("Failed to enable servo readout");
+            eyre::bail!("Failed to enable servo readout");
         }
         Ok(())
     }
@@ -74,7 +74,7 @@ impl Servo {
     pub fn disable_readout(&self) -> Result<()> {
         let result = unsafe { disable_servo_readout() };
         if result != 0 {
-            anyhow::bail!("Failed to disable servo readout");
+            eyre::bail!("Failed to disable servo readout");
         }
         Ok(())
     }
@@ -82,7 +82,7 @@ impl Servo {
     pub fn enable_movement(&self) -> Result<()> {
         let result = unsafe { enable_servo_movement() };
         if result != 0 {
-            anyhow::bail!("Failed to enable servo movement");
+            eyre::bail!("Failed to enable servo movement");
         }
         Ok(())
     }
@@ -90,7 +90,7 @@ impl Servo {
     pub fn disable_movement(&self) -> Result<()> {
         let result = unsafe { disable_servo_movement() };
         if result != 0 {
-            anyhow::bail!("Failed to disable servo movement");
+            eyre::bail!("Failed to disable servo movement");
         }
         Ok(())
     }
@@ -98,7 +98,7 @@ impl Servo {
     pub fn set_mode(&self, id: u8, mode: ServoMode) -> Result<()> {
         let result = unsafe { set_servo_mode(id, mode as u8) };
         if result != 0 {
-            anyhow::bail!("Failed to set servo mode");
+            eyre::bail!("Failed to set servo mode");
         }
         Ok(())
     }
@@ -107,7 +107,7 @@ impl Servo {
         let direction = if direction == ServoDirection::Clockwise { 1 } else { -1 };
         let result = unsafe { set_servo_speed(id, speed, direction as i32) };
         if result != 0 {
-            anyhow::bail!("Failed to set servo speed");
+            eyre::bail!("Failed to set servo speed");
         }
         Ok(())
     }
@@ -135,7 +135,7 @@ impl Servo {
         };
         let result = unsafe { servo_read_info(id, &mut info) };
         if result != 0 {
-            anyhow::bail!("Failed to read servo info");
+            eyre::bail!("Failed to read servo info");
         }
         Ok(info)
     }
@@ -166,7 +166,7 @@ impl Servo {
         };
         let result = unsafe { read_servo_positions(&mut data) };
         if result != 0 {
-            anyhow::bail!("Failed to read continuous servo data");
+            eyre::bail!("Failed to read continuous servo data");
         }
         Ok(data)
     }
@@ -174,7 +174,7 @@ impl Servo {
     pub fn write_multiple(&self, cmd: &ServoMultipleWriteCommand) -> Result<()> {
         let result = unsafe { servo_write_multiple(cmd) };
         if result != 0 {
-            anyhow::bail!("Failed to write multiple servo positions");
+            eyre::bail!("Failed to write multiple servo positions");
         }
         Ok(())
     }

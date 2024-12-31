@@ -26,7 +26,7 @@ use kos_stub::StubPlatform as PlatformImpl;
 use kos_sim::SimPlatform as PlatformImpl;
 
 #[cfg(feature = "kos-zeroth-01")]
-use kos_zeroth_01::Zeroth01Platform as PlatformImpl;
+use kos_zeroth_01::ZBotPlatform as PlatformImpl;
 
 #[cfg(feature = "kos-kbot")]
 use kos_kbot::KbotPlatform as PlatformImpl;
