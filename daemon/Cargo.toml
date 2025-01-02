@@ -12,14 +12,10 @@ readme.workspace = true
 [dependencies]
 kos_core = { version = "0.1.1", path = "../kos_core" }
 tokio = { version = "1", features = ["full"] }
-tonic = { version = "0.12", features = ["transport"] }
+tonic = { git = "https://github.com/hatomist/tonic-milkv" }
 eyre = "0.6"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-tower = "0.5"
-gstreamer = "0.23"
-gstreamer-base = "0.23"
-glib = "0.17"
 tracing-appender = "0.2"
 clap = { version = "4.0", features = ["derive"] }
 chrono = "0.4"
