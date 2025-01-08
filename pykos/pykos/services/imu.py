@@ -31,6 +31,42 @@ class ImuValues:
     def __repr__(self) -> str:
         return self.__str__()
 
+class EulerAngles:
+    def __init__(self, response: imu_pb2.EulerAnglesResponse) -> None:
+        self.roll = response.roll
+        self.pitch = response.pitch
+        self.yaw = response.yaw
+        self.error = response.error if response.HasField("error") else None
+
+    def __str__(self) -> str:
+        return (
+            f"EulerAngles("
+            f"roll={self.roll}, pitch={self.pitch}, yaw={self.yaw}, "
+            f"error={self.error})"
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
+class Quaternion:
+    def __init__(self, response: imu_pb2.QuaternionResponse) -> None:
+        self.x = response.x
+        self.y = response.y
+        self.z = response.z
+        self.w = response.w
+        self.error = response.error if response.HasField("error") else None
+
+    def __str__(self) -> str:
+        return (
+            f"Quaternion("
+            f"x={self.x}, y={self.y}, z={self.z}, w={self.w}, "
+            f"error={self.error})"
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
 
 class IMUServiceClient:
     def __init__(self, channel: grpc.Channel) -> None:
@@ -44,3 +80,21 @@ class IMUServiceClient:
         """
         response = self.stub.GetValues(Empty())
         return ImuValues(response)
+
+    def get_euler_angles(self) -> EulerAngles:
+        """Get the latest Euler angles.
+
+        Returns:
+            EulerAnglesResponse: The latest Euler angles.
+        """
+        response = self.stub.GetEuler(Empty())
+        return EulerAngles(response)
+
+    def get_quaternion(self) -> Quaternion:
+        """Get the latest quaternion.
+
+        Returns:
+            QuaternionResponse: The latest quaternion.
+        """
+        response = self.stub.GetQuaternion(Empty())
+        return Quaternion(response)
