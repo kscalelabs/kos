@@ -1,19 +1,22 @@
 """IMU service client."""
 
 from typing import Any, Dict, Optional
+
 import grpc
-from google.protobuf.empty_pb2 import Empty
-from google.protobuf.duration_pb2 import Duration
 from google.longrunning import operations_pb2, operations_pb2_grpc
 from google.protobuf.any_pb2 import Any as AnyPb2
+from google.protobuf.duration_pb2 import Duration
+from google.protobuf.empty_pb2 import Empty
 
-from kos_protos import imu_pb2, imu_pb2_grpc, common_pb2
+from kos_protos import common_pb2, imu_pb2, imu_pb2_grpc
 from kos_protos.imu_pb2 import CalibrateIMUMetadata
+
 
 class CalibrationStatus:
     IN_PROGRESS = "IN_PROGRESS"
     SUCCEEDED = "SUCCEEDED"
     FAILED = "FAILED"
+
 
 class CalibrationMetadata:
     def __init__(self, metadata_any: AnyPb2) -> None:
@@ -32,12 +35,14 @@ class CalibrationMetadata:
     def __repr__(self) -> str:
         return self.__str__()
 
+
 def _duration_from_seconds(seconds: float) -> Duration:
     """Convert seconds to Duration proto."""
     duration = Duration()
     duration.seconds = int(seconds)
     duration.nanos = int((seconds - int(seconds)) * 1e9)
     return duration
+
 
 class ImuValues:
     def __init__(self, response: imu_pb2.IMUValuesResponse) -> None:
@@ -64,6 +69,7 @@ class ImuValues:
     def __repr__(self) -> str:
         return self.__str__()
 
+
 class EulerAngles:
     def __init__(self, response: imu_pb2.EulerAnglesResponse) -> None:
         self.roll = response.roll
@@ -72,11 +78,7 @@ class EulerAngles:
         self.error = response.error if response.HasField("error") else None
 
     def __str__(self) -> str:
-        return (
-            f"EulerAngles("
-            f"roll={self.roll}, pitch={self.pitch}, yaw={self.yaw}, "
-            f"error={self.error})"
-        )
+        return f"EulerAngles(" f"roll={self.roll}, pitch={self.pitch}, yaw={self.yaw}, " f"error={self.error})"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -91,11 +93,7 @@ class Quaternion:
         self.error = response.error if response.HasField("error") else None
 
     def __str__(self) -> str:
-        return (
-            f"Quaternion("
-            f"x={self.x}, y={self.y}, z={self.z}, w={self.w}, "
-            f"error={self.error})"
-        )
+        return f"Quaternion(" f"x={self.x}, y={self.y}, z={self.z}, w={self.w}, " f"error={self.error})"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -152,7 +150,7 @@ class IMUServiceClient:
             "max_retries": kwargs.get("max_retries"),
             "max_angular_error": kwargs.get("max_angular_error"),
             "max_velocity": kwargs.get("max_velocity"),
-            "max_acceleration": kwargs.get("max_acceleration")
+            "max_acceleration": kwargs.get("max_acceleration"),
         }
 
         config = {k: v for k, v in config.items() if v is not None}
@@ -183,5 +181,3 @@ class IMUServiceClient:
         )
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
-
-
