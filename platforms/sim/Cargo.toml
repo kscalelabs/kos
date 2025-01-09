@@ -1,6 +1,6 @@
 [package]
 name = "kos-sim"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Denys Bezmenov <denys@kscale.dev>"]
 edition = "2021"
 license = "MIT"
@@ -8,6 +8,6 @@ repository = "https://github.com/kscalelabs/kos"
 description = "KOS platform for simulation"
 
 [dependencies]
-kos_core = { version = "0.1.1", path = "../../kos_core" }
+kos_core = { version = "0.1.2", path = "../../kos_core" }
 async-trait = "0.1"
 eyre = "0.6"

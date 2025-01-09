@@ -4,8 +4,8 @@ use eyre::Result;
 use kos_core::services::OperationsServiceImpl;
 use kos_core::{
     hal::{
-        CalibrateImuMetadata, CalibrationStatus, EulerAnglesResponse, ImuValuesResponse,
-        QuaternionResponse, IMU,
+        CalibrateImuMetadata, CalibrationStatus, EulerAnglesResponse, ImuAdvancedValuesResponse,
+        ImuValuesResponse, QuaternionResponse, IMU,
     },
     kos_proto::common::ActionResponse,
 };
@@ -41,6 +41,19 @@ impl IMU for StubIMU {
             mag_x: None,
             mag_y: None,
             mag_z: None,
+            error: None,
+        })
+    }
+
+    async fn get_advanced_values(&self) -> Result<ImuAdvancedValuesResponse> {
+        Ok(ImuAdvancedValuesResponse {
+            lin_acc_x: None,
+            lin_acc_y: None,
+            lin_acc_z: None,
+            grav_x: None,
+            grav_y: None,
+            grav_z: None,
+            temp: None,
             error: None,
         })
     }

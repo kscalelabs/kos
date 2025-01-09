@@ -44,6 +44,29 @@ def _duration_from_seconds(seconds: float) -> Duration:
     return duration
 
 
+class ImuAdvancedValues:
+    def __init__(self, response: imu_pb2.IMUAdvancedValuesResponse) -> None:
+        self.lin_acc_x = response.lin_acc_x if response.HasField("lin_acc_x") else None
+        self.lin_acc_y = response.lin_acc_y if response.HasField("lin_acc_y") else None
+        self.lin_acc_z = response.lin_acc_z if response.HasField("lin_acc_z") else None
+        self.grav_x = response.grav_x if response.HasField("grav_x") else None
+        self.grav_y = response.grav_y if response.HasField("grav_y") else None
+        self.grav_z = response.grav_z if response.HasField("grav_z") else None
+        self.temp = response.temp if response.HasField("temp") else None
+        self.error = response.error if response.HasField("error") else None
+
+    def __str__(self) -> str:
+        return (
+            f"ImuAdvancedValues("
+            f"lin_acc_x={self.lin_acc_x}, lin_acc_y={self.lin_acc_y}, lin_acc_z={self.lin_acc_z}, "
+            f"grav_x={self.grav_x}, grav_y={self.grav_y}, grav_z={self.grav_z}, "
+            f"error={self.error})"
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
 class ImuValues:
     def __init__(self, response: imu_pb2.IMUValuesResponse) -> None:
         self.accel_x = response.accel_x
@@ -112,6 +135,15 @@ class IMUServiceClient:
         """
         response = self.stub.GetValues(Empty())
         return ImuValues(response)
+
+    def get_imu_advanced_values(self) -> ImuAdvancedValues:
+        """Get the latest IMU advanced values.
+
+        Returns:
+            ImuAdvancedValuesResponse: The latest IMU advanced values.
+        """
+        response = self.stub.GetAdvancedValues(Empty())
+        return ImuAdvancedValues(response)
 
     def get_euler_angles(self) -> EulerAngles:
         """Get the latest Euler angles.

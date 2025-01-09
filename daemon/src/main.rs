@@ -32,7 +32,7 @@ use kos_zeroth_01::ZBotPlatform as PlatformImpl;
 use kos_kbot::KbotPlatform as PlatformImpl;
 
 mod file_logging;
-use file_logging::{setup_logging, cleanup_logging};
+use file_logging::{cleanup_logging, setup_logging};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
