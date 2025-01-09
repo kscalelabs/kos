@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build wheel
+          pip install build wheel grpcio-tools
 
       - name: Generate Proto Files
         working-directory: ./pykos
