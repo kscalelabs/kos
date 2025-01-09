@@ -4,8 +4,8 @@ use eyre::Result;
 use kos_core::services::OperationsServiceImpl;
 use kos_core::{
     hal::{
-        CalibrateImuMetadata, CalibrationStatus, EulerAnglesResponse, ImuValuesResponse, ImuAdvancedValuesResponse,
-        QuaternionResponse, IMU,
+        CalibrateImuMetadata, CalibrationStatus, EulerAnglesResponse, ImuAdvancedValuesResponse,
+        ImuValuesResponse, QuaternionResponse, IMU,
     },
     kos_proto::common::ActionResponse,
 };
