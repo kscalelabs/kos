@@ -37,10 +37,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install build wheel grpcio-tools
 
-      - name: Generate Proto Files
-        working-directory: ./pykos
-        run: make generate-proto
-
       - name: Build package
         working-directory: ./pykos
         run: python -m build --sdist --wheel --outdir dist/ .
