@@ -45,10 +45,10 @@ message IMUValuesResponse {
     optional double mag_x = 7;   // Magnetometer X-axis
     optional double mag_y = 8;   // Magnetometer Y-axis
     optional double mag_z = 9;   // Magnetometer Z-axis
-    optional double grav_x = 11; // Gravity X-axis
-    optional double grav_y = 12; // Gravity Y-axis
-    optional double grav_z = 13; // Gravity Z-axis
-    kos.common.Error error = 10; // Error details if any
+    optional double grav_x = 10; // Projected gravity X-axis
+    optional double grav_y = 11; // Projected gravity Y-axis
+    optional double grav_z = 12; // Projected gravity Z-axis
+    kos.common.Error error = 13; // Error details if any
 
 }
 
