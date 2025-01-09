@@ -14,7 +14,13 @@ service InferenceService {
     // Uploads a model to the robot.
     rpc UploadModel(UploadModelRequest) returns (UploadModelResponse);
 
-    // Get all available models
+    // Loads models from the robot's filesystem.
+    rpc LoadModels(LoadModelsRequest) returns (LoadModelsResponse);
+
+    // Unloads models from the robot's filesystem.
+    rpc UnloadModels(UnloadModelsRequest) returns (UnloadModelsResponse);
+
+    // Get available models
     rpc GetModelsInfo(GetModelsInfoRequest) returns (GetModelsInfoResponse);
 
     // Runs inference using a specified model.
@@ -31,6 +37,27 @@ message UploadModelRequest {
 message UploadModelResponse {
     string model_uid = 1;           // Unique identifier for the model
     kos.common.Error error = 2; // Error details if upload failed
+}
+
+// Request message for loading models.
+message LoadModelsRequest {
+    repeated string model_uids = 1; // List of model UIDs to load
+}
+
+// Response message containing the loaded models.
+message LoadModelsResponse {
+    repeated ModelInfo models = 1; // List of loaded models
+    kos.common.ActionResponse result = 2; // Result of the action
+}
+
+// Request message for unloading models.
+message UnloadModelsRequest {
+    repeated string model_uids = 1; // List of model UIDs to unload
+}
+
+// Response message containing the unloaded models.
+message UnloadModelsResponse {
+    kos.common.ActionResponse result = 1; // Result of the action
 }
 
 // Request message for getting all available models
@@ -63,7 +90,7 @@ message ModelMetadata {
 // Information about a model
 message ModelInfo {
     string uid = 1; // Model UID (assigned by server)
-    optional ModelMetadata metadata = 2; // Model metadata
+    ModelMetadata metadata = 2; // Model metadata
 }
 
 // Request message for running inference.
@@ -76,11 +103,4 @@ message ForwardRequest {
 message ForwardResponse {
     repeated float outputs = 1;        // Output data from the model
     kos.common.Error error = 2;   // Error details if inference failed
-}
-
-message ModelMetadata {
-    optional string model_name = 1; // Model name
-    optional string model_description = 2; // Model description
-    optional string model_version = 3; // Model version
-    optional string model_author = 4; // Model author
 }
