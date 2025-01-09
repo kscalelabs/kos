@@ -6,6 +6,8 @@ use async_trait::async_trait;
 use eyre::Result;
 use std::fmt::Display;
 
+use self::kos::inference::{ForwardResponse, UploadModelResponse, GetModelsInfoRequest, GetModelsInfoResponse, ModelMetadata, LoadModelsRequest, LoadModelsResponse, UnloadModelsRequest, UnloadModelsResponse};
+
 #[async_trait]
 pub trait Actuator: Send + Sync {
     async fn command_actuators(&self, commands: Vec<ActuatorCommand>) -> Result<Vec<ActionResult>>;
@@ -38,6 +40,15 @@ pub trait IMU: Send + Sync {
 pub trait ProcessManager: Send + Sync {
     async fn start_kclip(&self, action: String) -> Result<KClipStartResponse>;
     async fn stop_kclip(&self) -> Result<KClipStopResponse>;
+}
+
+#[async_trait]
+pub trait Inference: Send + Sync {
+    async fn upload_model(&self, model: Vec<u8>, metadata: Option<ModelMetadata>) -> Result<UploadModelResponse>;
+    async fn get_models_info(&self, request: GetModelsInfoRequest) -> Result<GetModelsInfoResponse>;
+    async fn load_models(&self, uids: Vec<String>) -> Result<LoadModelsResponse>;
+    async fn unload_models(&self, uids: Vec<String>) -> Result<ActionResponse>;
+    async fn forward(&self, model_uid: String, inputs: Vec<f32>) -> Result<ForwardResponse>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
