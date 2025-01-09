@@ -15,10 +15,10 @@ service InferenceService {
     rpc UploadModel(UploadModelRequest) returns (UploadModelResponse);
 
     // Loads models from the robot's filesystem.
-    rpc LoadModels(LoadModelsRequest) returns (LoadModelsResponse);
+    rpc LoadModels(ModelUids) returns (LoadModelsResponse);
 
     // Unloads models from the robot's filesystem.
-    rpc UnloadModels(UnloadModelsRequest) returns (UnloadModelsResponse);
+    rpc UnloadModels(ModelUids) returns (kos.common.ActionResponse);
 
     // Get available models
     rpc GetModelsInfo(GetModelsInfoRequest) returns (GetModelsInfoResponse);
@@ -39,25 +39,10 @@ message UploadModelResponse {
     kos.common.Error error = 2; // Error details if upload failed
 }
 
-// Request message for loading models.
-message LoadModelsRequest {
-    repeated string model_uids = 1; // List of model UIDs to load
-}
-
 // Response message containing the loaded models.
 message LoadModelsResponse {
     repeated ModelInfo models = 1; // List of loaded models
     kos.common.ActionResponse result = 2; // Result of the action
-}
-
-// Request message for unloading models.
-message UnloadModelsRequest {
-    repeated string model_uids = 1; // List of model UIDs to unload
-}
-
-// Response message containing the unloaded models.
-message UnloadModelsResponse {
-    kos.common.ActionResponse result = 1; // Result of the action
 }
 
 // Request message for getting all available models
