@@ -43,6 +43,7 @@ def _duration_from_seconds(seconds: float) -> Duration:
     duration.nanos = int((seconds - int(seconds)) * 1e9)
     return duration
 
+
 class ImuAdvancedValues:
     def __init__(self, response: imu_pb2.IMUAdvancedValuesResponse) -> None:
         self.lin_acc_x = response.lin_acc_x if response.HasField("lin_acc_x") else None
@@ -55,7 +56,12 @@ class ImuAdvancedValues:
         self.error = response.error if response.HasField("error") else None
 
     def __str__(self) -> str:
-        return f"ImuAdvancedValues(" f"lin_acc_x={self.lin_acc_x}, lin_acc_y={self.lin_acc_y}, lin_acc_z={self.lin_acc_z}, " f"grav_x={self.grav_x}, grav_y={self.grav_y}, grav_z={self.grav_z}, " f"error={self.error})"
+        return (
+            f"ImuAdvancedValues("
+            f"lin_acc_x={self.lin_acc_x}, lin_acc_y={self.lin_acc_y}, lin_acc_z={self.lin_acc_z}, "
+            f"grav_x={self.grav_x}, grav_y={self.grav_y}, grav_z={self.grav_z}, "
+            f"error={self.error})"
+        )
 
     def __repr__(self) -> str:
         return self.__str__()
