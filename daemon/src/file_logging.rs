@@ -6,7 +6,7 @@ use flate2::Compression;
 use std::fs::File;
 use std::io::{self, BufWriter, Write};
 use std::path::PathBuf;
-use tracing::{info, error};
+use tracing::{error, info};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{filter::EnvFilter, Layer};
 

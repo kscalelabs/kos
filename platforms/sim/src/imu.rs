@@ -27,6 +27,10 @@ impl IMU for SimIMU {
         todo!()
     }
 
+    async fn get_advanced_values(&self) -> Result<ImuAdvancedValuesResponse> {
+        todo!()
+    }
+
     async fn calibrate(&self) -> Result<Operation> {
         todo!()
     }

@@ -1,5 +1,5 @@
 use kos_core::{
-    hal::{EulerAnglesResponse, ImuValuesResponse, Operation, QuaternionResponse, IMU},
+    hal::{EulerAnglesResponse, ImuAdvancedValuesResponse, ImuValuesResponse, Operation, QuaternionResponse, IMU},
     kos_proto::common::{ActionResponse, Error, ErrorCode},
     services::OperationsServiceImpl,
 };
@@ -87,6 +87,19 @@ impl IMU for KBotIMU {
             grav_x: None,
             grav_y: None,
             grav_z: None,
+            error: None,
+        })
+    }
+
+    async fn get_advanced_values(&self) -> Result<ImuAdvancedValuesResponse> {
+        Ok(ImuAdvancedValuesResponse {
+            lin_acc_x: None,
+            lin_acc_y: None,
+            lin_acc_z: None,
+            grav_x: None,
+            grav_y: None,
+            grav_z: None,
+            temp: None,
             error: None,
         })
     }

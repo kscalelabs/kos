@@ -20,6 +20,7 @@ pub trait Actuator: Send + Sync {
 #[async_trait]
 pub trait IMU: Send + Sync {
     async fn get_values(&self) -> Result<ImuValuesResponse>;
+    async fn get_advanced_values(&self) -> Result<ImuAdvancedValuesResponse>;
     async fn calibrate(&self) -> Result<Operation>;
     async fn zero(
         &self,

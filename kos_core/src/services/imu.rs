@@ -46,6 +46,18 @@ impl ImuService for IMUServiceImpl {
         Ok(Response::new(values))
     }
 
+    async fn get_advanced_values(
+        &self,
+        _request: Request<()>,
+    ) -> Result<Response<ImuAdvancedValuesResponse>, Status> {
+        let values =
+            self.imu.get_advanced_values().await.map_err(|e| {
+                Status::internal(format!("Failed to get IMU advanced values, {:?}", e))
+            })?;
+
+        Ok(Response::new(values))
+    }
+
     async fn calibrate(&self, _request: Request<()>) -> Result<Response<Operation>, Status> {
         let _status = self
             .imu

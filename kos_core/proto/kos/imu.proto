@@ -16,6 +16,9 @@ service IMUService {
     // Retrieves the latest IMU sensor values.
     rpc GetValues(google.protobuf.Empty) returns (IMUValuesResponse);
 
+    // Retrieves the processed IMU sensor values.
+    rpc GetAdvancedValues(google.protobuf.Empty) returns (IMUAdvancedValuesResponse);
+
     // Calibrates the IMU (long-running operation).
     rpc Calibrate(google.protobuf.Empty) returns (google.longrunning.Operation) {
         option (google.longrunning.operation_info) = {
@@ -36,19 +39,16 @@ service IMUService {
 
 // Response message containing IMU values.
 message IMUValuesResponse {
-    double accel_x = 1; // Acceleration X-axis
-    double accel_y = 2; // Acceleration Y-axis
-    double accel_z = 3; // Acceleration Z-axis
-    double gyro_x = 4;  // Gyroscope X-axis
-    double gyro_y = 5;  // Gyroscope Y-axis
-    double gyro_z = 6;  // Gyroscope Z-axis
-    optional double mag_x = 7;   // Magnetometer X-axis
-    optional double mag_y = 8;   // Magnetometer Y-axis
-    optional double mag_z = 9;   // Magnetometer Z-axis
-    optional double grav_x = 10; // Projected gravity X-axis
-    optional double grav_y = 11; // Projected gravity Y-axis
-    optional double grav_z = 12; // Projected gravity Z-axis
-    kos.common.Error error = 13; // Error details if any
+    double accel_x = 1; // Acceleration X-axis in m/s^2
+    double accel_y = 2; // Acceleration Y-axis in m/s^2
+    double accel_z = 3; // Acceleration Z-axis in m/s^2
+    double gyro_x = 4;  // Gyroscope X-axis in deg/s
+    double gyro_y = 5;  // Gyroscope Y-axis in deg/s
+    double gyro_z = 6;  // Gyroscope Z-axis in deg/s
+    optional double mag_x = 7;   // Magnetometer X-axis in uT
+    optional double mag_y = 8;   // Magnetometer Y-axis in uT
+    optional double mag_z = 9;   // Magnetometer Z-axis in uT
+    kos.common.Error error = 10; // Error details if any
 
 }
 
@@ -73,17 +73,36 @@ message ZeroIMURequest {
 
 // Response message containing Euler angles.
 message EulerAnglesResponse {
-    double roll = 1;    // Roll angle
-    double pitch = 2;   // Pitch angle
-    double yaw = 3;     // Yaw angle
+    double roll = 1;    // Roll angle in degrees
+    double pitch = 2;   // Pitch angle in degrees
+    double yaw = 3;     // Yaw angle in degrees
     kos.common.Error error = 4; // Error details if any
 }
 
-// Response message containing quaternion.
+// Response message containing a normalized quaternion.
 message QuaternionResponse {
     double x = 1; // Quaternion X component
     double y = 2; // Quaternion Y component
     double z = 3; // Quaternion Z component
     double w = 4; // Quaternion W component
     kos.common.Error error = 5; // Error details if any
+}
+
+// Response message containing advanced/extended IMU values that may not be
+// supported by all hardware implementations.
+message IMUAdvancedValuesResponse {
+    // Linear acceleration with gravity compensation
+    optional double lin_acc_x = 1; // Linear acceleration X-axis in m/s^2
+    optional double lin_acc_y = 2; // Linear acceleration Y-axis in m/s^2
+    optional double lin_acc_z = 3; // Linear acceleration Z-axis in m/s^2
+    
+    // Projected gravity vector
+    optional double grav_x = 4; // Projected gravity X-axis in m/s^2
+    optional double grav_y = 5; // Projected gravity Y-axis in m/s^2
+    optional double grav_z = 6; // Projected gravity Z-axis in m/s^2
+
+    // Temperature
+    optional double temp = 7; // Temperature in degrees Celsius
+        
+    kos.common.Error error = 8; // Error details if any
 }
