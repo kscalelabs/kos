@@ -10,9 +10,9 @@ documentation.workspace = true
 readme.workspace = true
 
 [dependencies]
-kos_core = { version = "0.1.1", path = "../kos_core" }
+kos_core = { version = "0.1.2", path = "../kos_core" }
 tokio = { version = "1", features = ["full"] }
-tonic = { git = "https://github.com/hatomist/tonic-milkv" }
+tonic = { version="0.12", git = "https://github.com/hatomist/tonic-milkv" }
 eyre = "0.6"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
