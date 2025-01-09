@@ -55,6 +55,9 @@ class ImuValues:
         self.mag_x = response.mag_x if response.HasField("mag_x") else None
         self.mag_y = response.mag_y if response.HasField("mag_y") else None
         self.mag_z = response.mag_z if response.HasField("mag_z") else None
+        self.grav_x = response.grav_x if response.HasField("grav_x") else None
+        self.grav_y = response.grav_y if response.HasField("grav_y") else None
+        self.grav_z = response.grav_z if response.HasField("grav_z") else None
         self.error = response.error if response.HasField("error") else None
 
     def __str__(self) -> str:

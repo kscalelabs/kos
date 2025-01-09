@@ -84,6 +84,9 @@ impl IMU for KBotIMU {
             mag_x: None,
             mag_y: None,
             mag_z: None,
+            grav_x: None,
+            grav_y: None,
+            grav_z: None,
             error: None,
         })
     }
