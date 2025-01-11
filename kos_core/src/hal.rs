@@ -1,7 +1,7 @@
 pub use crate::grpc_interface::google::longrunning::*;
 pub use crate::grpc_interface::kos;
 pub use crate::grpc_interface::kos::common::ActionResponse;
-pub use crate::kos_proto::{actuator::*, common::ActionResult, imu::*, process_manager::*};
+pub use crate::kos_proto::{actuator::*, common::ActionResult, imu::*, process_manager::*, inference::*};
 use async_trait::async_trait;
 use eyre::Result;
 use std::fmt::Display;
