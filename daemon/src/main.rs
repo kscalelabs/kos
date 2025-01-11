@@ -55,6 +55,7 @@ fn add_service_to_router(
         ServiceEnum::Actuator(svc) => router.add_service(svc),
         ServiceEnum::Imu(svc) => router.add_service(svc),
         ServiceEnum::ProcessManager(svc) => router.add_service(svc),
+        ServiceEnum::Inference(svc) => router.add_service(svc),
     }
 }
 
