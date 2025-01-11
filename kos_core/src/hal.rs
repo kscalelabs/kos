@@ -6,7 +6,7 @@ use async_trait::async_trait;
 use eyre::Result;
 use std::fmt::Display;
 
-use self::kos::inference::{ForwardResponse, UploadModelResponse, GetModelsInfoRequest, GetModelsInfoResponse, ModelMetadata, LoadModelsRequest, LoadModelsResponse, UnloadModelsRequest, UnloadModelsResponse};
+use self::kos::inference::{ForwardResponse, UploadModelResponse, GetModelsInfoRequest, GetModelsInfoResponse, ModelMetadata, LoadModelsResponse};
 
 #[async_trait]
 pub trait Actuator: Send + Sync {
