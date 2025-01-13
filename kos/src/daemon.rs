@@ -1,6 +1,3 @@
-// TODO: Implement daemon for managing the robot.
-// This will run the gRPC server and, if applicable, a runtime loop
-// (e.g., actuator polling, loaded model inference).
 
 use clap::Parser;
 use eyre::Result;
@@ -116,7 +113,7 @@ pub async fn kos_runtime(
         }
     });
 
-    // telemetry
+    // Telemetry
     Telemetry::initialize(
         format!("{}-{}", state.platform.name(), state.platform.serial()).as_str(),
         "localhost",
