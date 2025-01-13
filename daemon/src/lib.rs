@@ -18,18 +18,7 @@ use tracing::{debug, error, info};
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Layer;
-
-#[cfg(not(any(feature = "kos-sim", feature = "kos-zeroth-01", feature = "kos-kbot")))]
-use kos_stub::StubPlatform as PlatformImpl;
-
-#[cfg(feature = "kos-sim")]
-use kos_sim::SimPlatform as PlatformImpl;
-
-#[cfg(feature = "kos-zeroth-01")]
-use kos_zeroth_01::ZBotPlatform as PlatformImpl;
-
-#[cfg(feature = "kos-kbot")]
-use kos_kbot::KbotPlatform as PlatformImpl;
+use kos_core::Platform;
 
 mod file_logging;
 use file_logging::{cleanup_logging, setup_logging};
@@ -84,11 +73,12 @@ async fn run_server(
 
 struct DaemonState {
     _guard: Option<tracing_appender::non_blocking::WorkerGuard>,
-    platform: PlatformImpl,
+    platform: Platform,
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+pub async fn kos_runtime(
+    platform: Platform,
+) -> Result<()> {
     let args = Args::parse();
 
     // tracing
@@ -114,7 +104,7 @@ async fn main() -> Result<()> {
 
     let mut state = DaemonState {
         _guard: guard,
-        platform: PlatformImpl::new(),
+        platform: platform,
     };
 
     // Setup signal handler
