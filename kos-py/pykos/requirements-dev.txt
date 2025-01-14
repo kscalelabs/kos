@@ -3,9 +3,10 @@
 grpcio-tools
 types-protobuf
 
-# python checks
+# Python checks
 black
 darglint
 mypy
+mypy-protobuf
 pytest
 ruff

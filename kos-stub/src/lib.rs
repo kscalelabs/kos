@@ -1,12 +1,15 @@
 mod actuator;
 mod imu;
 mod process_manager;
-pub use actuator::*;
-pub use imu::*;
-pub use process_manager::*;
-
+use crate::actuator::StubActuator;
+use crate::imu::StubIMU;
+use crate::process_manager::StubProcessManager;
 use async_trait::async_trait;
 use kos::hal::Operation;
+use kos::kos_proto::actuator::actuator_service_server::ActuatorServiceServer;
+use kos::kos_proto::imu::imu_service_server::ImuServiceServer;
+use kos::kos_proto::process_manager::process_manager_service_server::ProcessManagerServiceServer;
+use kos::services::{ActuatorServiceImpl, IMUServiceImpl, ProcessManagerServiceImpl};
 use kos::{services::OperationsServiceImpl, Platform, ServiceEnum};
 use std::future::Future;
 use std::pin::Pin;
@@ -43,10 +46,22 @@ impl Platform for StubPlatform {
 
     fn create_services<'a>(
         &'a self,
-        _operations_service: Arc<OperationsServiceImpl>,
+        operations_service: Arc<OperationsServiceImpl>,
     ) -> Pin<Box<dyn Future<Output = eyre::Result<Vec<ServiceEnum>>> + Send + 'a>> {
         Box::pin(async move {
-            Ok(vec![]) // or whatever the stub implementation should return
+            let actuator = StubActuator::new(operations_service.clone());
+            let imu = StubIMU::new(operations_service.clone());
+            let process_manager = StubProcessManager::new();
+
+            Ok(vec![
+                ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
+                    Arc::new(actuator),
+                ))),
+                ServiceEnum::ProcessManager(ProcessManagerServiceServer::new(
+                    ProcessManagerServiceImpl::new(Arc::new(process_manager)),
+                )),
+                ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(imu)))),
+            ])
         })
     }
 

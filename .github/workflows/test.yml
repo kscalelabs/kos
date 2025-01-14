@@ -43,18 +43,18 @@ jobs:
             python-requirements-
 
       - name: Install package
-        working-directory: ./pykos
+        working-directory: ./kos-py
         run: |
           pip install --upgrade --upgrade-strategy eager --extra-index-url https://download.pytorch.org/whl/cpu -e '.[dev]'
 
       - name: Run static checks
-        working-directory: ./pykos
+        working-directory: ./kos-py
         run: |
           mkdir -p .mypy_cache
           make static-checks
 
       - name: Run unit tests
-        working-directory: ./pykos
+        working-directory: ./kos-py
         run: |
           make test
 

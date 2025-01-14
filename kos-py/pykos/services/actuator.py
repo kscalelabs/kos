@@ -1,13 +1,41 @@
 """Actuator service client."""
 
-from typing import Any, Dict, List, Optional
+from typing import NotRequired, TypedDict, Unpack
 
 import grpc
 from google.longrunning import operations_pb2, operations_pb2_grpc
 from google.protobuf.any_pb2 import Any as AnyPb2
-
 from kos_protos import actuator_pb2, actuator_pb2_grpc, common_pb2
 from kos_protos.actuator_pb2 import CalibrateActuatorMetadata
+
+
+class ActuatorCommand(TypedDict):
+    actuator_id: int
+    position: NotRequired[float]
+    velocity: NotRequired[float]
+    torque: NotRequired[float]
+
+
+class ActuatorResponse(TypedDict):
+    success: bool
+    error: common_pb2.Error
+
+
+class ConfigureActuatorRequest(TypedDict):
+    actuator_id: int
+    kp: NotRequired[float]
+    kd: NotRequired[float]
+    ki: NotRequired[float]
+    max_torque: NotRequired[float]
+    protective_torque: NotRequired[float]
+    protection_time: NotRequired[float]
+    torque_enabled: NotRequired[bool]
+    new_actuator_id: NotRequired[int]
+    zero_position: NotRequired[bool]
+
+
+class ActuatorStateRequest(TypedDict):
+    actuator_ids: list[int]
 
 
 class CalibrationStatus:
@@ -18,8 +46,8 @@ class CalibrationStatus:
 
 class CalibrationMetadata:
     def __init__(self, metadata_any: AnyPb2) -> None:
-        self.actuator_id: Optional[int] = None
-        self.status: Optional[str] = None
+        self.actuator_id: int | None = None
+        self.status: str | None = None
         self.decode_metadata(metadata_any)
 
     def decode_metadata(self, metadata_any: AnyPb2) -> None:
@@ -51,14 +79,14 @@ class ActuatorServiceClient:
         metadata = CalibrationMetadata(response.metadata)
         return metadata
 
-    def get_calibration_status(self, actuator_id: int) -> Optional[str]:
+    def get_calibration_status(self, actuator_id: int) -> str | None:
         response = self.operations_stub.GetOperation(
             operations_pb2.GetOperationRequest(name=f"operations/calibrate_actuator/{actuator_id}")
         )
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
 
-    def command_actuators(self, commands: List[Dict[str, Any]]) -> List[common_pb2.ActionResult]:
+    def command_actuators(self, commands: list[ActuatorCommand]) -> list[common_pb2.ActionResult]:
         """Command multiple actuators at once.
 
         Args:
@@ -74,7 +102,7 @@ class ActuatorServiceClient:
         response = self.stub.CommandActuators(request)
         return response.results
 
-    def configure_actuator(self, actuator_id: int, **kwargs: Dict[str, Any]) -> common_pb2.ActionResult:
+    def configure_actuator(self, **kwargs: Unpack[ConfigureActuatorRequest]) -> common_pb2.ActionResult:
         """Configure an actuator's parameters.
 
         Args:
@@ -86,11 +114,10 @@ class ActuatorServiceClient:
         Returns:
             ActionResponse indicating success/failure
         """
-        config = {"actuator_id": actuator_id, **kwargs}
-        request = actuator_pb2.ConfigureActuatorRequest(**config)
+        request = actuator_pb2.ConfigureActuatorRequest(**kwargs)
         return self.stub.ConfigureActuator(request)
 
-    def get_actuators_state(self, actuator_ids: Optional[List[int]] = None) -> List[common_pb2.ActionResult]:
+    def get_actuators_state(self, actuator_ids: list[int] | None = None) -> list[common_pb2.ActionResult]:
         """Get the state of multiple actuators.
 
         Args:

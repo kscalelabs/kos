@@ -38,10 +38,10 @@ jobs:
           pip install build wheel
 
       - name: Build package
-        working-directory: ./pykos
+        working-directory: ./kos-py
         run: python -m build --sdist --wheel --outdir dist/ .
 
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: pykos/dist/
+          packages-dir: kos-py/dist/

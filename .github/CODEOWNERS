@@ -2,7 +2,7 @@
 /kos/ @codekansas @hatomist @WT-MM
 
 # Python client
-/pykos/ @codekansas @hatomist @WT-MM
+/kos-py/ @codekansas @hatomist @WT-MM
 
 # Build and CI configuration
 /.github/ @codekansas @hatomist @WT-MM

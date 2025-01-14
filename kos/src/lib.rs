@@ -29,11 +29,13 @@ impl Debug for ActuatorServiceImpl {
         write!(f, "ActuatorServiceImpl")
     }
 }
+
 impl Debug for IMUServiceImpl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "IMUServiceImpl")
     }
 }
+
 impl Debug for ProcessManagerServiceImpl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "ProcessManagerServiceImpl")

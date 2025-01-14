@@ -13,8 +13,8 @@ __pycache__/
 venv/
 
 # python protobuf
-pykos/kos_protos/
-!pykos/kos_protos/__init__.py
+kos-py/kos_protos/
+!kos-py/kos_protos/__init__.py
 
 # Rust
 target/

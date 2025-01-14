@@ -31,6 +31,7 @@ generate-proto:
 	python -m grpc_tools.protoc \
 		--python_out=. \
 		--grpc_python_out=. \
+		--mypy_out=. \
 		--proto_path=../kos/proto/ \
 		--proto_path=../kos/proto/googleapis \
 		../kos/proto/kos/*.proto
@@ -79,7 +80,7 @@ push-to-pypi: build-for-pypi
 #       Static Checks      #
 # ------------------------ #
 
-py-files := $(shell find . -name '*.py' -not -path './kos_protos/*' -not -path './pykos/kos_protos/*')
+py-files := $(shell find . -name '*.py' -not -path './kos_protos/*' -not -path './kos-py/kos_protos/*')
 
 format:
 	@black $(py-files)
