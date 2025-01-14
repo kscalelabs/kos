@@ -3,6 +3,7 @@
 
 pub mod config;
 pub mod daemon;
+pub mod file_logging;
 mod grpc_interface;
 pub mod hal;
 pub mod services;

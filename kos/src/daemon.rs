@@ -1,11 +1,11 @@
-
+use crate::file_logging::{cleanup_logging, setup_logging};
+use crate::google_proto::longrunning::operations_server::OperationsServer;
+use crate::services::OperationsServiceImpl;
+use crate::telemetry::Telemetry;
+use crate::Platform;
+use crate::ServiceEnum;
 use clap::Parser;
 use eyre::Result;
-use kos::google_proto::longrunning::operations_server::OperationsServer;
-use kos::services::OperationsServiceImpl;
-use kos::telemetry::Telemetry;
-use kos::Platform;
-use kos::ServiceEnum;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::signal;
@@ -15,10 +15,6 @@ use tracing::{debug, error, info};
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Layer;
-use kos::Platform;
-
-mod file_logging;
-use file_logging::{cleanup_logging, setup_logging};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -70,12 +66,10 @@ async fn run_server(
 
 struct DaemonState {
     _guard: Option<tracing_appender::non_blocking::WorkerGuard>,
-    platform: Platform,
+    platform: Box<dyn Platform>,
 }
 
-pub async fn kos_runtime(
-    platform: Platform,
-) -> Result<()> {
+pub async fn kos_runtime(platform: Box<dyn Platform>) -> Result<()> {
     let args = Args::parse();
 
     // tracing
@@ -127,7 +121,7 @@ pub async fn kos_runtime(
     state.platform.initialize(operations_service.clone())?;
 
     tokio::select! {
-        res = run_server(&state.platform, operations_service) => {
+        res = run_server(&*state.platform, operations_service) => {
             if let Err(e) = res {
                 error!("Server error: {:?}", e);
                 std::process::exit(1);

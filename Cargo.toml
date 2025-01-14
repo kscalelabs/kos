@@ -5,10 +5,6 @@ members = [
     "kos",
 ]
 
-exclude = [
-    "platforms",
-]
-
 [workspace.package]
 version = "0.1.2"
 authors = [
