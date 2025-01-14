@@ -17,11 +17,6 @@ class ActuatorCommand(TypedDict):
     torque: NotRequired[float]
 
 
-class ActuatorResponse(TypedDict):
-    success: bool
-    error: common_pb2.Error
-
-
 class ConfigureActuatorRequest(TypedDict):
     actuator_id: int
     kp: NotRequired[float]

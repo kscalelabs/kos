@@ -47,13 +47,13 @@ cross build --release --target aarch64-unknown-linux-gnu
 ## Running
 
 ```bash
-RUST_LOG=debug cargo run --features stub
+RUST_LOG=debug cargo run
 ```
 
 You can specify logging levels for individual modules by adding `module_name=log_level` to the `RUST_LOG` environment variable. For example:
 
 ```bash
-RUST_LOG=debug,krec=warn cargo run --features stub
+RUST_LOG=debug,krec=warn cargo run
 ```
 
 ### List of features (--features / -F flag)
@@ -73,7 +73,7 @@ You essentially create another package (Cargo.toml, lib.rs, etc) with the necess
 To save trace logs to a file, pass the `--log` flag:
 
 ```bash
-cargo run --features stub -- --log
+cargo run -- --log
 ```
 
 ## Contributing
