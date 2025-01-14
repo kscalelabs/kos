@@ -92,5 +92,5 @@ convention = "google"
 
 [build-system]
 
-requires = ["setuptools>=42", "wheel", "setuptools-rust>=1.5.2"]
+requires = ["setuptools>=42", "wheel", "setuptools-rust>=1.5.2", "mypy-protobuf"]
 build-backend = "setuptools.build_meta"
