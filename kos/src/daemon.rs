@@ -95,7 +95,7 @@ pub async fn kos_runtime(platform: Box<dyn Platform>) -> Result<()> {
 
     let mut state = DaemonState {
         _guard: guard,
-        platform: platform,
+        platform,
     };
 
     // Setup signal handler
