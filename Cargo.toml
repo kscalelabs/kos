@@ -2,16 +2,12 @@
 resolver = "2"
 
 members = [
-    "kos_core",
-    "daemon",
-]
-
-exclude = [
-    "platforms",
+    "kos",
+    "kos-stub",
 ]
 
 [workspace.package]
-version = "0.1.2"
+version = "0.3.0"
 authors = [
     "Benjamin Bolte <ben@kscale.dev>",
     "Denys Bezmenov <denys@kscale.dev>",

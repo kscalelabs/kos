@@ -1,1 +1,1 @@
-recursive-include kos_protos/ *.py *.txt py.typed MANIFEST.in py.typed Makefile pykos/Makefile
+recursive-include kos_protos/ *.py *.txt py.typed MANIFEST.in py.typed Makefile kos-py/Makefile

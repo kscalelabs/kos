@@ -1,15 +1,8 @@
 # Core components
-/kos_core/ @codekansas @hatomist @WT-MM
-/daemon/ @codekansas @hatomist @WT-MM
-
-# Platform-specific code
-/platforms/kscale_micro/ @codekansas @hatomist
-/platforms/kscale_pro/ @codekansas @hatomist @WT-MM
-/platforms/sim/ @codekansas @hatomist @WT-MM
-/platforms/stub/ @codekansas @hatomist
+/kos/ @codekansas @hatomist @WT-MM
 
 # Python client
-/pykos/ @codekansas @hatomist @WT-MM
+/kos-py/ @codekansas @hatomist @WT-MM
 
 # Build and CI configuration
 /.github/ @codekansas @hatomist @WT-MM
