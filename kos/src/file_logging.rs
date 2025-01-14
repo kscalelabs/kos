@@ -126,7 +126,7 @@ pub fn setup_logging(
                 .add_directive("h2=error".parse().unwrap())
                 .add_directive("grpc=error".parse().unwrap())
                 .add_directive("rumqttc=error".parse().unwrap())
-                .add_directive("kos_core::telemetry=error".parse().unwrap())
+                .add_directive("kos::telemetry=error".parse().unwrap())
                 .add_directive("polling=error".parse().unwrap())
                 .add_directive("async_io=error".parse().unwrap())
                 .add_directive("krec=error".parse().unwrap()),

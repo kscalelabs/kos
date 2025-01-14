@@ -31,9 +31,9 @@ generate-proto:
 	python -m grpc_tools.protoc \
 		--python_out=. \
 		--grpc_python_out=. \
-		--proto_path=../kos_core/proto/ \
-		--proto_path=../kos_core/proto/googleapis \
-		../kos_core/proto/kos/*.proto
+		--proto_path=../kos/proto/ \
+		--proto_path=../kos/proto/googleapis \
+		../kos/proto/kos/*.proto
 	mkdir -p kos_protos
 	mv kos/* kos_protos/
 	rm -rf kos

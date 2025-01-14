@@ -1,8 +1,8 @@
 use crate::Operation;
 use async_trait::async_trait;
 use eyre::Result;
-use kos_core::services::OperationsServiceImpl;
-use kos_core::{
+use kos::services::OperationsServiceImpl;
+use kos::{
     hal::{
         CalibrateImuMetadata, CalibrationStatus, EulerAnglesResponse, ImuAdvancedValuesResponse,
         ImuValuesResponse, QuaternionResponse, IMU,

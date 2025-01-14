@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use eyre::Result;
-use kos_core::hal::{KClipStartResponse, KClipStopResponse, ProcessManager};
-use kos_core::kos_proto::common::{Error, ErrorCode};
+use kos::hal::{KClipStartResponse, KClipStopResponse, ProcessManager};
+use kos::kos_proto::common::{Error, ErrorCode};
 use std::sync::Mutex;
 use uuid::Uuid;
 

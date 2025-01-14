@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use eyre::Result;
-use kos_core::google_proto::longrunning::Operation;
-use kos_core::services::OperationsServiceImpl;
-use kos_core::{
+use kos::google_proto::longrunning::Operation;
+use kos::services::OperationsServiceImpl;
+use kos::{
     hal::{
         ActionResponse, Actuator, ActuatorCommand, CalibrateActuatorMetadata,
         CalibrateActuatorRequest, CalibrationStatus,

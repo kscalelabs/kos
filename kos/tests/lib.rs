@@ -6,8 +6,8 @@ pub use imu::*;
 pub use process_manager::*;
 
 use async_trait::async_trait;
-use kos_core::hal::Operation;
-use kos_core::{services::OperationsServiceImpl, Platform, ServiceEnum};
+use kos::hal::Operation;
+use kos::{services::OperationsServiceImpl, Platform, ServiceEnum};
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;

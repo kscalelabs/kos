@@ -2,8 +2,7 @@
 resolver = "2"
 
 members = [
-    "kos_core",
-    "daemon",
+    "kos",
 ]
 
 exclude = [

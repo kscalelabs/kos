@@ -1,11 +1,11 @@
 
 use clap::Parser;
 use eyre::Result;
-use kos_core::google_proto::longrunning::operations_server::OperationsServer;
-use kos_core::services::OperationsServiceImpl;
-use kos_core::telemetry::Telemetry;
-use kos_core::Platform;
-use kos_core::ServiceEnum;
+use kos::google_proto::longrunning::operations_server::OperationsServer;
+use kos::services::OperationsServiceImpl;
+use kos::telemetry::Telemetry;
+use kos::Platform;
+use kos::ServiceEnum;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::signal;
@@ -15,7 +15,7 @@ use tracing::{debug, error, info};
 use tracing_subscriber::filter::EnvFilter;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::Layer;
-use kos_core::Platform;
+use kos::Platform;
 
 mod file_logging;
 use file_logging::{cleanup_logging, setup_logging};
@@ -89,7 +89,7 @@ pub async fn kos_runtime(
                 .add_directive("h2=error".parse().unwrap())
                 .add_directive("grpc=error".parse().unwrap())
                 .add_directive("rumqttc=error".parse().unwrap())
-                .add_directive("kos_core::telemetry=error".parse().unwrap())
+                .add_directive("kos::telemetry=error".parse().unwrap())
                 .add_directive("polling=error".parse().unwrap())
                 .add_directive("async_io=error".parse().unwrap())
                 .add_directive("krec=error".parse().unwrap()),
