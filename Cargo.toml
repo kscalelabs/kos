@@ -3,6 +3,7 @@ resolver = "2"
 
 members = [
     "kos",
+    "kos-stub",
 ]
 
 [workspace.package]
