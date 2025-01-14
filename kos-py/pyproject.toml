@@ -38,18 +38,11 @@ module = [
     "setuptools_rust",
     "grpc",
     "grpc.*",
-    "google.protobuf.*",
-    "google.longrunning.*",
+    "google.*",
     "kos.*",
-    "pykos.*",
-    "kos_protos.actuator_pb2_grpc",
-    "kos_protos.process_manager_pb2_grpc",
-    "kos_protos.imu_pb2_grpc",
-    "kos_protos.common_pb2",
-    "kos_protos.actuator_pb2",
-    "kos_protos.process_manager_pb2",
-    "kos_protos.imu_pb2"
+    "kos_protos.*",
 ]
+
 ignore_missing_imports = true
 follow_imports = "skip"
 disallow_untyped_defs = false
@@ -68,7 +61,6 @@ target-version = "py310"
 select = ["ANN", "D", "E", "F", "G", "I", "N", "PGH", "PLC", "PLE", "PLR", "PLW", "TID", "W"]
 
 ignore = [
-    "ANN101",
     "D101", "D102", "D103", "D104", "D105", "D106", "D107",
     "N812", "N817",
     "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004",
