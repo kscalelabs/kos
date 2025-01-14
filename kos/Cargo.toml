@@ -36,7 +36,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 yaml-rust2 = "0.9"
 
 [build-dependencies]
-tonic-build = "0.12"
+tonic-build = { version = "0.12", git = "https://github.com/hatomist/tonic-milkv" }
 
 [lib]
 doctest = false
