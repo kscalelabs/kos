@@ -74,9 +74,10 @@ To save trace logs to a file, pass the `--log` flag:
 
 ```bash
 cargo run --features stub -- --log
-
+```
 
 ## Contributing
+
 - Use `cargo fmt --all` to format the code.
 - Use `cargo clippy` to check for lint errors.
 - Use `cargo test` to run the tests.
@@ -87,4 +88,3 @@ cargo run --features stub -- --log
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-```
