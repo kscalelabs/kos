@@ -1,8 +1,9 @@
 """Defines a dummy test."""
 
 import grpc
-import pykos
 import pytest
+
+import pykos
 
 
 def test_dummy() -> None:
