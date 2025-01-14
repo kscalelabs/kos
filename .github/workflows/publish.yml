@@ -4,6 +4,16 @@ on:
   release:
     types: [created]
   workflow_dispatch:
+    inputs:
+      publish_kos_python:
+        description: "Publish KOS python package"
+        type: boolean
+        default: true
+
+      publish_kos_rust:
+        description: "Publish KOS rust package"
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -14,14 +24,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish:
+  publish-python:
     timeout-minutes: 10
     name: Build and publish
-
-    # We don't need to run on all platforms since this package is
-    # platform-agnostic. The output wheel is something like
-    # "kos-<version>-py3-none-any.whl".
     runs-on: ubuntu-latest
+    if: ${{ inputs.publish_kos_python }}
 
     steps:
       - name: Checkout code
@@ -45,3 +52,48 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: kos-py/dist/
+
+  publish-rust:
+    name: Build and publish Rust package
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    if: ${{ inputs.publish_kos_rust }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libudev-dev pkg-config
+
+      - name: Install protoc
+        uses: arduino/setup-protoc@v3
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry
+
+      - name: Cache Cargo index
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index
+          restore-keys: |
+            ${{ runner.os }}-cargo-index
+
+      - name: Publish Rust package
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          cargo publish -p kos
