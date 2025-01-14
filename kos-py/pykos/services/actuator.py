@@ -86,7 +86,7 @@ class ActuatorServiceClient:
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
 
-    def command_actuators(self, commands: list[ActuatorCommand]) -> list[common_pb2.ActionResult]:
+    def command_actuators(self, commands: list[ActuatorCommand]) -> actuator_pb2.CommandActuatorsResponse:
         """Command multiple actuators at once.
 
         Args:
@@ -99,8 +99,7 @@ class ActuatorServiceClient:
         """
         actuator_commands = [actuator_pb2.ActuatorCommand(**cmd) for cmd in commands]
         request = actuator_pb2.CommandActuatorsRequest(commands=actuator_commands)
-        response = self.stub.CommandActuators(request)
-        return response.results
+        return self.stub.CommandActuators(request)
 
     def configure_actuator(self, **kwargs: Unpack[ConfigureActuatorRequest]) -> common_pb2.ActionResult:
         """Configure an actuator's parameters.
@@ -117,7 +116,7 @@ class ActuatorServiceClient:
         request = actuator_pb2.ConfigureActuatorRequest(**kwargs)
         return self.stub.ConfigureActuator(request)
 
-    def get_actuators_state(self, actuator_ids: list[int] | None = None) -> list[common_pb2.ActionResult]:
+    def get_actuators_state(self, actuator_ids: list[int] | None = None) -> actuator_pb2.GetActuatorsStateResponse:
         """Get the state of multiple actuators.
 
         Args:
@@ -127,12 +126,4 @@ class ActuatorServiceClient:
             List of ActuatorStateResponse objects containing the state information
         """
         request = actuator_pb2.GetActuatorsStateRequest(actuator_ids=actuator_ids or [])
-        response = self.stub.GetActuatorsState(request)
-        if actuator_ids is None:
-            return response.states
-
-        states = []
-        for state in response.states:
-            if state.actuator_id in actuator_ids:
-                states.append(state)
-        return states
+        return self.stub.GetActuatorsState(request)

@@ -20,7 +20,7 @@ def test_pykos() -> None:
 
     # Tests getting the actuator state.
     actuator_state = client.actuator.get_actuators_state(actuator_ids=[1])
-    assert actuator_state[0].actuator_id == 1
+    assert actuator_state.states[0].actuator_id == 1
 
     # Tests the IMU endpoints.
     imu_response = client.imu.get_imu_values()
@@ -29,6 +29,8 @@ def test_pykos() -> None:
     client.imu.get_euler_angles()
     client.imu.get_quaternion()
     client.imu.calibrate()
+    zero_response = client.imu.zero(duration=1.0, max_retries=1, max_angular_error=1.0)
+    assert zero_response.success
 
     # Tests the K-Clip endpoints.
     start_kclip_response = client.process_manager.start_kclip(action="start")

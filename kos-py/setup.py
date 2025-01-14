@@ -65,7 +65,7 @@ setup(
     url="https://github.com/kscalelabs/kos",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    python_requires=">=3.8",
+    python_requires=">=3.11",
     install_requires=requirements,
     extras_require={"dev": requirements_dev},
     packages=["pykos", "pykos.services", "kos_protos"],
