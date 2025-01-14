@@ -9,7 +9,7 @@ option go_package = "kos/sim;sim";
 option java_package = "com.kos.sim";
 option csharp_namespace = "KOS.Sim";
 
-// The SimulationService provides methods to control the simulation environment.
+// Service to control the simulation environment.
 service SimulationService {
     // Resets the simulation to its initial state.
     rpc Reset(ResetRequest) returns (kos.common.ActionResponse);
@@ -27,25 +27,25 @@ service SimulationService {
     rpc GetParameters(google.protobuf.Empty) returns (GetParametersResponse);
 }
 
-// Default position 
+// Default position for the simulation (initial state)
 message DefaultPosition {
     repeated float qpos = 1;
 }
 
-// Reset Request
+// Request to reset the simulation to initial state
 message ResetRequest {
     // If provided, reset to this specific state, otherwise use default
     optional DefaultPosition initial_state = 1;
-    // If true, randomize the initial state within reasonable bounds
+    // If true, randomize the initial state within pre-set bounds
     optional bool randomize = 2;
 }
 
-// Set Paused Request
+// Request to pause or resume the simulation
 message SetPausedRequest {
     bool paused = 1;
 }
 
-// Step Request
+// Request to step the simulation forward
 message StepRequest {
     // Number of simulation steps to take
     uint32 num_steps = 1;
@@ -53,20 +53,21 @@ message StepRequest {
     optional float step_size = 2;
 }
 
-// Request message for SetParameters.
 message SetParametersRequest {
-    // Parameters to set
     SimulationParameters parameters = 1;
 }
 
-// Response message for GetParameters.
 message GetParametersResponse {
     SimulationParameters parameters = 1;
     kos.common.Error error = 2;  // Error details if any
 }
 
+// Controllable parameters for the simulation
 message SimulationParameters {
+    // Time scale for the simulation
     optional float time_scale = 1;
+    // Strength of gravity for the simulation
     optional float gravity = 2;
+    // Initial state for the simulation
     optional DefaultPosition initial_state = 3;
 }
