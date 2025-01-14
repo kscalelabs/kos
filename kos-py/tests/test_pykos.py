@@ -22,13 +22,19 @@ def test_pykos() -> None:
     actuator_state = client.actuator.get_actuators_state(actuator_ids=[1])
     assert actuator_state[0].actuator_id == 1
 
-    # Tests the IMU endpoint.
+    # Tests the IMU endpoints.
     imu_response = client.imu.get_imu_values()
     assert imu_response.accel_x is not None
     client.imu.get_imu_advanced_values()
     client.imu.get_euler_angles()
     client.imu.get_quaternion()
     client.imu.calibrate()
+
+    # Tests the K-Clip endpoints.
+    start_kclip_response = client.process_manager.start_kclip(action="start")
+    assert start_kclip_response.clip_uuid is not None
+    stop_kclip_response = client.process_manager.stop_kclip()
+    assert stop_kclip_response.clip_uuid is not None
 
 
 def is_server_running(address: str) -> bool:
