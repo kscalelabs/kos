@@ -3,13 +3,17 @@
 """Setup script for the project."""
 
 import os
-import re
 import subprocess
+import sys
 from typing import List
+
+# Add the pykos directory to the path so we can import version
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pykos"))
 
 from setuptools import setup
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
+from version import __version__  # noqa: E402
 
 
 class GenerateProtosMixin:
@@ -51,15 +55,9 @@ with open("pykos/requirements-dev.txt", "r", encoding="utf-8") as f:
     requirements_dev: List[str] = f.read().splitlines()
 
 
-with open("pykos/__init__.py", "r", encoding="utf-8") as fh:
-    version_re = re.search(r"^__version__ = \"([^\"]*)\"", fh.read(), re.MULTILINE)
-assert version_re is not None, "Could not find version in pykos/__init__.py"
-version: str = version_re.group(1)
-
-
 setup(
     name="pykos",
-    version=version,
+    version=__version__,
     description="The KOS command line interface",
     author="pykos Contributors",
     url="https://github.com/kscalelabs/kos",
