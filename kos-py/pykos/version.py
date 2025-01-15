@@ -3,13 +3,13 @@
 import re
 from pathlib import Path
 
-PYTHON_PATCH_VERSION = 2
+PYTHON_PATCH_VERSION = 3
 
 
 def get_workspace_root() -> Path:
     """Get the workspace root directory."""
     # Look for Cargo.toml in the same directory as the package
-    cargo_toml = Path(__file__).parent.parent / "Cargo.toml"
+    cargo_toml = Path(__file__).parent / "Cargo.toml"
     if cargo_toml.exists():
         return cargo_toml.parent
 

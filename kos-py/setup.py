@@ -20,24 +20,21 @@ from version import __version__  # noqa: E402
 class GenerateProtosMixin:
     """Mixin class to generate protos and prepare build files."""
 
+    def generate_protos(self) -> None:
+        """Generate proto files if Makefile exists."""
+        if os.path.exists("Makefile"):
+            subprocess.check_call(["make", "generate-proto"])
+
     def copy_workspace_files(self) -> None:
         """Copy necessary workspace files for version handling."""
         # Copy workspace Cargo.toml into the package directory
         parent_cargo = Path(__file__).parent.parent / "Cargo.toml"
         if parent_cargo.exists():
             import shutil
-            target_dir = Path(__file__).parent
-            # If file already exists, remove it
-            if (target_dir / "Cargo.toml").exists():
-                (target_dir / "Cargo.toml").unlink()
+            target_dir = Path(__file__).parent / "pykos"
             shutil.copy(parent_cargo, target_dir / "Cargo.toml")
         else:
             print("Warning: Could not find workspace Cargo.toml")
-
-    def generate_protos(self) -> None:
-        """Generate proto files if Makefile exists."""
-        if os.path.exists("Makefile"):
-            subprocess.check_call(["make", "generate-proto"])
 
 
 class BuildPyCommand(build_py, GenerateProtosMixin):
@@ -55,7 +52,6 @@ class EggInfoCommand(egg_info, GenerateProtosMixin):
     def run(self) -> None:
         """Run the egg_info command."""
         self.generate_protos()
-        self.copy_workspace_files()
         super().run()
 
 
