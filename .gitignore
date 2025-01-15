@@ -16,9 +16,6 @@ venv/
 kos-py/kos_protos/
 !kos-py/kos_protos/__init__.py
 
-# Reference Cargo.toml
-kos-py/pykos/Cargo.toml
-
 # Rust
 target/
 Cargo.lock
