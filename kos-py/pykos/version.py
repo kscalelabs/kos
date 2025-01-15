@@ -3,16 +3,17 @@
 import re
 from pathlib import Path
 
-PYTHON_PATCH_VERSION = 1
+PYTHON_PATCH_VERSION = 2
 
 
 def get_workspace_root() -> Path:
     """Get the workspace root directory."""
-    # When running normally, use __file__
-    if "__file__" in globals():
-        return Path(__file__).parents[2]
+    # Look for Cargo.toml in the same directory as the package
+    cargo_toml = Path(__file__).parent.parent / "Cargo.toml"
+    if cargo_toml.exists():
+        return cargo_toml.parent
 
-    raise RuntimeError("Could not determine workspace root")
+    raise RuntimeError("Could not find Cargo.toml")
 
 
 def get_version() -> str:
