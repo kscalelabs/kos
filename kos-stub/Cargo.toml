@@ -1,0 +1,16 @@
+[package]
+name = "kos-stub"
+version = "0.1.0"
+edition = "2018"
+
+[[bin]]
+name = "kos-stub"
+path = "src/main.rs"
+
+[dependencies]
+kos = { path = "../kos" }
+async-trait = "0.1"
+eyre = "0.6"
+uuid = { version = "1", features = ["v4"] }
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"

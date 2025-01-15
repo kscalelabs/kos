@@ -1,0 +1,5 @@
+# requirements.txt
+
+grpcio
+protobuf>=5.29.0
+googleapis-common-protos
