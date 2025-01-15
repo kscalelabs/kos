@@ -1,7 +1,7 @@
 use crate::hal::Inference;
+use crate::kos_proto::common::ActionResponse;
 use crate::kos_proto::inference::inference_service_server::InferenceService;
 use crate::kos_proto::inference::*;
-use crate::kos_proto::common::ActionResponse;
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
 use tracing::trace;
@@ -39,7 +39,11 @@ impl InferenceService for InferenceServiceImpl {
     ) -> Result<Response<LoadModelsResponse>, Status> {
         trace!("load_models request received");
         let request = request.into_inner();
-        self.inference.load_models(request.uids).await.map(Response::new).map_err(|e| Status::internal(format!("Failed to load models: {:?}", e)))
+        self.inference
+            .load_models(request.uids)
+            .await
+            .map(Response::new)
+            .map_err(|e| Status::internal(format!("Failed to load models: {:?}", e)))
     }
 
     async fn unload_models(
@@ -48,7 +52,11 @@ impl InferenceService for InferenceServiceImpl {
     ) -> Result<Response<ActionResponse>, Status> {
         trace!("unload_models request received");
         let request = request.into_inner();
-        self.inference.unload_models(request.uids).await.map(Response::new).map_err(|e| Status::internal(format!("Failed to unload models: {:?}", e)))
+        self.inference
+            .unload_models(request.uids)
+            .await
+            .map(Response::new)
+            .map_err(|e| Status::internal(format!("Failed to unload models: {:?}", e)))
     }
 
     async fn get_models_info(
@@ -57,7 +65,11 @@ impl InferenceService for InferenceServiceImpl {
     ) -> Result<Response<GetModelsInfoResponse>, Status> {
         trace!("get_models_info request received");
         let request = request.into_inner();
-        self.inference.get_models_info(request).await.map(Response::new).map_err(|e| Status::internal(format!("Failed to get models info: {:?}", e)))
+        self.inference
+            .get_models_info(request)
+            .await
+            .map(Response::new)
+            .map_err(|e| Status::internal(format!("Failed to get models info: {:?}", e)))
     }
 
     async fn forward(
@@ -66,7 +78,7 @@ impl InferenceService for InferenceServiceImpl {
     ) -> Result<Response<ForwardResponse>, Status> {
         trace!("forward request received");
         let request = request.into_inner();
-        
+
         self.inference
             .forward(request.model_uid, request.inputs)
             .await

@@ -1,7 +1,9 @@
 pub use crate::grpc_interface::google::longrunning::*;
 pub use crate::grpc_interface::kos;
 pub use crate::grpc_interface::kos::common::ActionResponse;
-pub use crate::kos_proto::{actuator::*, common::ActionResult, imu::*, process_manager::*, inference::*};
+pub use crate::kos_proto::{
+    actuator::*, common::ActionResult, imu::*, inference::*, process_manager::*,
+};
 use async_trait::async_trait;
 use eyre::Result;
 use std::fmt::Display;
@@ -42,8 +44,13 @@ pub trait ProcessManager: Send + Sync {
 
 #[async_trait]
 pub trait Inference: Send + Sync {
-    async fn upload_model(&self, model: Vec<u8>, metadata: Option<ModelMetadata>) -> Result<UploadModelResponse>;
-    async fn get_models_info(&self, request: GetModelsInfoRequest) -> Result<GetModelsInfoResponse>;
+    async fn upload_model(
+        &self,
+        model: Vec<u8>,
+        metadata: Option<ModelMetadata>,
+    ) -> Result<UploadModelResponse>;
+    async fn get_models_info(&self, request: GetModelsInfoRequest)
+        -> Result<GetModelsInfoResponse>;
     async fn load_models(&self, uids: Vec<String>) -> Result<LoadModelsResponse>;
     async fn unload_models(&self, uids: Vec<String>) -> Result<ActionResponse>;
     async fn forward(&self, model_uid: String, inputs: Vec<f32>) -> Result<ForwardResponse>;

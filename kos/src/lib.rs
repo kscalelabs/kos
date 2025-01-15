@@ -19,7 +19,9 @@ use hal::imu_service_server::ImuServiceServer;
 use hal::inference_service_server::InferenceServiceServer;
 use hal::process_manager_service_server::ProcessManagerServiceServer;
 use services::OperationsServiceImpl;
-use services::{ActuatorServiceImpl, IMUServiceImpl, ProcessManagerServiceImpl, InferenceServiceImpl};
+use services::{
+    ActuatorServiceImpl, IMUServiceImpl, InferenceServiceImpl, ProcessManagerServiceImpl,
+};
 use std::fmt::Debug;
 use std::future::Future;
 use std::pin::Pin;
