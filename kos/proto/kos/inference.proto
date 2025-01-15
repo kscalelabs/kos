@@ -14,6 +14,15 @@ service InferenceService {
     // Uploads a model to the robot.
     rpc UploadModel(UploadModelRequest) returns (UploadModelResponse);
 
+    // Loads models from the robot's filesystem.
+    rpc LoadModels(ModelUids) returns (LoadModelsResponse);
+
+    // Unloads models from the robot's filesystem.
+    rpc UnloadModels(ModelUids) returns (kos.common.ActionResponse);
+
+    // Get available models
+    rpc GetModelsInfo(GetModelsInfoRequest) returns (GetModelsInfoResponse);
+
     // Runs inference using a specified model.
     rpc Forward(ForwardRequest) returns (ForwardResponse);
 }
@@ -21,12 +30,52 @@ service InferenceService {
 // Request message for uploading a model.
 message UploadModelRequest {
     bytes model = 1; // Model binary data
+    optional ModelMetadata metadata = 2; // Model metadata
 }
 
 // Response message containing the uploaded model's UID.
 message UploadModelResponse {
     string model_uid = 1;           // Unique identifier for the model
     kos.common.Error error = 2; // Error details if upload failed
+}
+
+// Response message containing the loaded models.
+message LoadModelsResponse {
+    repeated ModelInfo models = 1; // List of loaded models
+    kos.common.ActionResponse result = 2; // Result of the action
+}
+
+// Request message for getting all available models
+message GetModelsInfoRequest {
+    oneof filter {
+        ModelUids model_uids = 1; // List of specific model UIDs to fetch
+        bool all = 2;             // If true, return all models
+    }
+}
+
+// List of model UIDs
+message ModelUids {
+    repeated string uids = 1;
+}
+
+// Response message containing all available models
+message GetModelsInfoResponse {
+    repeated ModelInfo models = 1; // List of model information
+    kos.common.Error error = 2; // Error details if fetching failed
+}
+
+// Model metadata
+message ModelMetadata {
+    optional string model_name = 1; // Model name
+    optional string model_description = 2; // Model description
+    optional string model_version = 3; // Model version
+    optional string model_author = 4; // Model author
+}
+
+// Information about a model
+message ModelInfo {
+    string uid = 1; // Model UID (assigned by server)
+    ModelMetadata metadata = 2; // Model metadata
 }
 
 // Request message for running inference.
