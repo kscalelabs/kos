@@ -1,8 +1,6 @@
 """KOS Python client."""
 
-from pykos.client import KOS
-from pykos.version import __version__
+__version__ = "0.4.1"
 
 from . import services
-
-__all__ = ["KOS", "__version__"]
+from .client import KOS
