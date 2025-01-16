@@ -90,7 +90,7 @@ impl InferenceService for InferenceServiceImpl {
                         values: proto_tensor.values,
                         shape: proto_tensor.shape.into_iter().map(|d| Dimension {
                             size: d.size,
-                            name: if d.name.is_empty() { None } else { Some(d.name) },
+                            name: d.name,
                             dynamic: d.dynamic,
                         }).collect(),
                     },

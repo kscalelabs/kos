@@ -49,8 +49,12 @@ pub trait Inference: Send + Sync {
         model: Vec<u8>,
         metadata: Option<ModelMetadata>,
     ) -> Result<UploadModelResponse>;
-    async fn get_models_info(&self, request: GetModelsInfoRequest)
-        -> Result<GetModelsInfoResponse>;
+
+    async fn get_models_info(
+        &self,
+        request: GetModelsInfoRequest
+    ) -> Result<GetModelsInfoResponse>;
+
     async fn load_models(&self, uids: Vec<String>) -> Result<LoadModelsResponse>;
     async fn unload_models(&self, uids: Vec<String>) -> Result<ActionResponse>;
     async fn forward(
@@ -80,7 +84,7 @@ impl Display for CalibrationStatus {
 #[derive(Debug, Clone)]
 pub struct Dimension {
     pub size: u32,
-    pub name: Option<String>,
+    pub name: String,
     pub dynamic: bool,
 }
 
@@ -88,4 +92,12 @@ pub struct Dimension {
 pub struct Tensor {
     pub values: Vec<f32>,
     pub shape: Vec<Dimension>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModelInfo {
+    pub uid: String,
+    pub metadata: Option<ModelMetadata>,
+    pub input_specs: std::collections::HashMap<String, Tensor>,
+    pub output_specs: std::collections::HashMap<String, Tensor>,
 }

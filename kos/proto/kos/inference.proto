@@ -72,10 +72,28 @@ message ModelMetadata {
     optional string model_author = 4; // Model author
 }
 
+// Information about a tensor's shape and type
+message TensorInfo {
+    repeated DimensionInfo shape = 1;  // Expected shape information
+    string description = 2;            // Description of what this tensor represents
+
+    // Information about a dimension
+    message DimensionInfo {
+        uint32 size = 1;        // Size of this dimension (0 if dynamic)
+        string name = 2;        // Name of this dimension (e.g., "batch", "channels")
+        bool dynamic = 3;       // Whether this dimension can vary
+    }
+
+}
+
+
 // Information about a model
 message ModelInfo {
-    string uid = 1; // Model UID (assigned by server)
-    ModelMetadata metadata = 2; // Model metadata
+    string uid = 1;                            // Model UID (assigned by server)
+    ModelMetadata metadata = 2;                // Model metadata
+    map<string, Tensor> input_specs = 3;       // Expected input tensor specifications
+    map<string, Tensor> output_specs = 4;      // Expected output tensor specifications
+    string description = 5;                    // Optional description of tensor usage
 }
 
 // Request message for running inference.
