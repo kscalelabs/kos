@@ -4,17 +4,12 @@
 
 import os
 import subprocess
-import sys
 from pathlib import Path
 from typing import List
-
-# Add the pykos directory to the path so we can import version
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pykos"))
 
 from setuptools import setup
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
-from version import __version__  # noqa: E402
 
 
 class GenerateProtosMixin:
@@ -31,6 +26,7 @@ class GenerateProtosMixin:
         parent_cargo = Path(__file__).parent.parent / "Cargo.toml"
         if parent_cargo.exists():
             import shutil
+
             target_dir = Path(__file__).parent / "pykos"
             shutil.copy(parent_cargo, target_dir / "Cargo.toml")
         else:
@@ -65,8 +61,6 @@ with open("pykos/requirements.txt", "r", encoding="utf-8") as f:
 
 with open("pykos/requirements-dev.txt", "r", encoding="utf-8") as f:
     requirements_dev: List[str] = f.read().splitlines()
-
-
 
 
 setup(
