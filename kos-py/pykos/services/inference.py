@@ -27,6 +27,7 @@ class TensorDimension(TypedDict):
         name: Name of this dimension (e.g., "batch", "channels", "height")
         dynamic: Whether this dimension can vary (e.g., batch size)
     """
+
     size: int
     name: str
     dynamic: bool
@@ -39,6 +40,7 @@ class Tensor(TypedDict):
         values: Tensor values in row-major order
         shape: List of dimension information
     """
+
     values: list[float]
     shape: list[TensorDimension]
 
@@ -126,11 +128,7 @@ class InferenceServiceClient:
             request = inference_pb2.GetModelsInfoRequest(all=True)
         return self.stub.GetModelsInfo(request)
 
-    def forward(
-        self,
-        model_uid: str,
-        inputs: dict[str, Tensor]
-    ) -> inference_pb2.ForwardResponse:
+    def forward(self, model_uid: str, inputs: dict[str, Tensor]) -> inference_pb2.ForwardResponse:
         """Run inference using a specified model.
 
         Args:
@@ -143,17 +141,10 @@ class InferenceServiceClient:
         tensor_inputs = {}
         for name, tensor in inputs.items():
             shape = [
-                inference_pb2.Tensor.Dimension(
-                    size=dim["size"],
-                    name=dim["name"],
-                    dynamic=dim["dynamic"]
-                )
+                inference_pb2.Tensor.Dimension(size=dim["size"], name=dim["name"], dynamic=dim["dynamic"])
                 for dim in tensor["shape"]
             ]
-            proto_tensor = inference_pb2.Tensor(
-                values=tensor["values"],
-                shape=shape
-            )
+            proto_tensor = inference_pb2.Tensor(values=tensor["values"], shape=shape)
             tensor_inputs[name] = proto_tensor
 
         request = inference_pb2.ForwardRequest(model_uid=model_uid, inputs=tensor_inputs)
