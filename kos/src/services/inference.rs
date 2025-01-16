@@ -1,4 +1,4 @@
-use crate::hal::Inference;
+use crate::hal::{Inference, Tensor as HALTensor, Dimension};
 use crate::kos_proto::common::ActionResponse;
 use crate::kos_proto::inference::inference_service_server::InferenceService;
 use crate::kos_proto::inference::*;
@@ -79,8 +79,27 @@ impl InferenceService for InferenceServiceImpl {
         trace!("forward request received");
         let request = request.into_inner();
 
+        // Convert proto tensors to HAL tensors
+        let inputs: std::collections::HashMap<String, HALTensor> = request
+            .inputs
+            .into_iter()
+            .map(|(name, proto_tensor)| {
+                (
+                    name,
+                    HALTensor {
+                        values: proto_tensor.values,
+                        shape: proto_tensor.shape.into_iter().map(|d| Dimension {
+                            size: d.size,
+                            name: if d.name.is_empty() { None } else { Some(d.name) },
+                            dynamic: d.dynamic,
+                        }).collect(),
+                    },
+                )
+            })
+            .collect();
+
         self.inference
-            .forward(request.model_uid, request.inputs)
+            .forward(request.model_uid, inputs)
             .await
             .map(Response::new)
             .map_err(|e| Status::internal(format!("Failed to run inference: {:?}", e)))

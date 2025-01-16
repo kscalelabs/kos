@@ -53,7 +53,11 @@ pub trait Inference: Send + Sync {
         -> Result<GetModelsInfoResponse>;
     async fn load_models(&self, uids: Vec<String>) -> Result<LoadModelsResponse>;
     async fn unload_models(&self, uids: Vec<String>) -> Result<ActionResponse>;
-    async fn forward(&self, model_uid: String, inputs: Vec<f32>) -> Result<ForwardResponse>;
+    async fn forward(
+        &self,
+        model_uid: String,
+        inputs: std::collections::HashMap<String, Tensor>
+    ) -> Result<ForwardResponse>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -71,4 +75,17 @@ impl Display for CalibrationStatus {
             CalibrationStatus::Timeout => write!(f, "timeout"),
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct Dimension {
+    pub size: u32,
+    pub name: Option<String>,
+    pub dynamic: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct Tensor {
+    pub values: Vec<f32>,
+    pub shape: Vec<Dimension>,
 }
