@@ -13,6 +13,7 @@ fn main() {
         "kos/common.proto",
         "kos/actuator.proto",
         "kos/imu.proto",
+        "kos/sim.proto",
         "kos/inference.proto",
         "kos/process_manager.proto",
         "kos/system.proto",

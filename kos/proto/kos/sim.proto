@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package kos.sim;
+
+import "google/protobuf/empty.proto";
+import "kos/common.proto";
+
+option go_package = "kos/sim;sim";
+option java_package = "com.kos.sim";
+option csharp_namespace = "KOS.Sim";
+
+// Service to control the simulation environment.
+service SimulationService {
+    // Resets the simulation to its initial state.
+    rpc Reset(ResetRequest) returns (kos.common.ActionResponse);
+
+    // Pauses/unpauses the simulation.
+    rpc SetPaused(SetPausedRequest) returns (kos.common.ActionResponse);
+
+    // Steps the simulation forward by a specified amount.
+    rpc Step(StepRequest) returns (kos.common.ActionResponse);
+
+    // Sets various simulation parameters.
+    rpc SetParameters(SetParametersRequest) returns (kos.common.ActionResponse);
+
+    // Gets the current simulation parameters.
+    rpc GetParameters(google.protobuf.Empty) returns (GetParametersResponse);
+}
+
+// Default position for the simulation (initial state)
+message DefaultPosition {
+    repeated float qpos = 1;
+}
+
+// Request to reset the simulation to initial state
+message ResetRequest {
+    // If provided, reset to this specific state, otherwise use default
+    optional DefaultPosition initial_state = 1;
+    // If true, randomize the initial state within pre-set bounds
+    optional bool randomize = 2;
+}
+
+// Request to pause or resume the simulation
+message SetPausedRequest {
+    bool paused = 1;
+}
+
+// Request to step the simulation forward
+message StepRequest {
+    // Number of simulation steps to take
+    uint32 num_steps = 1;
+    // Time per step in seconds
+    optional float step_size = 2;
+}
+
+message SetParametersRequest {
+    SimulationParameters parameters = 1;
+}
+
+message GetParametersResponse {
+    SimulationParameters parameters = 1;
+    kos.common.Error error = 2;  // Error details if any
+}
+
+// Controllable parameters for the simulation
+message SimulationParameters {
+    // Time scale for the simulation
+    optional float time_scale = 1;
+    // Strength of gravity for the simulation
+    optional float gravity = 2;
+    // Initial state for the simulation
+    optional DefaultPosition initial_state = 3;
+}
