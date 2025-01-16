@@ -85,6 +85,12 @@ class ActuatorServiceClient:
     def command_actuators(self, commands: list[ActuatorCommand]) -> actuator_pb2.CommandActuatorsResponse:
         """Command multiple actuators at once.
 
+        Example:
+            >>> command_actuators([
+            ...     {"actuator_id": 1, "position": 90.0, "velocity": 100.0, "torque": 1.0},
+            ...     {"actuator_id": 2, "position": 180.0},
+            ... ])
+
         Args:
             commands: List of dictionaries containing actuator commands.
                      Each dict should have 'actuator_id' and optionally 'position',
@@ -100,6 +106,27 @@ class ActuatorServiceClient:
     def configure_actuator(self, **kwargs: Unpack[ConfigureActuatorRequest]) -> common_pb2.ActionResult:
         """Configure an actuator's parameters.
 
+        Example:
+            >>> configure_actuator(
+            ...     actuator_id=1,
+            ...     kp=1.0,
+            ...     kd=0.1,
+            ...     ki=0.01,
+            ...     max_torque=100.0,
+            ...     protective_torque=None,
+            ...     protection_time=None,
+            ...     torque_enabled=True,
+            ...     new_actuator_id=None,
+            ...     zero_position=True
+            ... )
+
+            >>> configure_actuator(
+            ...     actuator_id=2,
+            ...     kp=1.0,
+            ...     kd=0.1,
+            ...     torque_enabled=True,
+            ... )
+
         Args:
             actuator_id: ID of the actuator to configure
             **kwargs: Configuration parameters that may include:
@@ -114,6 +141,9 @@ class ActuatorServiceClient:
 
     def get_actuators_state(self, actuator_ids: list[int] | None = None) -> actuator_pb2.GetActuatorsStateResponse:
         """Get the state of multiple actuators.
+
+        Example:
+            >>> get_actuators_state([1, 2])
 
         Args:
             actuator_ids: List of actuator IDs to query. If None, gets state of all actuators.

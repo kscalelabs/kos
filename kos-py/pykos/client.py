@@ -6,6 +6,7 @@ from pykos.services.actuator import ActuatorServiceClient
 from pykos.services.imu import IMUServiceClient
 from pykos.services.inference import InferenceServiceClient
 from pykos.services.process_manager import ProcessManagerServiceClient
+from pykos.services.sim import SimServiceClient
 
 
 class KOS:
@@ -27,6 +28,7 @@ class KOS:
         self.actuator = ActuatorServiceClient(self.channel)
         self.process_manager = ProcessManagerServiceClient(self.channel)
         self.inference = InferenceServiceClient(self.channel)
+        self.sim = SimServiceClient(self.channel)
 
     def close(self) -> None:
         """Close the gRPC channel."""

@@ -91,6 +91,14 @@ class IMUServiceClient:
     def zero(self, duration: float = 1.0, **kwargs: Unpack[ZeroIMURequest]) -> common_pb2.ActionResponse:
         """Zero the IMU.
 
+        Example:
+            >>> zero(duration=1.0,
+            ...     max_retries=3,
+            ...     max_angular_error=1.0,
+            ...     max_velocity=1.0,
+            ...     max_acceleration=1.0
+            ... )
+
         Args:
             duration: Duration in seconds for zeroing operation
             **kwargs: Additional zeroing parameters that may include:
