@@ -5,10 +5,10 @@ import grpc
 from pykos.services.actuator import ActuatorServiceClient
 from pykos.services.imu import IMUServiceClient
 from pykos.services.inference import InferenceServiceClient
+from pykos.services.led_matrix import LEDMatrixServiceClient
 from pykos.services.process_manager import ProcessManagerServiceClient
 from pykos.services.sim import SimServiceClient
 from pykos.services.sound import SoundServiceClient
-from pykos.services.led_matrix import LEDMatrixServiceClient
 
 
 class KOS:
