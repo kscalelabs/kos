@@ -74,18 +74,34 @@ message ModelMetadata {
 
 // Information about a model
 message ModelInfo {
-    string uid = 1; // Model UID (assigned by server)
-    ModelMetadata metadata = 2; // Model metadata
+    string uid = 1;                            // Model UID (assigned by server)
+    ModelMetadata metadata = 2;                // Model metadata
+    map<string, Tensor> input_specs = 3;       // Expected input tensor specifications
+    map<string, Tensor> output_specs = 4;      // Expected output tensor specifications
+    string description = 5;                    // Optional description of tensor usage
 }
 
 // Request message for running inference.
 message ForwardRequest {
     string model_uid = 1;        // Model UID to use for inference
-    repeated float inputs = 2;   // Input data for the model
+    map<string, Tensor> inputs = 2;   // Named input tensors
+}
+
+// A tensor containing data
+message Tensor {
+    repeated float values = 1;   // Tensor values in row-major order
+    repeated Dimension shape = 2; // Shape of the tensor
+
+    // Dimension information
+    message Dimension {
+        uint32 size = 1;        // Size of this dimension
+        string name = 2;        // Name (e.g., "batch", "channels", "height")
+        bool dynamic = 3;       // Whether this dimension can vary (e.g., batch size)
+    }
 }
 
 // Response message containing inference results.
 message ForwardResponse {
-    repeated float outputs = 1;        // Output data from the model
+    map<string, Tensor> outputs = 1;   // Named output tensors
     kos.common.Error error = 2;   // Error details if inference failed
 }

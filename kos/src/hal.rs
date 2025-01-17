@@ -49,11 +49,17 @@ pub trait Inference: Send + Sync {
         model: Vec<u8>,
         metadata: Option<ModelMetadata>,
     ) -> Result<UploadModelResponse>;
+
     async fn get_models_info(&self, request: GetModelsInfoRequest)
         -> Result<GetModelsInfoResponse>;
+
     async fn load_models(&self, uids: Vec<String>) -> Result<LoadModelsResponse>;
     async fn unload_models(&self, uids: Vec<String>) -> Result<ActionResponse>;
-    async fn forward(&self, model_uid: String, inputs: Vec<f32>) -> Result<ForwardResponse>;
+    async fn forward(
+        &self,
+        model_uid: String,
+        inputs: std::collections::HashMap<String, Tensor>,
+    ) -> Result<ForwardResponse>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
