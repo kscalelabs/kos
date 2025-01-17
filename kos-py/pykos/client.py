@@ -10,6 +10,7 @@ from pykos.services.sim import SimServiceClient
 from pykos.services.sound import SoundServiceClient
 from pykos.services.led_matrix import LEDMatrixServiceClient
 
+
 class KOS:
     """KOS client.
 

@@ -89,9 +89,7 @@ class SoundServiceClient:
             error=response.error if response.HasField("error") else None,
         )
 
-    def play_audio(
-        self, audio_iterator: Iterator[bytes], config: AudioConfig
-    ) -> common_pb2.ActionResponse:
+    def play_audio(self, audio_iterator: Iterator[bytes], config: AudioConfig) -> common_pb2.ActionResponse:
         """Stream PCM audio data to the speaker.
 
         Args:
@@ -125,9 +123,7 @@ class SoundServiceClient:
 
         return self.stub.PlayAudio(request_iterator())
 
-    def record_audio(
-        self, config: AudioConfig, duration_ms: int = 0
-    ) -> Generator[bytes, None, None]:
+    def record_audio(self, config: AudioConfig, duration_ms: int = 0) -> Generator[bytes, None, None]:
         """Record PCM audio data from the microphone.
 
         Args:
