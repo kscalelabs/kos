@@ -80,16 +80,3 @@ impl Display for CalibrationStatus {
         }
     }
 }
-
-#[derive(Debug, Clone)]
-pub struct Dimension {
-    pub size: u32,
-    pub name: String,
-    pub dynamic: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct Tensor {
-    pub values: Vec<f32>,
-    pub shape: Vec<Dimension>,
-}
