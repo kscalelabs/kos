@@ -93,11 +93,3 @@ pub struct Tensor {
     pub values: Vec<f32>,
     pub shape: Vec<Dimension>,
 }
-
-#[derive(Debug, Clone)]
-pub struct ModelInfo {
-    pub uid: String,
-    pub metadata: Option<ModelMetadata>,
-    pub input_specs: std::collections::HashMap<String, Tensor>,
-    pub output_specs: std::collections::HashMap<String, Tensor>,
-}
