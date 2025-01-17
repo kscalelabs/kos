@@ -13,10 +13,10 @@ class ModelMetadata(TypedDict):
     All fields are optional and can be used to provide additional information about the model.
     """
 
-    model_name: NotRequired[str]
-    model_description: NotRequired[str]
-    model_version: NotRequired[str]
-    model_author: NotRequired[str]
+    model_name: NotRequired[str | None]
+    model_description: NotRequired[str | None]
+    model_version: NotRequired[str | None]
+    model_author: NotRequired[str | None]
 
 
 class TensorDimension(TypedDict):
@@ -52,8 +52,9 @@ class ForwardResponse(TypedDict):
         outputs: Dictionary mapping tensor names to output tensors
         error: Optional error information if inference failed
     """
+
     outputs: dict[str, Tensor]
-    error: NotRequired[common_pb2.Error]
+    error: NotRequired[common_pb2.Error | None]
 
 
 class ModelInfo(TypedDict):
@@ -66,6 +67,7 @@ class ModelInfo(TypedDict):
         output_specs: Expected output tensor specifications
         description: str
     """
+
     uid: str
     metadata: ModelMetadata
     input_specs: dict[str, Tensor]
@@ -75,8 +77,9 @@ class ModelInfo(TypedDict):
 
 class GetModelsInfoResponse(TypedDict):
     """Response containing information about available models."""
+
     models: list[ModelInfo]
-    error: NotRequired[common_pb2.Error]
+    error: NotRequired[common_pb2.Error | None]
 
 
 class InferenceServiceClient:
@@ -159,9 +162,7 @@ class InferenceServiceClient:
                 error: Optional error information if fetching failed
         """
         if model_uids is not None:
-            request = inference_pb2.GetModelsInfoRequest(
-                model_uids=inference_pb2.ModelUids(uids=model_uids)
-            )
+            request = inference_pb2.GetModelsInfoRequest(model_uids=inference_pb2.ModelUids(uids=model_uids))
         else:
             request = inference_pb2.GetModelsInfoRequest(all=True)
 
@@ -173,21 +174,21 @@ class InferenceServiceClient:
                     uid=model.uid,
                     metadata=ModelMetadata(
                         model_name=model.metadata.model_name if model.metadata.HasField("model_name") else None,
-                        model_description=model.metadata.model_description if model.metadata.HasField("model_description") else None,
-                        model_version=model.metadata.model_version if model.metadata.HasField("model_version") else None,
+                        model_description=(
+                            model.metadata.model_description if model.metadata.HasField("model_description") else None
+                        ),
+                        model_version=(
+                            model.metadata.model_version if model.metadata.HasField("model_version") else None
+                        ),
                         model_author=model.metadata.model_author if model.metadata.HasField("model_author") else None,
                     ),
                     input_specs={
                         name: Tensor(
                             values=list(tensor.values),
                             shape=[
-                                TensorDimension(
-                                    size=dim.size,
-                                    name=dim.name,
-                                    dynamic=dim.dynamic
-                                )
+                                TensorDimension(size=dim.size, name=dim.name, dynamic=dim.dynamic)
                                 for dim in tensor.shape
-                            ]
+                            ],
                         )
                         for name, tensor in model.input_specs.items()
                     },
@@ -195,21 +196,17 @@ class InferenceServiceClient:
                         name: Tensor(
                             values=list(tensor.values),
                             shape=[
-                                TensorDimension(
-                                    size=dim.size,
-                                    name=dim.name,
-                                    dynamic=dim.dynamic
-                                )
+                                TensorDimension(size=dim.size, name=dim.name, dynamic=dim.dynamic)
                                 for dim in tensor.shape
-                            ]
+                            ],
                         )
                         for name, tensor in model.output_specs.items()
                     },
-                    description=model.description
+                    description=model.description,
                 )
                 for model in response.models
             ],
-            error=response.error if response.HasField("error") else None
+            error=response.error if response.HasField("error") else None,
         )
 
     def forward(self, model_uid: str, inputs: dict[str, Tensor]) -> ForwardResponse:
@@ -227,34 +224,21 @@ class InferenceServiceClient:
         tensor_inputs = {}
         for name, tensor in inputs.items():
             shape = [
-                inference_pb2.Tensor.Dimension(
-                    size=dim["size"],
-                    name=dim["name"],
-                    dynamic=dim["dynamic"]
-                )
+                inference_pb2.Tensor.Dimension(size=dim["size"], name=dim["name"], dynamic=dim["dynamic"])
                 for dim in tensor["shape"]
             ]
             proto_tensor = inference_pb2.Tensor(values=tensor["values"], shape=shape)
             tensor_inputs[name] = proto_tensor
 
-        response = self.stub.Forward(
-            inference_pb2.ForwardRequest(model_uid=model_uid, inputs=tensor_inputs)
-        )
+        response = self.stub.Forward(inference_pb2.ForwardRequest(model_uid=model_uid, inputs=tensor_inputs))
 
         return ForwardResponse(
             outputs={
                 name: Tensor(
                     values=list(tensor.values),
-                    shape=[
-                        TensorDimension(
-                            size=dim.size,
-                            name=dim.name,
-                            dynamic=dim.dynamic
-                        )
-                        for dim in tensor.shape
-                    ]
+                    shape=[TensorDimension(size=dim.size, name=dim.name, dynamic=dim.dynamic) for dim in tensor.shape],
                 )
                 for name, tensor in response.outputs.items()
             },
-            error=response.error if response.HasField("error") else None
+            error=response.error if response.HasField("error") else None,
         )
