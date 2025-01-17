@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package kos.led_matrix;
+
+import "google/protobuf/empty.proto";
+import "kos/common.proto";
+
+option go_package = "kos/led_matrix;led_matrix";
+option java_package = "com.kos.led_matrix";
+option csharp_namespace = "KOS.LEDMatrix";
+
+service LEDMatrixService {
+    // Gets information about the LED matrix including dimensions and capabilities
+    rpc GetMatrixInfo(google.protobuf.Empty) returns (GetMatrixInfoResponse);
+
+    // Writes the full LED matrix buffer with binary on/off states
+    rpc WriteBuffer(WriteBufferRequest) returns (kos.common.ActionResponse);
+
+    // Writes the full LED matrix buffer with color information
+    rpc WriteColorBuffer(WriteColorBufferRequest) returns (kos.common.ActionResponse);
+}
+
+message GetMatrixInfoResponse {
+    uint32 width = 1;                    // Width in pixels
+    uint32 height = 2;                   // Height in pixels
+    uint32 brightness_levels = 3;        // Number of brightness levels supported (1 for binary on/off)
+    bool color_capable = 4;              // Whether the matrix supports color
+    uint32 bits_per_pixel = 5;           // Number of bits used to represent each pixel
+    kos.common.Error error = 6;          // Error details if any
+}
+
+message WriteBufferRequest {
+    bytes buffer = 1; // Binary buffer containing LED states (width * height / 8 bytes)
+}
+
+message WriteColorBufferRequest {
+    bytes buffer = 1;     // RGB buffer (width * height * 3 bytes, one byte each for R,G,B per pixel)
+    uint32 brightness = 2; // Global brightness level (0-255)
+}
