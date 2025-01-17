@@ -19,6 +19,9 @@ service SoundService {
 
     // Records PCM audio data from the microphone
     rpc RecordAudio(RecordAudioRequest) returns (stream RecordAudioResponse);
+
+    // Stops an ongoing recording session
+    rpc StopRecording(google.protobuf.Empty) returns (kos.common.ActionResponse);
 }
 
 message GetAudioInfoResponse {
