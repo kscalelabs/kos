@@ -95,7 +95,7 @@ message Tensor {
     // Dimension information
     message Dimension {
         uint32 size = 1;        // Size of this dimension
-        string name = 2;        // Optional name (e.g., "batch", "channels", "height")
+        string name = 2;        // Name (e.g., "batch", "channels", "height")
         bool dynamic = 3;       // Whether this dimension can vary (e.g., batch size)
     }
 }
