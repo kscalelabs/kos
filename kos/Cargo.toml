@@ -12,6 +12,7 @@ build = "build.rs"
 
 [dependencies]
 async-trait = "0.1"
+async-stream = "0.3"
 base64 = "0.22"
 bytes = "1"
 chrono = "0.4"
@@ -19,6 +20,7 @@ clap = { version = "4.0", features = ["derive"] }
 directories = "5.0"
 eyre = "0.6"
 flate2 = "1.0"
+futures = "0.3"
 hyper = "0.14"
 krec = "0.2"
 lazy_static = "1.4"

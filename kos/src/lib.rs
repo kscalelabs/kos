@@ -17,10 +17,13 @@ use async_trait::async_trait;
 use hal::actuator_service_server::ActuatorServiceServer;
 use hal::imu_service_server::ImuServiceServer;
 use hal::inference_service_server::InferenceServiceServer;
+use hal::led_matrix_service_server::LedMatrixServiceServer;
+use hal::sound_service_server::SoundServiceServer;
 use hal::process_manager_service_server::ProcessManagerServiceServer;
 use services::OperationsServiceImpl;
 use services::{
-    ActuatorServiceImpl, IMUServiceImpl, InferenceServiceImpl, ProcessManagerServiceImpl,
+    ActuatorServiceImpl, IMUServiceImpl, InferenceServiceImpl, LEDMatrixServiceImpl,
+    ProcessManagerServiceImpl, SoundServiceImpl,
 };
 use std::fmt::Debug;
 use std::future::Future;
@@ -51,12 +54,26 @@ impl Debug for InferenceServiceImpl {
     }
 }
 
+impl Debug for LEDMatrixServiceImpl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "LEDMatrixServiceImpl")
+    }
+}
+
+impl Debug for SoundServiceImpl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "SoundServiceImpl")
+    }
+}
+
 #[derive(Debug)]
 pub enum ServiceEnum {
     Actuator(ActuatorServiceServer<ActuatorServiceImpl>),
     Imu(ImuServiceServer<IMUServiceImpl>),
     ProcessManager(ProcessManagerServiceServer<ProcessManagerServiceImpl>),
     Inference(InferenceServiceServer<InferenceServiceImpl>),
+    LEDMatrix(LedMatrixServiceServer<LEDMatrixServiceImpl>),
+    Sound(SoundServiceServer<SoundServiceImpl>),
 }
 
 #[async_trait]

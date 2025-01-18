@@ -22,6 +22,14 @@ pub mod kos {
     pub mod system {
         tonic::include_proto!("kos/kos.system");
     }
+
+    pub mod led_matrix {
+        tonic::include_proto!("kos/kos.led_matrix");
+    }
+
+    pub mod sound {
+        tonic::include_proto!("kos/kos.sound");
+    }
 }
 
 pub mod google {

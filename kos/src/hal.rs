@@ -2,11 +2,18 @@ pub use crate::grpc_interface::google::longrunning::*;
 pub use crate::grpc_interface::kos;
 pub use crate::grpc_interface::kos::common::ActionResponse;
 pub use crate::kos_proto::{
-    actuator::*, common::ActionResult, imu::*, inference::*, process_manager::*,
+    actuator::*, common::ActionResult, imu::*, inference::*, process_manager::*, led_matrix::*, sound::*,
 };
 use async_trait::async_trait;
 use eyre::Result;
 use std::fmt::Display;
+use futures::Stream;
+use tokio::sync::mpsc::Sender;
+use std::pin::Pin;
+use bytes::Bytes;
+
+// Type alias for the audio stream
+pub type AudioStream = Pin<Box<dyn Stream<Item = Bytes> + Send>>;
 
 #[async_trait]
 pub trait Actuator: Send + Sync {
@@ -62,6 +69,43 @@ pub trait Inference: Send + Sync {
     ) -> Result<ForwardResponse>;
 }
 
+#[async_trait]
+pub trait LEDMatrix: Send + Sync {
+    async fn get_matrix_info(&self) -> Result<GetMatrixInfoResponse>;
+    async fn write_buffer(&self, buffer: Vec<u8>) -> Result<ActionResponse>;
+    async fn write_color_buffer(
+        &self,
+        buffer: Vec<u8>,
+        width: u32,
+        height: u32,
+        format: String,
+        brightness: u32,
+    ) -> Result<ActionResponse>;
+}
+
+#[async_trait]
+pub trait Sound: Send + Sync {
+    /// Get information about audio capabilities
+    async fn get_audio_info(&self) -> Result<GetAudioInfoResponse, tonic::Status>;
+    
+    /// Start playing audio with the given configuration
+    async fn play_audio(
+        &self,
+        config: AudioConfig,
+        sender: Sender<Bytes>,
+    ) -> Result<ActionResponse, tonic::Status>;
+    
+    /// Start recording audio with the given configuration
+    async fn record_audio(
+        &self,
+        config: AudioConfig,
+        duration_ms: u32,
+    ) -> Result<AudioStream, tonic::Status>;
+    
+    /// Stop an ongoing recording session
+    async fn stop_recording(&self) -> Result<ActionResponse, tonic::Status>;
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CalibrationStatus {
     Calibrating,
@@ -78,3 +122,5 @@ impl Display for CalibrationStatus {
         }
     }
 }
+
+
