@@ -37,6 +37,7 @@ class ImageData(TypedDict):
         height: Image height in pixels
         format: Pixel format specification (e.g. 'RGB888', 'BGR888', 'RGB565')
     """
+
     data: bytes
     width: int
     height: int
