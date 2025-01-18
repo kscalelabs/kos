@@ -1,6 +1,6 @@
 """LED Matrix service client."""
 
-from typing import NotRequired, TypedDict
+from typing import NotRequired, TypedDict, Unpack
 
 import grpc
 from google.protobuf.empty_pb2 import Empty
@@ -26,6 +26,21 @@ class MatrixInfo(TypedDict):
     color_capable: bool
     bits_per_pixel: int
     error: NotRequired[common_pb2.Error | None]
+
+
+class ImageData(TypedDict):
+    """Information about image data.
+
+    Args:
+        data: Raw image data bytes
+        width: Image width in pixels
+        height: Image height in pixels
+        format: Pixel format specification (e.g. 'RGB888', 'BGR888', 'RGB565')
+    """
+    data: bytes
+    width: int
+    height: int
+    format: str
 
 
 class LEDMatrixServiceClient:
@@ -71,18 +86,19 @@ class LEDMatrixServiceClient:
         request = led_matrix_pb2.WriteBufferRequest(buffer=buffer)
         return self.stub.WriteBuffer(request)
 
-    def write_color_buffer(self, buffer: bytes, brightness: int = 255) -> common_pb2.ActionResponse:
-        """Write RGB color data to the LED matrix.
-
-        The buffer should be width * height * 3 bytes long, where each pixel
-        is represented by three consecutive bytes for R, G, and B values.
+    def write_color_buffer(self, **kwargs: Unpack[led_matrix_pb2.WriteColorBufferRequest]) -> common_pb2.ActionResponse:
+        """Write image data to the LED matrix.
 
         Args:
-            buffer: RGB buffer containing color data
-            brightness: Global brightness level (0-255)
+            **kwargs: ImageData containing the raw bytes, dimensions and format
+                buffer: Raw image data bytes
+                width: Image width in pixels
+                height: Image height in pixels
+                format: Pixel format specification (e.g. 'RGB888', 'BGR888', 'RGB565', 'MONO8')
+                brightness: Global brightness level (0-255)
 
         Returns:
             ActionResponse indicating success/failure of the write operation.
         """
-        request = led_matrix_pb2.WriteColorBufferRequest(buffer=buffer, brightness=brightness)
+        request = led_matrix_pb2.WriteColorBufferRequest(**kwargs)
         return self.stub.WriteColorBuffer(request)

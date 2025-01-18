@@ -34,6 +34,9 @@ message WriteBufferRequest {
 }
 
 message WriteColorBufferRequest {
-    bytes buffer = 1;     // RGB buffer (width * height * 3 bytes, one byte each for R,G,B per pixel)
-    uint32 brightness = 2; // Global brightness level (0-255)
+    bytes buffer = 1;       // Raw image data bytes
+    uint32 width = 2;       // Image width in pixels
+    uint32 height = 3;      // Image height in pixels
+    string format = 4;      // Pixel format of the image data
+    uint32 brightness = 5;  // Global brightness level (0-255)
 }
