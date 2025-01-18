@@ -66,6 +66,10 @@ with open("pykos/requirements.txt", "r", encoding="utf-8") as f:
     requirements: List[str] = f.read().splitlines()
 
 
+with open("pykos/requirements-webrtc.txt", "r", encoding="utf-8") as f:
+    requirements_webrtc: List[str] = f.read().splitlines()
+
+
 with open("pykos/requirements-dev.txt", "r", encoding="utf-8") as f:
     requirements_dev: List[str] = f.read().splitlines()
 
@@ -80,7 +84,10 @@ setup(
     long_description_content_type="text/markdown",
     python_requires=">=3.11",
     install_requires=requirements,
-    extras_require={"dev": requirements_dev},
+    extras_require={
+        "dev": requirements_dev,
+        "webrtc": requirements_webrtc,
+    },
     packages=["pykos", "pykos.services", "kos_protos"],
     package_data={
         "pykos": ["py.typed", "Cargo.toml"],
@@ -89,7 +96,8 @@ setup(
     include_package_data=True,
     entry_points={
         "console_scripts": [
-            "pykos=pykos.cli:cli",
+            "pykos-webrtc-server=pykos.webrtc.server:main",
+            "pykos-webrtc-client=pykos.webrtc.client:main",
         ],
     },
     setup_requires=["grpcio-tools"],
