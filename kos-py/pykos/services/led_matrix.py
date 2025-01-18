@@ -29,19 +29,21 @@ class MatrixInfo(TypedDict):
 
 
 class ImageData(TypedDict):
-    """Information about image data.
+    """Image data to be written to the LED matrix.
 
     Args:
-        data: Raw image data bytes
+        buffer: Raw image data bytes
         width: Image width in pixels
         height: Image height in pixels
-        format: Pixel format specification (e.g. 'RGB888', 'BGR888', 'RGB565')
+        format: Pixel format specification (e.g. 'RGB888', 'BGR888', 'RGB565', 'MONO8')
+        brightness: Global brightness level (0-255)
     """
 
-    data: bytes
+    buffer: bytes
     width: int
     height: int
     format: str
+    brightness: int
 
 
 class LEDMatrixServiceClient:
