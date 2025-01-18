@@ -5,3 +5,5 @@ aiohttp
 opencv-python
 numpy
 av
+# For Linux video capture
+v4l2-python3; sys_platform == 'linux'

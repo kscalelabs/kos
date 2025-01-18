@@ -2,25 +2,56 @@
 
 import asyncio
 import json
+import logging
+import platform
 from typing import Any, Coroutine, List, Set
 
 from aiohttp import web
 from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaPlayer
 
+logger = logging.getLogger(__name__)
 
-async def create_local_tracks():
+
+def get_platform_media_config() -> tuple[str, str]:
+    """Get the appropriate media source format for the current platform.
+
+    Returns:
+        Tuple of (device_string, format_string)
+    """
+    system = platform.system().lower()
+    if system == "darwin":  # MacOS
+        return "default:none", "avfoundation"
+    elif system == "linux":
+        return "/dev/video0", "v4l2"  # Video4Linux2
+    else:
+        logger.warning("Unsupported platform %s, falling back to test pattern", system)
+        return "color:blue", "lavfi"
+
+
+async def create_local_tracks() -> tuple[MediaStreamTrack | None, MediaStreamTrack | None]:
     """Create local video and audio tracks from webcam/microphone."""
+    device_string, format_string = get_platform_media_config()
+
     try:
         # Try to use the default webcam and microphone
         player = MediaPlayer(
-            "default:none", format="avfoundation", options={"framerate": "30", "video_size": "640x480"}
+            device_string,
+            format=format_string,
+            options={"framerate": "30", "video_size": "640x480"},
         )
+        if not player.video:
+            raise RuntimeError("No video device found")
         return player.video, player.audio
+
     except Exception as e:
-        print(f"Could not open webcam/microphone ({e}), using test sources")
-        # Fallback to test sources
-        player = MediaPlayer("color:blue", format="lavfi", options={"framerate": "30", "video_size": "640x480"})
+        logger.warning("Could not open webcam/microphone: %s", e)
+        logger.warning("Using test sources instead")
+        player = MediaPlayer(
+            "color:blue",
+            format="lavfi",
+            options={"framerate": "30", "video_size": "640x480"},
+        )
         return player.video, None
 
 
