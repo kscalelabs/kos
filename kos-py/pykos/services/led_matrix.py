@@ -87,11 +87,11 @@ class LEDMatrixServiceClient:
         request = led_matrix_pb2.WriteBufferRequest(buffer=buffer)
         return self.stub.WriteBuffer(request)
 
-    def write_color_buffer(self, **kwargs: Unpack[led_matrix_pb2.WriteColorBufferRequest]) -> common_pb2.ActionResponse:
+    def write_color_buffer(self, **kwargs: Unpack[ImageData]) -> common_pb2.ActionResponse:
         """Write image data to the LED matrix.
 
         Args:
-            **kwargs: ImageData containing the raw bytes, dimensions and format
+            **kwargs: Image data containing the raw bytes, dimensions and format
                 buffer: Raw image data bytes
                 width: Image width in pixels
                 height: Image height in pixels
