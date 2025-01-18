@@ -11,7 +11,7 @@ pub use actuator::*;
 pub use imu::*;
 pub use inference::*;
 pub use krec_logger::*;
+pub use led_matrix::*;
 pub use operations::*;
 pub use process_manager::*;
-pub use led_matrix::*;
 pub use sound::*;

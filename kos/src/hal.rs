@@ -2,15 +2,16 @@ pub use crate::grpc_interface::google::longrunning::*;
 pub use crate::grpc_interface::kos;
 pub use crate::grpc_interface::kos::common::ActionResponse;
 pub use crate::kos_proto::{
-    actuator::*, common::ActionResult, imu::*, inference::*, process_manager::*, led_matrix::*, sound::*,
+    actuator::*, common::ActionResult, imu::*, inference::*, led_matrix::*, process_manager::*,
+    sound::*,
 };
 use async_trait::async_trait;
-use eyre::Result;
-use std::fmt::Display;
-use futures::Stream;
-use tokio::sync::mpsc::Sender;
-use std::pin::Pin;
 use bytes::Bytes;
+use eyre::Result;
+use futures::Stream;
+use std::fmt::Display;
+use std::pin::Pin;
+use tokio::sync::mpsc::Sender;
 
 // Type alias for the audio stream
 pub type AudioStream = Pin<Box<dyn Stream<Item = Bytes> + Send>>;
@@ -87,21 +88,21 @@ pub trait LEDMatrix: Send + Sync {
 pub trait Sound: Send + Sync {
     /// Get information about audio capabilities
     async fn get_audio_info(&self) -> Result<GetAudioInfoResponse, tonic::Status>;
-    
+
     /// Start playing audio with the given configuration
     async fn play_audio(
         &self,
         config: AudioConfig,
         sender: Sender<Bytes>,
     ) -> Result<ActionResponse, tonic::Status>;
-    
+
     /// Start recording audio with the given configuration
     async fn record_audio(
         &self,
         config: AudioConfig,
         duration_ms: u32,
     ) -> Result<AudioStream, tonic::Status>;
-    
+
     /// Stop an ongoing recording session
     async fn stop_recording(&self) -> Result<ActionResponse, tonic::Status>;
 }
@@ -122,5 +123,3 @@ impl Display for CalibrationStatus {
         }
     }
 }
-
-

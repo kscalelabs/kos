@@ -18,8 +18,8 @@ use hal::actuator_service_server::ActuatorServiceServer;
 use hal::imu_service_server::ImuServiceServer;
 use hal::inference_service_server::InferenceServiceServer;
 use hal::led_matrix_service_server::LedMatrixServiceServer;
-use hal::sound_service_server::SoundServiceServer;
 use hal::process_manager_service_server::ProcessManagerServiceServer;
+use hal::sound_service_server::SoundServiceServer;
 use services::OperationsServiceImpl;
 use services::{
     ActuatorServiceImpl, IMUServiceImpl, InferenceServiceImpl, LEDMatrixServiceImpl,

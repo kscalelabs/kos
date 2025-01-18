@@ -37,7 +37,7 @@ impl LedMatrixService for LEDMatrixServiceImpl {
         request: Request<WriteBufferRequest>,
     ) -> Result<Response<ActionResponse>, Status> {
         let buffer = request.into_inner().buffer;
-        
+
         let response = self
             .led_matrix
             .write_buffer(buffer.clone())
@@ -53,7 +53,7 @@ impl LedMatrixService for LEDMatrixServiceImpl {
         request: Request<WriteColorBufferRequest>,
     ) -> Result<Response<ActionResponse>, Status> {
         let request = request.into_inner();
-        
+
         let response = self
             .led_matrix
             .write_color_buffer(

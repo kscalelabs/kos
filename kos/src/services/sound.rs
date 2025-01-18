@@ -36,23 +36,28 @@ impl SoundService for SoundServiceImpl {
         request: Request<tonic::Streaming<PlayAudioRequest>>,
     ) -> Result<Response<ActionResponse>, Status> {
         let mut stream = request.into_inner();
-        
+
         // Get the first message which must contain the config
-        let first_msg = stream.message().await
-            .map_err(|e| Status::internal(format!("Failed to receive first audio message: {:?}", e)))?
+        let first_msg = stream
+            .message()
+            .await
+            .map_err(|e| {
+                Status::internal(format!("Failed to receive first audio message: {:?}", e))
+            })?
             .ok_or_else(|| Status::invalid_argument("Empty audio stream"))?;
-            
-        let config = first_msg.config
-            .ok_or_else(|| Status::invalid_argument("First message must contain audio configuration"))?;
+
+        let config = first_msg.config.ok_or_else(|| {
+            Status::invalid_argument("First message must contain audio configuration")
+        })?;
 
         trace!("Starting audio playback with config: {:?}", config);
 
         // Create channel for audio data
         let (tx, _rx) = mpsc::channel(32);
-        
+
         // Start playback with the sender
         let response = self.sound.play_audio(config, tx.clone()).await?;
-        
+
         // Spawn task to handle incoming audio data
         tokio::spawn(async move {
             while let Ok(Some(msg)) = stream.message().await {
@@ -66,21 +71,23 @@ impl SoundService for SoundServiceImpl {
         Ok(Response::new(response))
     }
 
-    type RecordAudioStream = Pin<Box<dyn Stream<Item = Result<RecordAudioResponse, Status>> + Send>>;
+    type RecordAudioStream =
+        Pin<Box<dyn Stream<Item = Result<RecordAudioResponse, Status>> + Send>>;
 
     async fn record_audio(
         &self,
         request: Request<RecordAudioRequest>,
     ) -> Result<Response<Self::RecordAudioStream>, Status> {
         let request = request.into_inner();
-        
+
         trace!(
             "Starting audio recording with config: {:?}, duration: {}ms",
             request.config,
             request.duration_ms
         );
 
-        let config = request.config
+        let config = request
+            .config
             .ok_or_else(|| Status::invalid_argument("Audio configuration is required"))?;
 
         let stream = self.sound.record_audio(config, request.duration_ms).await?;
