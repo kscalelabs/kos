@@ -54,15 +54,7 @@ class LEDMatrixServiceClient:
                 bits_per_pixel: Number of bits used to represent each pixel
                 error: Optional error information
         """
-        response = self.stub.GetMatrixInfo(Empty())
-        return MatrixInfo(
-            width=response.width,
-            height=response.height,
-            brightness_levels=response.brightness_levels,
-            color_capable=response.color_capable,
-            bits_per_pixel=response.bits_per_pixel,
-            error=response.error if response.HasField("error") else None,
-        )
+        return self.stub.GetMatrixInfo(Empty())
 
     def write_buffer(self, buffer: bytes) -> common_pb2.ActionResponse:
         """Write binary on/off states to the LED matrix.

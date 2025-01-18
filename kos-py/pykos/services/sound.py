@@ -1,6 +1,6 @@
 """Sound service client."""
 
-from typing import Generator, Iterator, NotRequired, TypedDict
+from typing import Generator, Iterator, NotRequired, TypedDict, Unpack
 
 import grpc
 from google.protobuf.empty_pb2 import Empty
@@ -72,29 +72,17 @@ class SoundServiceClient:
         Returns:
             AudioInfo containing playback and recording capabilities.
         """
-        response = self.stub.GetAudioInfo(Empty())
-        return AudioInfo(
-            playback=AudioCapability(
-                sample_rates=list(response.playback.sample_rates),
-                bit_depths=list(response.playback.bit_depths),
-                channels=list(response.playback.channels),
-                available=response.playback.available,
-            ),
-            recording=AudioCapability(
-                sample_rates=list(response.recording.sample_rates),
-                bit_depths=list(response.recording.bit_depths),
-                channels=list(response.recording.channels),
-                available=response.recording.available,
-            ),
-            error=response.error if response.HasField("error") else None,
-        )
+        return self.stub.GetAudioInfo(Empty())
 
-    def play_audio(self, audio_iterator: Iterator[bytes], config: AudioConfig) -> common_pb2.ActionResponse:
+    def play_audio(self, audio_iterator: Iterator[bytes], **kwargs: Unpack[AudioConfig]) -> common_pb2.ActionResponse:
         """Stream PCM audio data to the speaker.
 
         Args:
             audio_iterator: Iterator yielding chunks of PCM audio data
-            config: Audio configuration parameters
+            **kwargs: Audio configuration parameters
+                sample_rate: Sample rate in Hz (e.g., 44100)
+                bit_depth: Bit depth (e.g., 16)
+                channels: Number of channels (1 for mono, 2 for stereo)
 
         Returns:
             ActionResponse indicating success/failure of the playback operation.
@@ -111,11 +99,7 @@ class SoundServiceClient:
         def request_iterator() -> Generator[sound_pb2.PlayAudioRequest, None, None]:
             # First message includes config
             yield sound_pb2.PlayAudioRequest(
-                config=sound_pb2.AudioConfig(
-                    sample_rate=config["sample_rate"],
-                    bit_depth=config["bit_depth"],
-                    channels=config["channels"],
-                )
+                config=sound_pb2.AudioConfig(**kwargs),
             )
             # Subsequent messages contain audio data
             for chunk in audio_iterator:
@@ -123,12 +107,15 @@ class SoundServiceClient:
 
         return self.stub.PlayAudio(request_iterator())
 
-    def record_audio(self, config: AudioConfig, duration_ms: int = 0) -> Generator[bytes, None, None]:
+    def record_audio(self, duration_ms: int = 0, **kwargs: Unpack[AudioConfig]) -> Generator[bytes, None, None]:
         """Record PCM audio data from the microphone.
 
         Args:
-            config: Audio configuration parameters
             duration_ms: Recording duration in milliseconds (0 for continuous)
+            **kwargs: Audio configuration parameters
+                sample_rate: Sample rate in Hz (e.g., 44100)
+                bit_depth: Bit depth (e.g., 16)
+                channels: Number of channels (1 for mono, 2 for stereo)
 
         Yields:
             Chunks of PCM audio data.
@@ -136,15 +123,11 @@ class SoundServiceClient:
         Example:
             >>> config = AudioConfig(sample_rate=44100, bit_depth=16, channels=1)
             >>> with open('recording.raw', 'wb') as f:
-            ...     for chunk in client.record_audio(config, duration_ms=5000):
+            ...     for chunk in client.record_audio(duration_ms=5000, **config):
             ...         f.write(chunk)
         """
         request = sound_pb2.RecordAudioRequest(
-            config=sound_pb2.AudioConfig(
-                sample_rate=config["sample_rate"],
-                bit_depth=config["bit_depth"],
-                channels=config["channels"],
-            ),
+            config=sound_pb2.AudioConfig(**kwargs),
             duration_ms=duration_ms,
         )
 
