@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package kos.sound;
+
+import "google/protobuf/empty.proto";
+import "kos/common.proto";
+
+option go_package = "kos/sound;sound";
+option java_package = "com.kos.sound";
+option csharp_namespace = "KOS.Sound";
+
+// The SoundService provides methods to play audio through speakers and record from microphones
+service SoundService {
+    // Gets information about audio capabilities
+    rpc GetAudioInfo(google.protobuf.Empty) returns (GetAudioInfoResponse);
+
+    // Streams PCM audio data to the speaker
+    rpc PlayAudio(stream PlayAudioRequest) returns (kos.common.ActionResponse);
+
+    // Records PCM audio data from the microphone
+    rpc RecordAudio(RecordAudioRequest) returns (stream RecordAudioResponse);
+
+    // Stops an ongoing recording session
+    rpc StopRecording(google.protobuf.Empty) returns (kos.common.ActionResponse);
+}
+
+message GetAudioInfoResponse {
+    AudioCapabilities playback = 1;     // Playback capabilities
+    AudioCapabilities recording = 2;     // Recording capabilities
+    kos.common.Error error = 3;         // Error details if any
+}
+
+message AudioCapabilities {
+    repeated uint32 sample_rates = 1;    // Supported sample rates (e.g., 44100, 48000)
+    repeated uint32 bit_depths = 2;      // Supported bit depths (e.g., 16, 24, 32)
+    repeated uint32 channels = 3;        // Supported channel counts (e.g., 1, 2)
+    bool available = 4;                  // Whether this capability is available
+}
+
+message PlayAudioRequest {
+    // First message must include config, subsequent messages only need audio_data
+    optional AudioConfig config = 1;     // Audio configuration (required for first message)
+    bytes audio_data = 2;               // Raw PCM audio data
+}
+
+message RecordAudioRequest {
+    AudioConfig config = 1;              // Desired recording configuration
+    uint32 duration_ms = 2;              // Recording duration in milliseconds (0 for continuous)
+}
+
+message RecordAudioResponse {
+    bytes audio_data = 1;                // Raw PCM audio data
+    kos.common.Error error = 2;          // Error details if any
+}
+
+message AudioConfig {
+    uint32 sample_rate = 1;              // Sample rate in Hz (e.g., 44100)
+    uint32 bit_depth = 2;                // Bit depth (e.g., 16)
+    uint32 channels = 3;                 // Number of channels (1 for mono, 2 for stereo)
+}

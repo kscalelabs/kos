@@ -5,8 +5,10 @@ import grpc
 from pykos.services.actuator import ActuatorServiceClient
 from pykos.services.imu import IMUServiceClient
 from pykos.services.inference import InferenceServiceClient
+from pykos.services.led_matrix import LEDMatrixServiceClient
 from pykos.services.process_manager import ProcessManagerServiceClient
 from pykos.services.sim import SimServiceClient
+from pykos.services.sound import SoundServiceClient
 
 
 class KOS:
@@ -26,6 +28,8 @@ class KOS:
         self.channel = grpc.insecure_channel(f"{self.ip}:{self.port}")
         self.imu = IMUServiceClient(self.channel)
         self.actuator = ActuatorServiceClient(self.channel)
+        self.led_matrix = LEDMatrixServiceClient(self.channel)
+        self.sound = SoundServiceClient(self.channel)
         self.process_manager = ProcessManagerServiceClient(self.channel)
         self.inference = InferenceServiceClient(self.channel)
         self.sim = SimServiceClient(self.channel)
