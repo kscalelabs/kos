@@ -1,6 +1,6 @@
 """Actuator service client."""
 
-from typing import NotRequired, TypedDict, Unpack
+from typing import List, NotRequired, TypedDict, Unpack
 
 import grpc
 from google.longrunning import operations_pb2, operations_pb2_grpc
@@ -8,6 +8,31 @@ from google.protobuf.any_pb2 import Any as AnyPb2
 
 from kos_protos import actuator_pb2, actuator_pb2_grpc, common_pb2
 from kos_protos.actuator_pb2 import CalibrateActuatorMetadata
+
+
+class ActionResult(TypedDict):
+    actuator_id: int
+    success: bool
+    error: NotRequired[common_pb2.Error]
+
+
+class CommandActuatorsResponse(TypedDict):
+    results: List[ActionResult]
+
+
+class ActuatorStateResponse(TypedDict):
+    actuator_id: int
+    online: bool
+    position: NotRequired[float]
+    velocity: NotRequired[float]
+    torque: NotRequired[float]
+    temperature: NotRequired[float]
+    voltage: NotRequired[float]
+    current: NotRequired[float]
+
+
+class GetActuatorsStateResponse(TypedDict):
+    states: List[ActuatorStateResponse]
 
 
 class ActuatorCommand(TypedDict):
@@ -82,7 +107,7 @@ class ActuatorServiceClient:
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
 
-    def command_actuators(self, commands: list[ActuatorCommand]) -> actuator_pb2.CommandActuatorsResponse:
+    def command_actuators(self, commands: list[ActuatorCommand]) -> CommandActuatorsResponse:
         """Command multiple actuators at once.
 
         Example:
@@ -97,13 +122,13 @@ class ActuatorServiceClient:
                      'velocity', and 'torque'.
 
         Returns:
-            List of ActionResult objects indicating success/failure for each command.
+            CommandActuatorsResponse is a list of ActionResult objects indicating success/failure for each command.
         """
         actuator_commands = [actuator_pb2.ActuatorCommand(**cmd) for cmd in commands]
         request = actuator_pb2.CommandActuatorsRequest(commands=actuator_commands)
         return self.stub.CommandActuators(request)
 
-    def configure_actuator(self, **kwargs: Unpack[ConfigureActuatorRequest]) -> common_pb2.ActionResult:
+    def configure_actuator(self, **kwargs: Unpack[ConfigureActuatorRequest]) -> ActionResult:
         """Configure an actuator's parameters.
 
         Example:
@@ -134,12 +159,12 @@ class ActuatorServiceClient:
                      protection_time, torque_enabled, new_actuator_id
 
         Returns:
-            ActionResponse indicating success/failure
+            ActionResult conatining the actuator_id and a ActionResponse indicating success/failure
         """
         request = actuator_pb2.ConfigureActuatorRequest(**kwargs)
         return self.stub.ConfigureActuator(request)
 
-    def get_actuators_state(self, actuator_ids: list[int] | None = None) -> actuator_pb2.GetActuatorsStateResponse:
+    def get_actuators_state(self, actuator_ids: list[int] | None = None) -> GetActuatorsStateResponse:
         """Get the state of multiple actuators.
 
         Example:
@@ -149,7 +174,7 @@ class ActuatorServiceClient:
             actuator_ids: List of actuator IDs to query. If None, gets state of all actuators.
 
         Returns:
-            List of ActuatorStateResponse objects containing the state information
+            GetActuatorsStateResponse containing a list of ActuatorStateResponse objects with state information
         """
         request = actuator_pb2.GetActuatorsStateRequest(actuator_ids=actuator_ids or [])
         return self.stub.GetActuatorsState(request)

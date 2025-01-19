@@ -82,6 +82,27 @@ class GetModelsInfoResponse(TypedDict):
     error: NotRequired[common_pb2.Error | None]
 
 
+class UploadModelResponse(TypedDict):
+    """Response from uploading a model."""
+
+    uid: str
+    error: NotRequired[common_pb2.Error | None]
+
+
+class LoadModelsResponse(TypedDict):
+    """Response from loading models."""
+
+    success: bool
+    error: NotRequired[common_pb2.Error | None]
+
+
+class ActionResponse(TypedDict):
+    """Response indicating success/failure of an action."""
+
+    success: bool
+    error: NotRequired[common_pb2.Error | None]
+
+
 class InferenceServiceClient:
     """Client for the InferenceService.
 
@@ -96,9 +117,7 @@ class InferenceServiceClient:
         """
         self.stub = inference_pb2_grpc.InferenceServiceStub(channel)
 
-    def upload_model(
-        self, model_data: bytes, metadata: ModelMetadata | None = None
-    ) -> inference_pb2.UploadModelResponse:
+    def upload_model(self, model_data: bytes, metadata: ModelMetadata | None = None) -> UploadModelResponse:
         """Upload a model to the robot.
 
         Example:
@@ -125,19 +144,19 @@ class InferenceServiceClient:
         request = inference_pb2.UploadModelRequest(model=model_data, metadata=proto_metadata)
         return self.stub.UploadModel(request)
 
-    def load_models(self, uids: list[str]) -> inference_pb2.LoadModelsResponse:
+    def load_models(self, uids: list[str]) -> LoadModelsResponse:
         """Load models from the robot's filesystem.
 
         Args:
             uids: List of model UIDs to load.
 
         Returns:
-            LoadModelsResponse containing information about the loaded models.
+            LoadModelsResponse containing success status and any error information.
         """
         request = inference_pb2.ModelUids(uids=uids)
         return self.stub.LoadModels(request)
 
-    def unload_models(self, uids: list[str]) -> common_pb2.ActionResponse:
+    def unload_models(self, uids: list[str]) -> ActionResponse:
         """Unload models from the robot's filesystem.
 
         Args:

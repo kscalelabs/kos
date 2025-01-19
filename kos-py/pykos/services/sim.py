@@ -9,30 +9,54 @@ from kos_protos import common_pb2, sim_pb2, sim_pb2_grpc
 
 
 class DefaultPosition(TypedDict):
+    """Default position state for simulation."""
+
     qpos: list[float]
 
 
 class ResetRequest(TypedDict):
+    """Request parameters for resetting simulation."""
+
     initial_state: NotRequired[DefaultPosition]
     randomize: NotRequired[bool]
 
 
 class StepRequest(TypedDict):
+    """Request parameters for stepping simulation."""
+
     num_steps: int
     step_size: NotRequired[float]
 
 
 class SimulationParameters(TypedDict):
+    """Parameters for configuring simulation."""
+
     time_scale: NotRequired[float]
     gravity: NotRequired[float]
     initial_state: NotRequired[DefaultPosition]
+
+
+class ActionResponse(TypedDict):
+    """Response indicating success/failure of an action."""
+
+    success: bool
+    error: NotRequired[common_pb2.Error | None]
+
+
+class GetParametersResponse(TypedDict):
+    """Response containing current simulation parameters."""
+
+    time_scale: float
+    gravity: float
+    initial_state: DefaultPosition
+    error: NotRequired[common_pb2.Error | None]
 
 
 class SimServiceClient:
     def __init__(self, channel: grpc.Channel) -> None:
         self.stub = sim_pb2_grpc.SimulationServiceStub(channel)
 
-    def reset(self, **kwargs: Unpack[ResetRequest]) -> common_pb2.ActionResponse:
+    def reset(self, **kwargs: Unpack[ResetRequest]) -> ActionResponse:
         """Reset the simulation to its initial state.
 
         Args:
@@ -57,7 +81,7 @@ class SimServiceClient:
         request = sim_pb2.ResetRequest(initial_state=initial_state, randomize=kwargs.get("randomize"))
         return self.stub.Reset(request)
 
-    def set_paused(self, paused: bool) -> common_pb2.ActionResponse:
+    def set_paused(self, paused: bool) -> ActionResponse:
         """Pause or unpause the simulation.
 
         Args:
@@ -69,7 +93,7 @@ class SimServiceClient:
         request = sim_pb2.SetPausedRequest(paused=paused)
         return self.stub.SetPaused(request)
 
-    def step(self, num_steps: int, step_size: float | None = None) -> common_pb2.ActionResponse:
+    def step(self, num_steps: int, step_size: float | None = None) -> ActionResponse:
         """Step the simulation forward.
 
         Args:
@@ -82,7 +106,7 @@ class SimServiceClient:
         request = sim_pb2.StepRequest(num_steps=num_steps, step_size=step_size)
         return self.stub.Step(request)
 
-    def set_parameters(self, **kwargs: Unpack[SimulationParameters]) -> common_pb2.ActionResponse:
+    def set_parameters(self, **kwargs: Unpack[SimulationParameters]) -> ActionResponse:
         """Set simulation parameters.
 
         Example:
@@ -112,10 +136,11 @@ class SimServiceClient:
         request = sim_pb2.SetParametersRequest(parameters=params)
         return self.stub.SetParameters(request)
 
-    def get_parameters(self) -> sim_pb2.GetParametersResponse:
+    def get_parameters(self) -> GetParametersResponse:
         """Get current simulation parameters.
 
         Returns:
-            GetParametersResponse containing current parameters and any error
+            GetParametersResponse containing current parameters (time_scale, gravity, initial_state)
+            and any error information.
         """
         return self.stub.GetParameters(Empty())

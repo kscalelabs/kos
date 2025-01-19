@@ -30,7 +30,8 @@ def test_pykos() -> None:
     client.imu.get_euler_angles()
     client.imu.get_quaternion()
     client.imu.calibrate()
-    zero_response = client.imu.zero(duration=1.0, max_retries=1, max_angular_error=1.0)
+    zero_response = client.imu.zero(
+        duration=1.0, max_retries=1, max_angular_error=1.0)
     assert zero_response.success
 
     # Tests the K-Clip endpoints.

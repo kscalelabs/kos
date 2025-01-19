@@ -52,6 +52,20 @@ class AudioConfig(TypedDict):
     channels: int
 
 
+class ActionResponse(TypedDict):
+    """Response indicating success/failure of an action."""
+
+    success: bool
+    error: NotRequired[common_pb2.Error | None]
+
+
+class RecordAudioResponse(TypedDict):
+    """Response containing recorded audio data."""
+
+    audio_data: bytes
+    error: NotRequired[common_pb2.Error | None]
+
+
 class SoundServiceClient:
     """Client for the SoundService.
 
@@ -74,7 +88,7 @@ class SoundServiceClient:
         """
         return self.stub.GetAudioInfo(Empty())
 
-    def play_audio(self, audio_iterator: Iterator[bytes], **kwargs: Unpack[AudioConfig]) -> common_pb2.ActionResponse:
+    def play_audio(self, audio_iterator: Iterator[bytes], **kwargs: Unpack[AudioConfig]) -> ActionResponse:
         """Stream PCM audio data to the speaker.
 
         Args:
@@ -93,7 +107,7 @@ class SoundServiceClient:
             ...     def chunks():
             ...         while chunk := f.read(4096):
             ...             yield chunk
-            ...     response = client.play_audio(chunks(), config)
+            ...     response = client.play_audio(chunks(), **config)
         """
 
         def request_iterator() -> Generator[sound_pb2.PlayAudioRequest, None, None]:
@@ -136,7 +150,7 @@ class SoundServiceClient:
                 raise RuntimeError(f"Recording error: {response.error}")
             yield response.audio_data
 
-    def stop_recording(self) -> common_pb2.ActionResponse:
+    def stop_recording(self) -> ActionResponse:
         """Stop an ongoing recording session.
 
         Returns:

@@ -12,6 +12,53 @@ from kos_protos import common_pb2, imu_pb2, imu_pb2_grpc
 from kos_protos.imu_pb2 import CalibrateIMUMetadata
 
 
+class IMUValuesResponse(TypedDict):
+    acceleration_x: float
+    acceleration_y: float
+    acceleration_z: float
+    gyroscope_x: float
+    gyroscope_y: float
+    gyroscope_z: float
+    magnetometer_x: float
+    magnetometer_y: float
+    magnetometer_z: float
+
+
+class IMUAdvancedValuesResponse(TypedDict):
+    linear_acceleration_x: float
+    linear_acceleration_y: float
+    linear_acceleration_z: float
+    gravity_x: float
+    gravity_y: float
+    gravity_z: float
+    rotation_rate_x: float
+    rotation_rate_y: float
+    rotation_rate_z: float
+
+
+class EulerAnglesResponse(TypedDict):
+    roll: float
+    pitch: float
+    yaw: float
+
+
+class QuaternionResponse(TypedDict):
+    w: float
+    x: float
+    y: float
+    z: float
+
+
+class ActionResponse(TypedDict):
+    success: bool
+    error: NotRequired[common_pb2.Error]
+
+
+class CalibrateIMUResponse(TypedDict):
+    name: str
+    metadata: AnyPb2
+
+
 class ZeroIMURequest(TypedDict):
     max_retries: NotRequired[int]
     max_angular_error: NotRequired[float]
@@ -56,39 +103,41 @@ class IMUServiceClient:
         self.stub = imu_pb2_grpc.IMUServiceStub(channel)
         self.operations_stub = operations_pb2_grpc.OperationsStub(channel)
 
-    def get_imu_values(self) -> imu_pb2.IMUValuesResponse:
+    def get_imu_values(self) -> IMUValuesResponse:
         """Get the latest IMU sensor values.
 
         Returns:
-            ImuValuesResponse: The latest IMU sensor values.
+            IMUValuesResponse: The latest IMU sensor values including acceleration,
+            gyroscope, and magnetometer readings on x, y, z axes.
         """
         return self.stub.GetValues(Empty())
 
-    def get_imu_advanced_values(self) -> imu_pb2.IMUAdvancedValuesResponse:
+    def get_imu_advanced_values(self) -> IMUAdvancedValuesResponse:
         """Get the latest IMU advanced values.
 
         Returns:
-            ImuAdvancedValuesResponse: The latest IMU advanced values.
+            IMUAdvancedValuesResponse: The latest IMU advanced values including linear acceleration,
+            gravity, and rotation rate on x, y, z axes.
         """
         return self.stub.GetAdvancedValues(Empty())
 
-    def get_euler_angles(self) -> imu_pb2.EulerAnglesResponse:
+    def get_euler_angles(self) -> EulerAnglesResponse:
         """Get the latest Euler angles.
 
         Returns:
-            EulerAnglesResponse: The latest Euler angles.
+            EulerAnglesResponse: The latest Euler angles (roll, pitch, yaw).
         """
         return self.stub.GetEuler(Empty())
 
-    def get_quaternion(self) -> imu_pb2.QuaternionResponse:
+    def get_quaternion(self) -> QuaternionResponse:
         """Get the latest quaternion.
 
         Returns:
-            QuaternionResponse: The latest quaternion.
+            QuaternionResponse: The latest quaternion values (w, x, y, z).
         """
         return self.stub.GetQuaternion(Empty())
 
-    def zero(self, duration: float = 1.0, **kwargs: Unpack[ZeroIMURequest]) -> common_pb2.ActionResponse:
+    def zero(self, duration: float = 1.0, **kwargs: Unpack[ZeroIMURequest]) -> ActionResponse:
         """Zero the IMU.
 
         Example:
@@ -108,18 +157,18 @@ class IMUServiceClient:
                      max_acceleration: Maximum acceleration during zeroing
 
         Returns:
-            ActionResponse: The response from the zero operation.
+            ActionResponse: Response indicating success/failure of the zero operation.
         """
         request = imu_pb2.ZeroIMURequest(duration=_duration_from_seconds(duration), **kwargs)
         return self.stub.Zero(request)
 
-    def calibrate(self) -> imu_pb2.CalibrateIMUResponse:
+    def calibrate(self) -> CalibrateIMUResponse:
         """Calibrate the IMU.
 
         This starts a long-running calibration operation. The operation can be monitored
         using get_calibration_status().
 
         Returns:
-            CalibrationMetadata: Metadata about the calibration operation.
+            CalibrateIMUResponse: Response containing operation name and metadata about the calibration.
         """
         return self.stub.Calibrate(Empty())

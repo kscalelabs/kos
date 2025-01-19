@@ -46,6 +46,13 @@ class ImageData(TypedDict):
     brightness: int
 
 
+class ActionResponse(TypedDict):
+    """Response indicating success/failure of an action."""
+
+    success: bool
+    error: NotRequired[common_pb2.Error | None]
+
+
 class LEDMatrixServiceClient:
     """Client for the LEDMatrixService.
 
@@ -74,7 +81,7 @@ class LEDMatrixServiceClient:
         """
         return self.stub.GetMatrixInfo(Empty())
 
-    def write_buffer(self, buffer: bytes) -> common_pb2.ActionResponse:
+    def write_buffer(self, buffer: bytes) -> ActionResponse:
         """Write binary on/off states to the LED matrix.
 
         The buffer should be width * height / 8 bytes long, where each bit
@@ -89,7 +96,7 @@ class LEDMatrixServiceClient:
         request = led_matrix_pb2.WriteBufferRequest(buffer=buffer)
         return self.stub.WriteBuffer(request)
 
-    def write_color_buffer(self, **kwargs: Unpack[ImageData]) -> common_pb2.ActionResponse:
+    def write_color_buffer(self, **kwargs: Unpack[ImageData]) -> ActionResponse:
         """Write image data to the LED matrix.
 
         Args:
