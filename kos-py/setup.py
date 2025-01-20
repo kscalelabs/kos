@@ -27,7 +27,6 @@ class GenerateProtosMixin:
         parent_cargo = Path(__file__).parent.parent / "Cargo.toml"
         if parent_cargo.exists():
             import shutil
-
             target_dir = Path(__file__).parent / "pykos"
             shutil.copy(parent_cargo, target_dir / "Cargo.toml")
         else:
