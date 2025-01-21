@@ -13,15 +13,18 @@ from kos_protos.imu_pb2 import CalibrateIMUMetadata
 
 
 class IMUValuesResponse(TypedDict):
-    acceleration_x: float
-    acceleration_y: float
-    acceleration_z: float
-    gyroscope_x: float
-    gyroscope_y: float
-    gyroscope_z: float
-    magnetometer_x: float
-    magnetometer_y: float
-    magnetometer_z: float
+    """Response containing IMU sensor values."""
+
+    accel_x: float
+    accel_y: float
+    accel_z: float
+    gyro_x: float
+    gyro_y: float
+    gyro_z: float
+    mag_x: NotRequired[float | None]
+    mag_y: NotRequired[float | None]
+    mag_z: NotRequired[float | None]
+    error: NotRequired[common_pb2.Error | None]
 
 
 class IMUAdvancedValuesResponse(TypedDict):

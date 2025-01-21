@@ -13,6 +13,7 @@ class KClipStartResponse(TypedDict):
     """Response from starting KClip recording."""
 
     success: bool
+    clip_uuid: str
     error: NotRequired[common_pb2.Error | None]
 
 
@@ -20,8 +21,8 @@ class KClipStopResponse(TypedDict):
     """Response from stopping KClip recording."""
 
     success: bool
+    clip_uuid: str
     error: NotRequired[common_pb2.Error | None]
-    clip_path: NotRequired[str | None]
 
 
 class ProcessManagerServiceClient:
