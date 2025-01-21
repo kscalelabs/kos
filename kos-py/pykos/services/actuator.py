@@ -1,6 +1,6 @@
 """Actuator service client."""
 
-from typing import List, NotRequired, TypedDict, Unpack
+from typing import NotRequired, TypedDict, Unpack
 
 import grpc
 from google.longrunning import operations_pb2, operations_pb2_grpc
@@ -11,16 +11,51 @@ from kos_protos.actuator_pb2 import CalibrateActuatorMetadata
 
 
 class ActionResult(TypedDict):
+    """TypedDict containing the result of an actuator action.
+
+    A dictionary type that includes the actuator ID and whether the action succeeded.
+
+    Fields:
+        actuator_id: The ID of the actuator that performed the action
+        success: Whether the action completed successfully
+        error: Optional error information if the action failed
+    """
+
     actuator_id: int
     success: bool
-    error: NotRequired[common_pb2.Error]
+    error: NotRequired[common_pb2.Error | None]
 
 
 class CommandActuatorsResponse(TypedDict):
-    results: List[ActionResult]
+    """TypedDict containing response from actuator command execution.
+
+    A dictionary type containing a list of ActionResult objects for each command sent.
+
+    Fields:
+        results: List of ActionResult objects indicating success/failure for each command
+        error: Optional error information if the overall command failed
+    """
+
+    results: list[ActionResult]
+    error: NotRequired[common_pb2.Error | None]
 
 
 class ActuatorStateResponse(TypedDict):
+    """TypedDict containing the current state of an actuator.
+
+    A dictionary type containing various measurements and states for a specific actuator.
+
+    Fields:
+        actuator_id: The ID of the actuator
+        online: Whether the actuator is currently online
+        position: Optional current position of the actuator
+        velocity: Optional current velocity of the actuator
+        torque: Optional current torque of the actuator
+        temperature: Optional current temperature of the actuator
+        voltage: Optional current voltage of the actuator
+        current: Optional current draw of the actuator
+    """
+
     actuator_id: int
     online: bool
     position: NotRequired[float]
@@ -32,10 +67,31 @@ class ActuatorStateResponse(TypedDict):
 
 
 class GetActuatorsStateResponse(TypedDict):
-    states: List[ActuatorStateResponse]
+    """TypedDict containing response for actuator state query.
+
+    A dictionary type containing a list of actuator states.
+
+    Fields:
+        states: List of ActuatorStateResponse objects for each queried actuator
+        error: Optional error information if the query failed
+    """
+
+    states: list[ActuatorStateResponse]
+    error: NotRequired[common_pb2.Error | None]
 
 
 class ActuatorCommand(TypedDict):
+    """TypedDict containing command parameters for an actuator.
+
+    A dictionary type specifying various control parameters for an actuator.
+
+    Fields:
+        actuator_id: The ID of the actuator to command
+        position: Optional target position to move to
+        velocity: Optional target velocity to maintain
+        torque: Optional target torque to apply
+    """
+
     actuator_id: int
     position: NotRequired[float]
     velocity: NotRequired[float]
@@ -43,6 +99,23 @@ class ActuatorCommand(TypedDict):
 
 
 class ConfigureActuatorRequest(TypedDict):
+    """TypedDict containing configuration parameters for an actuator.
+
+    A dictionary type specifying various configuration options for an actuator.
+
+    Fields:
+        actuator_id: The ID of the actuator to configure
+        kp: Optional proportional gain for position control
+        kd: Optional derivative gain for position control
+        ki: Optional integral gain for position control
+        max_torque: Optional maximum torque limit
+        protective_torque: Optional protective torque threshold
+        protection_time: Optional protection activation time
+        torque_enabled: Optional flag to enable/disable torque
+        new_actuator_id: Optional new ID to assign to the actuator
+        zero_position: Optional flag to set current position as zero
+    """
+
     actuator_id: int
     kp: NotRequired[float]
     kd: NotRequired[float]
@@ -122,7 +195,8 @@ class ActuatorServiceClient:
                      'velocity', and 'torque'.
 
         Returns:
-            CommandActuatorsResponse is a list of ActionResult objects indicating success/failure for each command.
+            CommandActuatorsResponse is a dictionary where the key 'results' corresponds to a list of
+            ActionResult objects indicating success/failure for each command.
         """
         actuator_commands = [actuator_pb2.ActuatorCommand(**cmd) for cmd in commands]
         request = actuator_pb2.CommandActuatorsRequest(commands=actuator_commands)
@@ -159,7 +233,8 @@ class ActuatorServiceClient:
                      protection_time, torque_enabled, new_actuator_id
 
         Returns:
-            ActionResult conatining the actuator_id and a ActionResponse indicating success/failure
+            ActionResult is a dictionary containing the actuator_id and a success flag indicating
+            whether the configuration was successful.
         """
         request = actuator_pb2.ConfigureActuatorRequest(**kwargs)
         return self.stub.ConfigureActuator(request)
@@ -174,7 +249,8 @@ class ActuatorServiceClient:
             actuator_ids: List of actuator IDs to query. If None, gets state of all actuators.
 
         Returns:
-            GetActuatorsStateResponse containing a list of ActuatorStateResponse objects with state information
+            GetActuatorsStateResponse is a dictionary where the key 'states' corresponds to a list of
+            ActuatorStateResponse objects containing the current state of each queried actuator.
         """
         request = actuator_pb2.GetActuatorsStateRequest(actuator_ids=actuator_ids or [])
         return self.stub.GetActuatorsState(request)

@@ -9,13 +9,28 @@ from kos_protos import common_pb2, sim_pb2, sim_pb2_grpc
 
 
 class DefaultPosition(TypedDict):
-    """Default position state for simulation."""
+    """TypedDict containing initial simulation state.
+
+    A dictionary type specifying the initial joint positions for
+    resetting the simulation to a known state.
+
+    Fields:
+        qpos: List of joint positions in simulation units
+    """
 
     qpos: list[float]
 
 
 class ResetRequest(TypedDict):
-    """Request parameters for resetting simulation."""
+    """TypedDict containing simulation reset parameters.
+
+    A dictionary type specifying how the simulation should be reset,
+    including optional initial state and randomization settings.
+
+    Fields:
+        initial_state: Optional DefaultPosition to set initial joint positions
+        randomize: Optional flag to add randomization during reset
+    """
 
     initial_state: NotRequired[DefaultPosition]
     randomize: NotRequired[bool]
@@ -59,19 +74,20 @@ class SimServiceClient:
     def reset(self, **kwargs: Unpack[ResetRequest]) -> ActionResponse:
         """Reset the simulation to its initial state.
 
+        Example:
+            >>> reset(
+            ...     initial_state={"qpos": [0.0, 0.0, 0.0]},
+            ...     randomize=True
+            ... )
+
         Args:
             **kwargs: Reset parameters that may include:
                      initial_state: DefaultPosition to reset to
                      randomize: Whether to randomize the initial state
 
-        Example:
-            >>> client.reset(
-            ...     initial_state={"qpos": [0.0, 0.0, 0.0]},
-            ...     randomize=True
-            ... )
-
         Returns:
-            ActionResponse indicating success/failure
+            ActionResponse is a dictionary where 'success' indicates if the reset operation
+            was successful, and 'error' contains any error information if the reset failed.
         """
         initial_state = None
         if "initial_state" in kwargs:
@@ -84,11 +100,16 @@ class SimServiceClient:
     def set_paused(self, paused: bool) -> ActionResponse:
         """Pause or unpause the simulation.
 
+        Example:
+            >>> set_paused(True)  # Pause simulation
+            >>> set_paused(False)  # Resume simulation
+
         Args:
             paused: True to pause, False to unpause
 
         Returns:
-            ActionResponse indicating success/failure
+            ActionResponse is a dictionary where 'success' indicates if the pause state
+            was set successfully, and 'error' contains any error information if the operation failed.
         """
         request = sim_pb2.SetPausedRequest(paused=paused)
         return self.stub.SetPaused(request)
@@ -96,12 +117,17 @@ class SimServiceClient:
     def step(self, num_steps: int, step_size: float | None = None) -> ActionResponse:
         """Step the simulation forward.
 
+        Example:
+            >>> step(num_steps=100, step_size=0.001)  # Step forward 100 times with 1ms steps
+            >>> step(num_steps=50)  # Step forward 50 times with default step size
+
         Args:
             num_steps: Number of simulation steps to take
             step_size: Optional time per step in seconds
 
         Returns:
-            ActionResponse indicating success/failure
+            ActionResponse is a dictionary where 'success' indicates if the stepping operation
+            was successful, and 'error' contains any error information if the stepping failed.
         """
         request = sim_pb2.StepRequest(num_steps=num_steps, step_size=step_size)
         return self.stub.Step(request)
@@ -110,11 +136,11 @@ class SimServiceClient:
         """Set simulation parameters.
 
         Example:
-        >>> client.set_parameters(
-        ...     time_scale=1.0,
-        ...     gravity=9.81,
-        ...     initial_state={"qpos": [0.0, 0.0, 0.0]}
-        ... )
+            >>> set_parameters(
+            ...     time_scale=1.0,
+            ...     gravity=9.81,
+            ...     initial_state={"qpos": [0.0, 0.0, 0.0]}
+            ... )
 
         Args:
             **kwargs: Parameters that may include:
@@ -123,7 +149,8 @@ class SimServiceClient:
                      initial_state: Default position state
 
         Returns:
-            ActionResponse indicating success/failure
+            ActionResponse is a dictionary where 'success' indicates if the parameters were
+            set successfully, and 'error' contains any error information if the operation failed.
         """
         initial_state = None
         if "initial_state" in kwargs:
@@ -139,8 +166,14 @@ class SimServiceClient:
     def get_parameters(self) -> GetParametersResponse:
         """Get current simulation parameters.
 
+        Example:
+            >>> get_parameters()
+
         Returns:
-            GetParametersResponse containing current parameters (time_scale, gravity, initial_state)
-            and any error information.
+            GetParametersResponse is a dictionary where:
+            - 'time_scale' contains the current simulation time scaling factor
+            - 'gravity' contains the current gravity constant value
+            - 'initial_state' contains the default position state as a DefaultPosition dictionary
+            - 'error' contains any error information if the query failed
         """
         return self.stub.GetParameters(Empty())

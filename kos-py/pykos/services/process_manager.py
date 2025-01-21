@@ -10,7 +10,16 @@ from kos_protos.process_manager_pb2 import KClipStartRequest
 
 
 class KClipStartResponse(TypedDict):
-    """Response from starting KClip recording."""
+    """TypedDict containing response from starting a KClip recording.
+
+    A dictionary type containing information about a newly started
+    KClip recording session, including its unique identifier.
+
+    Fields:
+        success: Whether the recording started successfully
+        clip_uuid: Unique identifier for the recording session
+        error: Optional error information if start failed
+    """
 
     success: bool
     clip_uuid: str
@@ -18,7 +27,16 @@ class KClipStartResponse(TypedDict):
 
 
 class KClipStopResponse(TypedDict):
-    """Response from stopping KClip recording."""
+    """TypedDict containing response from stopping a KClip recording.
+
+    A dictionary type containing information about the stopped
+    KClip recording session, including its identifier.
+
+    Fields:
+        success: Whether the recording stopped successfully
+        clip_uuid: Identifier of the stopped recording session
+        error: Optional error information if stop failed
+    """
 
     success: bool
     clip_uuid: str
@@ -36,7 +54,10 @@ class ProcessManagerServiceClient:
             action: The action string for the KClip request
 
         Returns:
-            KClipStartResponse containing success status and any error information.
+            KClipStartResponse is a dictionary where:
+            - 'success' indicates if the recording started successfully
+            - 'clip_uuid' contains the unique identifier for the recording session
+            - 'error' contains any error information if the start failed
         """
         request = KClipStartRequest(action=action)
         return self.stub.StartKClip(request)
@@ -45,6 +66,9 @@ class ProcessManagerServiceClient:
         """Stop KClip recording.
 
         Returns:
-            KClipStopResponse containing success status, clip path, and any error information.
+            KClipStopResponse is a dictionary where:
+            - 'success' indicates if the recording stopped successfully
+            - 'clip_uuid' contains the identifier of the stopped recording session
+            - 'error' contains any error information if the stop failed
         """
         return self.stub.StopKClip(request)

@@ -9,9 +9,12 @@ from kos_protos import common_pb2, led_matrix_pb2, led_matrix_pb2_grpc
 
 
 class MatrixInfo(TypedDict):
-    """Information about the LED matrix.
+    """TypedDict containing LED matrix configuration details.
 
-    Args:
+    A dictionary type describing the physical layout and capabilities
+    of the LED matrix display.
+
+    Fields:
         width: Width in pixels
         height: Height in pixels
         brightness_levels: Number of brightness levels supported (1 for binary on/off)
@@ -71,13 +74,13 @@ class LEDMatrixServiceClient:
         """Get information about the LED matrix including dimensions and capabilities.
 
         Returns:
-            MatrixInfo containing:
-                width: Width in pixels
-                height: Height in pixels
-                brightness_levels: Number of brightness levels supported
-                color_capable: Whether the matrix supports color
-                bits_per_pixel: Number of bits used to represent each pixel
-                error: Optional error information
+            MatrixInfo is a dictionary containing LED matrix configuration where:
+            - 'width' contains the number of LEDs in horizontal dimension
+            - 'height' contains the number of LEDs in vertical dimension
+            - 'brightness_levels' contains the number of supported brightness levels
+            - 'color_capable' indicates whether the matrix supports color
+            - 'bits_per_pixel' contains the number of bits used per pixel
+            - 'error' contains any error information if the query failed
         """
         return self.stub.GetMatrixInfo(Empty())
 
@@ -91,7 +94,8 @@ class LEDMatrixServiceClient:
             buffer: Binary buffer containing LED states
 
         Returns:
-            ActionResponse indicating success/failure of the write operation.
+            ActionResponse is a dictionary where 'success' indicates if the write operation
+            was successful, and 'error' contains any error information if the operation failed.
         """
         request = led_matrix_pb2.WriteBufferRequest(buffer=buffer)
         return self.stub.WriteBuffer(request)
@@ -100,15 +104,16 @@ class LEDMatrixServiceClient:
         """Write image data to the LED matrix.
 
         Args:
-            **kwargs: Image data containing the raw bytes, dimensions and format
-                buffer: Raw image data bytes
-                width: Image width in pixels
-                height: Image height in pixels
-                format: Pixel format specification (e.g. 'RGB888', 'BGR888', 'RGB565', 'MONO8')
-                brightness: Global brightness level (0-255)
+            **kwargs: Image data containing:
+                     buffer: Raw image data bytes
+                     width: Image width in pixels
+                     height: Image height in pixels
+                     format: Pixel format specification (e.g. 'RGB888', 'BGR888', 'RGB565', 'MONO8')
+                     brightness: Global brightness level (0-255)
 
         Returns:
-            ActionResponse indicating success/failure of the write operation.
+            ActionResponse is a dictionary where 'success' indicates if the write operation
+            was successful, and 'error' contains any error information if the operation failed.
         """
         request = led_matrix_pb2.WriteColorBufferRequest(**kwargs)
         return self.stub.WriteColorBuffer(request)

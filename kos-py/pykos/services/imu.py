@@ -13,7 +13,23 @@ from kos_protos.imu_pb2 import CalibrateIMUMetadata
 
 
 class IMUValuesResponse(TypedDict):
-    """Response containing IMU sensor values."""
+    """TypedDict containing basic IMU sensor measurements.
+
+    A dictionary type containing raw accelerometer, gyroscope, and optional
+    magnetometer readings from the IMU sensor.
+
+    Fields:
+        accel_x: Acceleration along X-axis in m/s²
+        accel_y: Acceleration along Y-axis in m/s²
+        accel_z: Acceleration along Z-axis in m/s²
+        gyro_x: Angular velocity around X-axis in rad/s
+        gyro_y: Angular velocity around Y-axis in rad/s
+        gyro_z: Angular velocity around Z-axis in rad/s
+        mag_x: Optional magnetic field strength along X-axis
+        mag_y: Optional magnetic field strength along Y-axis
+        mag_z: Optional magnetic field strength along Z-axis
+        error: Optional error information if the reading failed
+    """
 
     accel_x: float
     accel_y: float
@@ -28,28 +44,83 @@ class IMUValuesResponse(TypedDict):
 
 
 class IMUAdvancedValuesResponse(TypedDict):
+    """TypedDict containing processed IMU measurements.
+
+    A dictionary type containing filtered and processed IMU readings,
+    including linear accelerations and angular velocities with gravity compensation.
+
+    Fields:
+        linear_acceleration_x: Gravity-compensated acceleration along X-axis in m/s²
+        linear_acceleration_y: Gravity-compensated acceleration along Y-axis in m/s²
+        linear_acceleration_z: Gravity-compensated acceleration along Z-axis in m/s²
+        angular_velocity_x: Filtered angular velocity around X-axis in rad/s
+        angular_velocity_y: Filtered angular velocity around Y-axis in rad/s
+        angular_velocity_z: Filtered angular velocity around Z-axis in rad/s
+        error: Optional error information if the processing failed
+    """
+
     linear_acceleration_x: float
     linear_acceleration_y: float
     linear_acceleration_z: float
-    gravity_x: float
-    gravity_y: float
-    gravity_z: float
-    rotation_rate_x: float
-    rotation_rate_y: float
-    rotation_rate_z: float
+    angular_velocity_x: float
+    angular_velocity_y: float
+    angular_velocity_z: float
+    error: NotRequired[common_pb2.Error | None]
 
 
 class EulerAnglesResponse(TypedDict):
+    """TypedDict containing orientation in Euler angles.
+
+    A dictionary type containing the IMU's orientation expressed as Euler angles
+    in the roll-pitch-yaw convention.
+
+    Fields:
+        roll: Rotation around X-axis in radians
+        pitch: Rotation around Y-axis in radians
+        yaw: Rotation around Z-axis in radians
+        error: Optional error information if the calculation failed
+    """
+
     roll: float
     pitch: float
     yaw: float
+    error: NotRequired[common_pb2.Error | None]
 
 
 class QuaternionResponse(TypedDict):
+    """TypedDict containing orientation as quaternion.
+
+    A dictionary type containing the IMU's orientation expressed as a unit quaternion,
+    which provides a singularity-free representation of orientation.
+
+    Fields:
+        w: Scalar component of the quaternion
+        x: X component of the quaternion's vector part
+        y: Y component of the quaternion's vector part
+        z: Z component of the quaternion's vector part
+        error: Optional error information if the calculation failed
+    """
+
     w: float
     x: float
     y: float
     z: float
+    error: NotRequired[common_pb2.Error | None]
+
+
+class ZeroIMUResponse(TypedDict):
+    """TypedDict containing response from IMU zeroing operation.
+
+    A dictionary type indicating whether the IMU zeroing operation succeeded.
+    Zeroing sets the current orientation as the reference orientation.
+
+    Fields:
+        success: Whether the zeroing operation completed successfully
+        error: Optional error information if the operation failed
+    """
+
+    success: bool
+    error: NotRequired[common_pb2.Error | None]
 
 
 class ActionResponse(TypedDict):
@@ -110,8 +181,11 @@ class IMUServiceClient:
         """Get the latest IMU sensor values.
 
         Returns:
-            IMUValuesResponse: The latest IMU sensor values including acceleration,
-            gyroscope, and magnetometer readings on x, y, z axes.
+            IMUValuesResponse is a dictionary containing raw sensor measurements where:
+            - 'accel_x/y/z' contain acceleration values in m/s²
+            - 'gyro_x/y/z' contain angular velocity values in rad/s
+            - 'mag_x/y/z' optionally contain magnetic field measurements
+            - 'error' contains any error information if the reading failed
         """
         return self.stub.GetValues(Empty())
 
@@ -119,8 +193,10 @@ class IMUServiceClient:
         """Get the latest IMU advanced values.
 
         Returns:
-            IMUAdvancedValuesResponse: The latest IMU advanced values including linear acceleration,
-            gravity, and rotation rate on x, y, z axes.
+            IMUAdvancedValuesResponse is a dictionary containing processed measurements where:
+            - 'linear_acceleration_x/y/z' contain gravity-compensated acceleration in m/s²
+            - 'angular_velocity_x/y/z' contain filtered angular velocity in rad/s
+            - 'error' contains any error information if the processing failed
         """
         return self.stub.GetAdvancedValues(Empty())
 
@@ -128,7 +204,11 @@ class IMUServiceClient:
         """Get the latest Euler angles.
 
         Returns:
-            EulerAnglesResponse: The latest Euler angles (roll, pitch, yaw).
+            EulerAnglesResponse is a dictionary containing orientation angles where:
+            - 'roll' contains rotation around X-axis in radians
+            - 'pitch' contains rotation around Y-axis in radians
+            - 'yaw' contains rotation around Z-axis in radians
+            - 'error' contains any error information if the calculation failed
         """
         return self.stub.GetEuler(Empty())
 
@@ -136,7 +216,10 @@ class IMUServiceClient:
         """Get the latest quaternion.
 
         Returns:
-            QuaternionResponse: The latest quaternion values (w, x, y, z).
+            QuaternionResponse is a dictionary containing orientation as quaternion where:
+            - 'w' contains the scalar component
+            - 'x/y/z' contain the vector components
+            - 'error' contains any error information if the calculation failed
         """
         return self.stub.GetQuaternion(Empty())
 
@@ -160,7 +243,8 @@ class IMUServiceClient:
                      max_acceleration: Maximum acceleration during zeroing
 
         Returns:
-            ActionResponse: Response indicating success/failure of the zero operation.
+            ActionResponse is a dictionary where 'success' indicates if the zeroing operation
+            was successful, and 'error' contains any error information if the operation failed.
         """
         request = imu_pb2.ZeroIMURequest(duration=_duration_from_seconds(duration), **kwargs)
         return self.stub.Zero(request)
