@@ -33,6 +33,7 @@ tonic = { version="0.12", git = "https://github.com/kscalelabs/tonic-milkv" }
 tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+console-subscriber = "0.4"
 yaml-rust2 = "0.9"
 
 [build-dependencies]

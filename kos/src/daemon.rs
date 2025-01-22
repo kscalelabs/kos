@@ -73,29 +73,35 @@ struct DaemonState {
 pub async fn kos_runtime(platform: Box<dyn Platform>) -> Result<()> {
     let args = Args::parse();
 
-    // tracing
-    let subscriber = tracing_subscriber::registry();
+    // // tracing
+    // let subscriber = tracing_subscriber::registry();
 
-    // Always add stdout layer
-    let stdout_layer = tracing_subscriber::fmt::layer()
-        .with_writer(std::io::stdout)
-        .with_filter(
-            EnvFilter::from_default_env()
-                .add_directive("h2=error".parse().unwrap())
-                .add_directive("grpc=error".parse().unwrap())
-                .add_directive("rumqttc=error".parse().unwrap())
-                .add_directive("kos::telemetry=error".parse().unwrap())
-                .add_directive("polling=error".parse().unwrap())
-                .add_directive("async_io=error".parse().unwrap())
-                .add_directive("krec=error".parse().unwrap()),
-        );
+    // // console layer - profiler
+    // let console_layer = console_subscriber::spawn();
 
-    let _subscriber = subscriber.with(stdout_layer);
+    // // Always add stdout layer
+    // let stdout_layer = tracing_subscriber::fmt::layer()
+    //     .with_writer(std::io::stdout)
+    //     .with_filter(
+    //         EnvFilter::from_default_env()
+    //             .add_directive("h2=error".parse().unwrap())
+    //             .add_directive("grpc=error".parse().unwrap())
+    //             .add_directive("rumqttc=error".parse().unwrap())
+    //             .add_directive("kos::telemetry=error".parse().unwrap())
+    //             // .add_directive("polling=error".parse().unwrap())
+    //             // .add_directive("async_io=error".parse().unwrap())
+    //             .add_directive("krec=error".parse().unwrap()),
+    //     );
 
-    let guard = setup_logging(args.log, &args.log_level)?;
+    // // Add both layers to the subscriber
+    // let _subscriber = subscriber
+    //     .with(stdout_layer)
+    //     .with(console_layer);
+
+    // `let guard = setup_logging(args.log, &args.log_level)?;
 
     let mut state = DaemonState {
-        _guard: guard,
+        _guard: None,
         platform,
     };
 
