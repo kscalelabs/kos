@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.7.0"
+version = "0.7.1"
 authors = [
     "Benjamin Bolte <ben@kscale.dev>",
     "Denys Bezmenov <denys@kscale.dev>",
