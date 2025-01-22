@@ -28,14 +28,14 @@ class KOS:
     def __init__(self, ip: str = "localhost", port: int = 50051) -> None:
         self.ip = ip
         self.port = port
-        self._channel = None
-        self._imu = None
-        self._actuator = None
-        self._led_matrix = None
-        self._sound = None
-        self._process_manager = None
-        self._inference = None
-        self._sim = None
+        self._channel: grpc.aio.Channel | None = None
+        self._imu: IMUServiceClient | None = None
+        self._actuator: ActuatorServiceClient | None = None
+        self._led_matrix: LEDMatrixServiceClient | None = None
+        self._sound: SoundServiceClient | None = None
+        self._process_manager: ProcessManagerServiceClient | None = None
+        self._inference: InferenceServiceClient | None = None
+        self._sim: SimServiceClient | None = None
 
     @property
     def imu(self) -> IMUServiceClient:

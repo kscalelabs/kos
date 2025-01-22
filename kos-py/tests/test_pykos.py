@@ -24,7 +24,7 @@ async def test_pykos() -> None:
 
         # Tests getting the actuator state.
         actuator_state = await client.actuator.get_actuators_state(actuator_ids=[1])
-        assert actuator_state[0].actuator_id == 1
+        assert actuator_state.states[0].actuator_id == 1
 
         # Tests the IMU endpoints.
         imu_response = await client.imu.get_imu_values()
