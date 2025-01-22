@@ -9,4 +9,5 @@ darglint
 mypy
 mypy-protobuf
 pytest
+pytest-asyncio
 ruff

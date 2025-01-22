@@ -3,6 +3,7 @@
 from typing import NotRequired, TypedDict, Unpack
 
 import grpc
+import grpc.aio
 from google.longrunning import operations_pb2, operations_pb2_grpc
 from google.protobuf.any_pb2 import Any as AnyPb2
 
@@ -61,28 +62,24 @@ class CalibrationMetadata:
 
 
 class ActuatorServiceClient:
-    def __init__(self, channel: grpc.Channel) -> None:
+    def __init__(self, channel: grpc.aio.Channel) -> None:
         self.stub = actuator_pb2_grpc.ActuatorServiceStub(channel)
         self.operations_stub = operations_pb2_grpc.OperationsStub(channel)
 
-    def calibrate(self, actuator_id: int) -> CalibrationMetadata:
-        """Calibrate an actuator.
-
-        Returns:
-            Operation: The operation for the calibration.
-        """
-        response = self.stub.CalibrateActuator(actuator_pb2.CalibrateActuatorRequest(actuator_id=actuator_id))
+    async def calibrate(self, actuator_id: int) -> CalibrationMetadata:
+        """Calibrate an actuator."""
+        response = await self.stub.CalibrateActuator(actuator_pb2.CalibrateActuatorRequest(actuator_id=actuator_id))
         metadata = CalibrationMetadata(response.metadata)
         return metadata
 
-    def get_calibration_status(self, actuator_id: int) -> str | None:
-        response = self.operations_stub.GetOperation(
+    async def get_calibration_status(self, actuator_id: int) -> str | None:
+        response = await self.operations_stub.GetOperation(
             operations_pb2.GetOperationRequest(name=f"operations/calibrate_actuator/{actuator_id}")
         )
         metadata = CalibrationMetadata(response.metadata)
         return metadata.status
 
-    def command_actuators(self, commands: list[ActuatorCommand]) -> actuator_pb2.CommandActuatorsResponse:
+    async def command_actuators(self, commands: list[ActuatorCommand]) -> actuator_pb2.CommandActuatorsResponse:
         """Command multiple actuators at once.
 
         Example:
@@ -101,9 +98,9 @@ class ActuatorServiceClient:
         """
         actuator_commands = [actuator_pb2.ActuatorCommand(**cmd) for cmd in commands]
         request = actuator_pb2.CommandActuatorsRequest(commands=actuator_commands)
-        return self.stub.CommandActuators(request)
+        return await self.stub.CommandActuators(request)
 
-    def configure_actuator(self, **kwargs: Unpack[ConfigureActuatorRequest]) -> common_pb2.ActionResult:
+    async def configure_actuator(self, **kwargs: Unpack[ConfigureActuatorRequest]) -> common_pb2.ActionResult:
         """Configure an actuator's parameters.
 
         Example:
@@ -137,9 +134,12 @@ class ActuatorServiceClient:
             ActionResponse indicating success/failure
         """
         request = actuator_pb2.ConfigureActuatorRequest(**kwargs)
-        return self.stub.ConfigureActuator(request)
+        return await self.stub.ConfigureActuator(request)
 
-    def get_actuators_state(self, actuator_ids: list[int] | None = None) -> actuator_pb2.GetActuatorsStateResponse:
+    async def get_actuators_state(
+        self,
+        actuator_ids: list[int] | None = None,
+    ) -> actuator_pb2.GetActuatorsStateResponse:
         """Get the state of multiple actuators.
 
         Example:
@@ -152,4 +152,4 @@ class ActuatorServiceClient:
             List of ActuatorStateResponse objects containing the state information
         """
         request = actuator_pb2.GetActuatorsStateRequest(actuator_ids=actuator_ids or [])
-        return self.stub.GetActuatorsState(request)
+        return await self.stub.GetActuatorsState(request)

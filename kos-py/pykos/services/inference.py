@@ -3,6 +3,7 @@
 from typing import NotRequired, TypedDict
 
 import grpc
+import grpc.aio
 
 from kos_protos import common_pb2, inference_pb2, inference_pb2_grpc
 
@@ -88,7 +89,7 @@ class InferenceServiceClient:
     This service allows uploading models and running inference on them.
     """
 
-    def __init__(self, channel: grpc.Channel) -> None:
+    def __init__(self, channel: grpc.aio.Channel) -> None:
         """Initialize the inference service client.
 
         Args:
@@ -96,7 +97,7 @@ class InferenceServiceClient:
         """
         self.stub = inference_pb2_grpc.InferenceServiceStub(channel)
 
-    def upload_model(
+    async def upload_model(
         self, model_data: bytes, metadata: ModelMetadata | None = None
     ) -> inference_pb2.UploadModelResponse:
         """Upload a model to the robot.
@@ -123,9 +124,9 @@ class InferenceServiceClient:
         if metadata is not None:
             proto_metadata = inference_pb2.ModelMetadata(**metadata)
         request = inference_pb2.UploadModelRequest(model=model_data, metadata=proto_metadata)
-        return self.stub.UploadModel(request)
+        return await self.stub.UploadModel(request)
 
-    def load_models(self, uids: list[str]) -> inference_pb2.LoadModelsResponse:
+    async def load_models(self, uids: list[str]) -> inference_pb2.LoadModelsResponse:
         """Load models from the robot's filesystem.
 
         Args:
@@ -135,9 +136,9 @@ class InferenceServiceClient:
             LoadModelsResponse containing information about the loaded models.
         """
         request = inference_pb2.ModelUids(uids=uids)
-        return self.stub.LoadModels(request)
+        return await self.stub.LoadModels(request)
 
-    def unload_models(self, uids: list[str]) -> common_pb2.ActionResponse:
+    async def unload_models(self, uids: list[str]) -> common_pb2.ActionResponse:
         """Unload models from the robot's filesystem.
 
         Args:
@@ -147,9 +148,9 @@ class InferenceServiceClient:
             ActionResponse indicating success/failure of the unload operation.
         """
         request = inference_pb2.ModelUids(uids=uids)
-        return self.stub.UnloadModels(request)
+        return await self.stub.UnloadModels(request)
 
-    def get_models_info(self, model_uids: list[str] | None = None) -> GetModelsInfoResponse:
+    async def get_models_info(self, model_uids: list[str] | None = None) -> GetModelsInfoResponse:
         """Get information about available models.
 
         Args:
@@ -166,7 +167,7 @@ class InferenceServiceClient:
         else:
             request = inference_pb2.GetModelsInfoRequest(all=True)
 
-        response = self.stub.GetModelsInfo(request)
+        response = await self.stub.GetModelsInfo(request)
 
         return GetModelsInfoResponse(
             models=[
@@ -209,7 +210,7 @@ class InferenceServiceClient:
             error=response.error if response.HasField("error") else None,
         )
 
-    def forward(self, model_uid: str, inputs: dict[str, Tensor]) -> ForwardResponse:
+    async def forward(self, model_uid: str, inputs: dict[str, Tensor]) -> ForwardResponse:
         """Run inference using a specified model.
 
         Args:
@@ -230,7 +231,7 @@ class InferenceServiceClient:
             proto_tensor = inference_pb2.Tensor(values=tensor["values"], shape=shape)
             tensor_inputs[name] = proto_tensor
 
-        response = self.stub.Forward(inference_pb2.ForwardRequest(model_uid=model_uid, inputs=tensor_inputs))
+        response = await self.stub.Forward(inference_pb2.ForwardRequest(model_uid=model_uid, inputs=tensor_inputs))
 
         return ForwardResponse(
             outputs={
