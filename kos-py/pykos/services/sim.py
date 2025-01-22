@@ -3,6 +3,7 @@
 from typing import NotRequired, TypedDict, Unpack
 
 import grpc
+import grpc.aio
 from google.protobuf.empty_pb2 import Empty
 
 from kos_protos import common_pb2, sim_pb2, sim_pb2_grpc
@@ -29,10 +30,10 @@ class SimulationParameters(TypedDict):
 
 
 class SimServiceClient:
-    def __init__(self, channel: grpc.Channel) -> None:
+    def __init__(self, channel: grpc.aio.Channel) -> None:
         self.stub = sim_pb2_grpc.SimulationServiceStub(channel)
 
-    def reset(self, **kwargs: Unpack[ResetRequest]) -> common_pb2.ActionResponse:
+    async def reset(self, **kwargs: Unpack[ResetRequest]) -> common_pb2.ActionResponse:
         """Reset the simulation to its initial state.
 
         Args:
@@ -55,9 +56,9 @@ class SimServiceClient:
             initial_state = sim_pb2.DefaultPosition(qpos=pos["qpos"])
 
         request = sim_pb2.ResetRequest(initial_state=initial_state, randomize=kwargs.get("randomize"))
-        return self.stub.Reset(request)
+        return await self.stub.Reset(request)
 
-    def set_paused(self, paused: bool) -> common_pb2.ActionResponse:
+    async def set_paused(self, paused: bool) -> common_pb2.ActionResponse:
         """Pause or unpause the simulation.
 
         Args:
@@ -67,9 +68,9 @@ class SimServiceClient:
             ActionResponse indicating success/failure
         """
         request = sim_pb2.SetPausedRequest(paused=paused)
-        return self.stub.SetPaused(request)
+        return await self.stub.SetPaused(request)
 
-    def step(self, num_steps: int, step_size: float | None = None) -> common_pb2.ActionResponse:
+    async def step(self, num_steps: int, step_size: float | None = None) -> common_pb2.ActionResponse:
         """Step the simulation forward.
 
         Args:
@@ -80,9 +81,9 @@ class SimServiceClient:
             ActionResponse indicating success/failure
         """
         request = sim_pb2.StepRequest(num_steps=num_steps, step_size=step_size)
-        return self.stub.Step(request)
+        return await self.stub.Step(request)
 
-    def set_parameters(self, **kwargs: Unpack[SimulationParameters]) -> common_pb2.ActionResponse:
+    async def set_parameters(self, **kwargs: Unpack[SimulationParameters]) -> common_pb2.ActionResponse:
         """Set simulation parameters.
 
         Example:
@@ -110,12 +111,12 @@ class SimServiceClient:
             time_scale=kwargs.get("time_scale"), gravity=kwargs.get("gravity"), initial_state=initial_state
         )
         request = sim_pb2.SetParametersRequest(parameters=params)
-        return self.stub.SetParameters(request)
+        return await self.stub.SetParameters(request)
 
-    def get_parameters(self) -> sim_pb2.GetParametersResponse:
+    async def get_parameters(self) -> sim_pb2.GetParametersResponse:
         """Get current simulation parameters.
 
         Returns:
             GetParametersResponse containing current parameters and any error
         """
-        return self.stub.GetParameters(Empty())
+        return await self.stub.GetParameters(Empty())

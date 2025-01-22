@@ -28,30 +28,72 @@ class KOS:
     def __init__(self, ip: str = "localhost", port: int = 50051) -> None:
         self.ip = ip
         self.port = port
-        self.channel = None
-        self.imu = None
-        self.actuator = None
-        self.led_matrix = None
-        self.sound = None
-        self.process_manager = None
-        self.inference = None
-        self.sim = None
+        self._channel = None
+        self._imu = None
+        self._actuator = None
+        self._led_matrix = None
+        self._sound = None
+        self._process_manager = None
+        self._inference = None
+        self._sim = None
+
+    @property
+    def imu(self) -> IMUServiceClient:
+        if self._imu is None:
+            raise RuntimeError("IMU client not initialized! Must call __aenter__() first.")
+        return self._imu
+
+    @property
+    def actuator(self) -> ActuatorServiceClient:
+        if self._actuator is None:
+            raise RuntimeError("Actuator client not initialized! Must call __aenter__() first.")
+        return self._actuator
+
+    @property
+    def led_matrix(self) -> LEDMatrixServiceClient:
+        if self._led_matrix is None:
+            raise RuntimeError("LED Matrix client not initialized! Must call __aenter__() first.")
+        return self._led_matrix
+
+    @property
+    def sound(self) -> SoundServiceClient:
+        if self._sound is None:
+            raise RuntimeError("Sound client not initialized! Must call __aenter__() first.")
+        return self._sound
+
+    @property
+    def process_manager(self) -> ProcessManagerServiceClient:
+        if self._process_manager is None:
+            raise RuntimeError("Process Manager client not initialized! Must call __aenter__() first.")
+        return self._process_manager
+
+    @property
+    def inference(self) -> InferenceServiceClient:
+        if self._inference is None:
+            raise RuntimeError("Inference client not initialized! Must call __aenter__() first.")
+        return self._inference
+
+    @property
+    def sim(self) -> SimServiceClient:
+        if self._sim is None:
+            raise RuntimeError("Sim client not initialized! Must call __aenter__() first.")
+        return self._sim
 
     async def connect(self) -> None:
         """Connect to the gRPC server and initialize service clients."""
-        self.channel = grpc.aio.insecure_channel(f"{self.ip}:{self.port}")
-        self.imu = IMUServiceClient(self.channel)
-        self.actuator = ActuatorServiceClient(self.channel)
-        self.led_matrix = LEDMatrixServiceClient(self.channel)
-        self.sound = SoundServiceClient(self.channel)
-        self.process_manager = ProcessManagerServiceClient(self.channel)
-        self.inference = InferenceServiceClient(self.channel)
-        self.sim = SimServiceClient(self.channel)
+        self._channel = grpc.aio.insecure_channel(f"{self.ip}:{self.port}")
+        self._imu = IMUServiceClient(self._channel)
+        self._actuator = ActuatorServiceClient(self._channel)
+        self._led_matrix = LEDMatrixServiceClient(self._channel)
+        self._sound = SoundServiceClient(self._channel)
+        self._process_manager = ProcessManagerServiceClient(self._channel)
+        self._inference = InferenceServiceClient(self._channel)
+        self._sim = SimServiceClient(self._channel)
 
     async def close(self) -> None:
         """Close the gRPC channel."""
-        if self.channel is not None:
-            await self.channel.close()
+        if self._channel is not None:
+            await self._channel.close()
 
     async def __aenter__(self) -> "KOS":
         await self.connect()

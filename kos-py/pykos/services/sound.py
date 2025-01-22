@@ -1,8 +1,9 @@
 """Sound service client."""
 
-from typing import Generator, Iterator, NotRequired, TypedDict, Unpack
+from typing import AsyncGenerator, AsyncIterator, NotRequired, TypedDict, Unpack
 
 import grpc
+import grpc.aio
 from google.protobuf.empty_pb2 import Empty
 
 from kos_protos import common_pb2, sound_pb2, sound_pb2_grpc
@@ -58,7 +59,7 @@ class SoundServiceClient:
     This service allows playing audio through speakers and recording from microphones.
     """
 
-    def __init__(self, channel: grpc.Channel) -> None:
+    def __init__(self, channel: grpc.aio.Channel) -> None:
         """Initialize the sound service client.
 
         Args:
@@ -66,15 +67,17 @@ class SoundServiceClient:
         """
         self.stub = sound_pb2_grpc.SoundServiceStub(channel)
 
-    def get_audio_info(self) -> AudioInfo:
+    async def get_audio_info(self) -> AudioInfo:
         """Get information about audio capabilities.
 
         Returns:
             AudioInfo containing playback and recording capabilities.
         """
-        return self.stub.GetAudioInfo(Empty())
+        return await self.stub.GetAudioInfo(Empty())
 
-    def play_audio(self, audio_iterator: Iterator[bytes], **kwargs: Unpack[AudioConfig]) -> common_pb2.ActionResponse:
+    async def play_audio(
+        self, audio_iterator: AsyncIterator[bytes], **kwargs: Unpack[AudioConfig]
+    ) -> common_pb2.ActionResponse:
         """Stream PCM audio data to the speaker.
 
         Args:
@@ -96,18 +99,18 @@ class SoundServiceClient:
             ...     response = client.play_audio(chunks(), config)
         """
 
-        def request_iterator() -> Generator[sound_pb2.PlayAudioRequest, None, None]:
+        async def request_iterator() -> AsyncGenerator[sound_pb2.PlayAudioRequest, None]:
             # First message includes config
             yield sound_pb2.PlayAudioRequest(
                 config=sound_pb2.AudioConfig(**kwargs),
             )
             # Subsequent messages contain audio data
-            for chunk in audio_iterator:
+            async for chunk in audio_iterator:
                 yield sound_pb2.PlayAudioRequest(audio_data=chunk)
 
-        return self.stub.PlayAudio(request_iterator())
+        return await self.stub.PlayAudio(request_iterator())
 
-    def record_audio(self, duration_ms: int = 0, **kwargs: Unpack[AudioConfig]) -> Generator[bytes, None, None]:
+    async def record_audio(self, duration_ms: int = 0, **kwargs: Unpack[AudioConfig]) -> AsyncGenerator[bytes, None]:
         """Record PCM audio data from the microphone.
 
         Args:
@@ -131,15 +134,15 @@ class SoundServiceClient:
             duration_ms=duration_ms,
         )
 
-        for response in self.stub.RecordAudio(request):
+        async for response in self.stub.RecordAudio(request):
             if response.HasField("error"):
                 raise RuntimeError(f"Recording error: {response.error}")
             yield response.audio_data
 
-    def stop_recording(self) -> common_pb2.ActionResponse:
+    async def stop_recording(self) -> common_pb2.ActionResponse:
         """Stop an ongoing recording session.
 
         Returns:
             ActionResponse indicating success/failure of the stop operation.
         """
-        return self.stub.StopRecording(Empty())
+        return await self.stub.StopRecording(Empty())
