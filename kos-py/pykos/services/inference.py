@@ -8,9 +8,9 @@ from kos_protos import common_pb2, inference_pb2, inference_pb2_grpc
 
 
 class ModelMetadata(TypedDict):
-    """Model metadata for uploading models.
+    """TypedDict containing model metadata for uploading models.
 
-    All fields are optional and can be used to provide additional information about the model.
+    Contains optional fields providing additional information about the model.
     """
 
     model_name: NotRequired[str | None]
@@ -82,6 +82,27 @@ class GetModelsInfoResponse(TypedDict):
     error: NotRequired[common_pb2.Error | None]
 
 
+class UploadModelResponse(TypedDict):
+    """Response from uploading a model."""
+
+    uid: str
+    error: NotRequired[common_pb2.Error | None]
+
+
+class LoadModelsResponse(TypedDict):
+    """Response from loading models."""
+
+    success: bool
+    error: NotRequired[common_pb2.Error | None]
+
+
+class ActionResponse(TypedDict):
+    """Response indicating success/failure of an action."""
+
+    success: bool
+    error: NotRequired[common_pb2.Error | None]
+
+
 class InferenceServiceClient:
     """Client for the InferenceService.
 
@@ -96,17 +117,15 @@ class InferenceServiceClient:
         """
         self.stub = inference_pb2_grpc.InferenceServiceStub(channel)
 
-    def upload_model(
-        self, model_data: bytes, metadata: ModelMetadata | None = None
-    ) -> inference_pb2.UploadModelResponse:
+    def upload_model(self, model_data: bytes, metadata: ModelMetadata | None = None) -> UploadModelResponse:
         """Upload a model to the robot.
 
         Example:
-        >>> client.upload_model(model_data,
-        ... metadata={"model_name": "MyModel",
-        ... "model_description": "A model for inference",
-        ... "model_version": "1.0.0",
-        ... "model_author": "John Doe"})
+            >>> client.upload_model(model_data,
+            ... metadata={"model_name": "MyModel",
+            ... "model_description": "A model for inference",
+            ... "model_version": "1.0.0",
+            ... "model_author": "John Doe"})
 
         Args:
             model_data: The binary model data to upload.
@@ -117,7 +136,9 @@ class InferenceServiceClient:
                      model_author: Author of the model
 
         Returns:
-            UploadModelResponse containing the model UID and any error information.
+            UploadModelResponse is a dictionary where 'uid' contains the unique identifier
+            assigned to the uploaded model, and 'error' contains any error information if
+            the upload failed.
         """
         proto_metadata = None
         if metadata is not None:
@@ -125,19 +146,21 @@ class InferenceServiceClient:
         request = inference_pb2.UploadModelRequest(model=model_data, metadata=proto_metadata)
         return self.stub.UploadModel(request)
 
-    def load_models(self, uids: list[str]) -> inference_pb2.LoadModelsResponse:
+    def load_models(self, uids: list[str]) -> LoadModelsResponse:
         """Load models from the robot's filesystem.
 
         Args:
             uids: List of model UIDs to load.
 
         Returns:
-            LoadModelsResponse containing information about the loaded models.
+            LoadModelsResponse is a dictionary where 'success' indicates if all models
+            were loaded successfully, and 'error' contains any error information if the
+            loading failed.
         """
         request = inference_pb2.ModelUids(uids=uids)
         return self.stub.LoadModels(request)
 
-    def unload_models(self, uids: list[str]) -> common_pb2.ActionResponse:
+    def unload_models(self, uids: list[str]) -> ActionResponse:
         """Unload models from the robot's filesystem.
 
         Args:
@@ -157,9 +180,9 @@ class InferenceServiceClient:
                        If None, returns info for all models.
 
         Returns:
-            GetModelsInfoResponse containing:
-                models: List of ModelInfo objects
-                error: Optional error information if fetching failed
+            GetModelsInfoResponse is a dictionary where 'models' contains a list of ModelInfo
+            objects with details about each model, and 'error' contains any error information
+            if the query failed.
         """
         if model_uids is not None:
             request = inference_pb2.GetModelsInfoRequest(model_uids=inference_pb2.ModelUids(uids=model_uids))
@@ -217,9 +240,9 @@ class InferenceServiceClient:
             inputs: Dictionary mapping tensor names to tensors.
 
         Returns:
-            ForwardResponse containing:
-                outputs: Dictionary mapping tensor names to output tensors
-                error: Optional error information if inference failed
+            ForwardResponse is a dictionary where 'outputs' contains a mapping of tensor
+            names to output tensors from the model inference, and 'error' contains any
+            error information if the inference failed.
         """
         tensor_inputs = {}
         for name, tensor in inputs.items():
