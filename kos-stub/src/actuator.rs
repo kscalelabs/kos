@@ -125,6 +125,7 @@ impl Actuator for StubActuator {
             temperature: Some(0.0),
             voltage: Some(0.0),
             current: Some(0.0),
+            faults: vec![],
         }])
     }
 }

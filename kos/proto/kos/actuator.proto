@@ -101,4 +101,5 @@ message ActuatorStateResponse {
     optional double temperature = 6; // Temperature in Celsius
     optional float voltage = 7;      // Voltage in volts
     optional float current = 8;      // Current in amperes
+    repeated string faults = 9;      // Faults
 }
