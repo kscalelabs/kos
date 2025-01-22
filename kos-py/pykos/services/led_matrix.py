@@ -3,6 +3,7 @@
 from typing import NotRequired, TypedDict, Unpack
 
 import grpc
+import grpc.aio
 from google.protobuf.empty_pb2 import Empty
 
 from kos_protos import common_pb2, led_matrix_pb2, led_matrix_pb2_grpc
@@ -52,7 +53,7 @@ class LEDMatrixServiceClient:
     This service allows controlling an LED matrix display.
     """
 
-    def __init__(self, channel: grpc.Channel) -> None:
+    def __init__(self, channel: grpc.aio.Channel) -> None:
         """Initialize the LED matrix service client.
 
         Args:
@@ -60,7 +61,7 @@ class LEDMatrixServiceClient:
         """
         self.stub = led_matrix_pb2_grpc.LEDMatrixServiceStub(channel)
 
-    def get_matrix_info(self) -> MatrixInfo:
+    async def get_matrix_info(self) -> MatrixInfo:
         """Get information about the LED matrix including dimensions and capabilities.
 
         Returns:
@@ -72,9 +73,9 @@ class LEDMatrixServiceClient:
                 bits_per_pixel: Number of bits used to represent each pixel
                 error: Optional error information
         """
-        return self.stub.GetMatrixInfo(Empty())
+        return await self.stub.GetMatrixInfo(Empty())
 
-    def write_buffer(self, buffer: bytes) -> common_pb2.ActionResponse:
+    async def write_buffer(self, buffer: bytes) -> common_pb2.ActionResponse:
         """Write binary on/off states to the LED matrix.
 
         The buffer should be width * height / 8 bytes long, where each bit
@@ -87,9 +88,9 @@ class LEDMatrixServiceClient:
             ActionResponse indicating success/failure of the write operation.
         """
         request = led_matrix_pb2.WriteBufferRequest(buffer=buffer)
-        return self.stub.WriteBuffer(request)
+        return await self.stub.WriteBuffer(request)
 
-    def write_color_buffer(self, **kwargs: Unpack[ImageData]) -> common_pb2.ActionResponse:
+    async def write_color_buffer(self, **kwargs: Unpack[ImageData]) -> common_pb2.ActionResponse:
         """Write image data to the LED matrix.
 
         Args:
@@ -104,4 +105,4 @@ class LEDMatrixServiceClient:
             ActionResponse indicating success/failure of the write operation.
         """
         request = led_matrix_pb2.WriteColorBufferRequest(**kwargs)
-        return self.stub.WriteColorBuffer(request)
+        return await self.stub.WriteColorBuffer(request)
