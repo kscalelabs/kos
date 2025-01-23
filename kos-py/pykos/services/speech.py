@@ -1,25 +1,9 @@
 """Speech service client."""
 
-from typing import TypedDict, Unpack
-
 import grpc
 import grpc.aio
 
 from kos_protos import speech_pb2, speech_pb2_grpc
-
-
-class AudioConfig(TypedDict):
-    """Audio configuration parameters.
-
-    Args:
-        sample_rate: Sample rate in Hz (e.g., 44100)
-        bit_depth: Bit depth (e.g., 16)
-        channels: Number of channels (1 for mono, 2 for stereo)
-    """
-
-    sample_rate: int
-    bit_depth: int
-    channels: int
 
 
 class SpeechServiceClient:
