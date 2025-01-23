@@ -6,7 +6,10 @@ fn main() {
     let proto_root = "proto";
 
     // Where to output the compiled Rust files
-    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_dir = PathBuf::from(match env::var("OUT_DIR") {
+        Ok(dir) => dir,
+        Err(e) => panic!("Failed to get OUT_DIR: {}", e),
+    });
 
     // List of Protobuf files
     let protos = [

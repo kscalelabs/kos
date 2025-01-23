@@ -53,7 +53,7 @@ class SpeechServiceClient:
         response = await self.stub.Synthesize(request)
         if response.HasField("error"):
             raise RuntimeError(f"Synthesis error: {response.error}")
-        return response.output_file
+        return response.file_path
 
     async def transcribe(self, audio_data: str) -> str:
         """Transcribe speech to text.

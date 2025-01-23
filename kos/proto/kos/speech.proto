@@ -32,6 +32,6 @@ message SynthesizeRequest {
 }
 
 message SynthesizeResponse {
-    string output_file = 1;
+    string file_path = 1;
     kos.common.Error error = 2;
 }

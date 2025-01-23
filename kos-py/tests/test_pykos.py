@@ -42,6 +42,10 @@ async def test_pykos() -> None:
         stop_kclip_response = await client.process_manager.stop_kclip()
         assert stop_kclip_response.clip_uuid is not None
 
+        # Tests the speech endpoints.
+        speech_response = await client.speech.synthesize(text="Hello, world!")
+        assert speech_response is not None
+
 
 def _is_server_running(address: str) -> bool:
     try:
