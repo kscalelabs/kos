@@ -10,7 +10,6 @@ pub mod services;
 pub mod telemetry;
 pub mod telemetry_types;
 
-
 pub use grpc_interface::google as google_proto;
 pub use grpc_interface::kos as kos_proto;
 

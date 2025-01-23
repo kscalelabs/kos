@@ -16,6 +16,7 @@ class AudioConfig(TypedDict):
         bit_depth: Bit depth (e.g., 16)
         channels: Number of channels (1 for mono, 2 for stereo)
     """
+
     sample_rate: int
     bit_depth: int
     channels: int
@@ -35,15 +36,11 @@ class SpeechServiceClient:
         """
         self.stub = speech_pb2_grpc.SpeechServiceStub(channel)
 
-    async def synthesize(self, text: str, **kwargs: Unpack[AudioConfig]) -> str:
+    async def synthesize(self, text: str) -> speech_pb2.SynthesizeResponse:
         """Synthesize speech from text.
 
         Args:
             text: Text to synthesize
-            **kwargs: Audio configuration parameters
-                sample_rate: Sample rate in Hz (e.g., 44100)
-                bit_depth: Bit depth (e.g., 16)
-                channels: Number of channels (1 for mono, 2 for stereo)
 
         Returns:
             Audio data as a string.
@@ -51,15 +48,12 @@ class SpeechServiceClient:
         Raises:
             RuntimeError: If synthesis fails.
         """
-        request = speech_pb2.SynthesizeRequest(
-            text=text,
-            config=speech_pb2.AudioConfig(**kwargs) if kwargs else None,
-        )
+        request = speech_pb2.SynthesizeRequest(text=text)
 
         response = await self.stub.Synthesize(request)
         if response.HasField("error"):
             raise RuntimeError(f"Synthesis error: {response.error}")
-        return response.audio_data
+        return response.output_file
 
     async def transcribe(self, audio_data: str) -> str:
         """Transcribe speech to text.

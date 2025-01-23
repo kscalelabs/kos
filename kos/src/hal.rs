@@ -45,12 +45,6 @@ pub trait IMU: Send + Sync {
 }
 
 #[async_trait]
-pub trait ProcessManager: Send + Sync {
-    async fn start_kclip(&self, action: String) -> Result<KClipStartResponse>;
-    async fn stop_kclip(&self) -> Result<KClipStopResponse>;
-}
-
-#[async_trait]
 pub trait Inference: Send + Sync {
     async fn upload_model(
         &self,
@@ -105,6 +99,12 @@ pub trait Sound: Send + Sync {
 
     /// Stop an ongoing recording session
     async fn stop_recording(&self) -> Result<ActionResponse, tonic::Status>;
+}
+
+#[async_trait]
+pub trait ProcessManager: Send + Sync {
+    async fn start_kclip(&self, action: String) -> Result<KClipStartResponse>;
+    async fn stop_kclip(&self) -> Result<KClipStopResponse>;
 }
 
 // TODO action response pfb30

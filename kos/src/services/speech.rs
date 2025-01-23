@@ -24,16 +24,15 @@ impl SpeechService for SpeechServiceImpl {
         let req = request.into_inner();
         trace!("Synthesizing text: {}", req.text);
 
-
-        Ok(Response::new(
-            self
+        let response = self
             .speech
             .synthesize(req.text)
             .await
-            .map_err(|e| Status::internal(format!("Failed to synthesize text, {:?}", e)))?,
-        ))
+            .map_err(|e| Status::internal(format!("Failed to synthesize text, {:?}", e)))?;
+
+        Ok(Response::new(response))
     }
-    
+
     async fn transcribe(
         &self,
         request: Request<TranscribeRequest>,
