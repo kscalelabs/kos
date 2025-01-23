@@ -18,6 +18,12 @@ service SpeechService {
     rpc Synthesize(SynthesizeRequest) returns (SynthesizeResponse);
 }
 
+enum Model {
+    ESPEAK_NG = 0;
+    KMODEL = 1;
+    LOCAL = 2;
+}
+
 message TranscribeRequest {
     string audio_data = 1;
 }
@@ -29,6 +35,7 @@ message TranscribeResponse {
 
 message SynthesizeRequest {
     string text = 1;
+    Model model = 2;
 }
 
 message SynthesizeResponse {

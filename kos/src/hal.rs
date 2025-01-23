@@ -107,10 +107,8 @@ pub trait ProcessManager: Send + Sync {
     async fn stop_kclip(&self) -> Result<KClipStopResponse>;
 }
 
-// TODO action response pfb30
 #[async_trait]
 pub trait Speech: Send + Sync {
-    // async fn start_kclip(&self, action: String) -> Result<KClipStartResponse>;
     async fn synthesize(&self, text: String) -> Result<SynthesizeResponse>;
 }
 

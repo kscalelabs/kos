@@ -27,7 +27,7 @@ class SpeechServiceClient:
             text: Text to synthesize
 
         Returns:
-            Audio data as a string.
+            Output file to the synthesized speech.
 
         Raises:
             RuntimeError: If synthesis fails.
