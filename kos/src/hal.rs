@@ -3,7 +3,7 @@ pub use crate::grpc_interface::kos;
 pub use crate::grpc_interface::kos::common::ActionResponse;
 pub use crate::kos_proto::{
     actuator::*, common::ActionResult, imu::*, inference::*, led_matrix::*, process_manager::*,
-    sound::*,
+    sound::*, speech::*,
 };
 use async_trait::async_trait;
 use bytes::Bytes;
@@ -105,6 +105,13 @@ pub trait Sound: Send + Sync {
 
     /// Stop an ongoing recording session
     async fn stop_recording(&self) -> Result<ActionResponse, tonic::Status>;
+}
+
+// TODO action response pfb30
+#[async_trait]
+pub trait Speech: Send + Sync {
+    // async fn start_kclip(&self, action: String) -> Result<KClipStartResponse>;
+    async fn synthesize(&self, text: String) -> Result<SynthesizeResponse>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

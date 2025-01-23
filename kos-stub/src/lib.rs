@@ -1,15 +1,21 @@
 mod actuator;
 mod imu;
 mod process_manager;
+mod speech;
 use crate::actuator::StubActuator;
 use crate::imu::StubIMU;
 use crate::process_manager::StubProcessManager;
+use crate::speech::StubSpeech;
 use async_trait::async_trait;
 use kos::hal::Operation;
 use kos::kos_proto::actuator::actuator_service_server::ActuatorServiceServer;
 use kos::kos_proto::imu::imu_service_server::ImuServiceServer;
 use kos::kos_proto::process_manager::process_manager_service_server::ProcessManagerServiceServer;
-use kos::services::{ActuatorServiceImpl, IMUServiceImpl, ProcessManagerServiceImpl};
+use kos::kos_proto::speech::speech_service_server::SpeechServiceServer;
+use kos::services::{
+    ActuatorServiceImpl, IMUServiceImpl, ProcessManagerServiceImpl, SpeechServiceImpl,
+};
+
 use kos::{services::OperationsServiceImpl, Platform, ServiceEnum};
 use std::future::Future;
 use std::pin::Pin;
@@ -52,6 +58,7 @@ impl Platform for StubPlatform {
             let actuator = StubActuator::new(operations_service.clone());
             let imu = StubIMU::new(operations_service.clone());
             let process_manager = StubProcessManager::new();
+            let speech = StubSpeech::new();
 
             Ok(vec![
                 ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
@@ -61,6 +68,9 @@ impl Platform for StubPlatform {
                     ProcessManagerServiceImpl::new(Arc::new(process_manager)),
                 )),
                 ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(imu)))),
+                ServiceEnum::Speech(SpeechServiceServer::new(SpeechServiceImpl::new(Arc::new(
+                    speech,
+                )))),
             ])
         })
     }

@@ -19,6 +19,7 @@ fn main() {
         "kos/system.proto",
         "kos/led_matrix.proto",
         "kos/sound.proto",
+        "kos/speech.proto",
         "google/longrunning/operations.proto",
     ];
 

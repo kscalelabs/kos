@@ -30,6 +30,10 @@ pub mod kos {
     pub mod sound {
         tonic::include_proto!("kos/kos.sound");
     }
+
+    pub mod speech {
+        tonic::include_proto!("kos/kos.speech");
+    }
 }
 
 pub mod google {

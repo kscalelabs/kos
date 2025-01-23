@@ -10,6 +10,7 @@ pub mod services;
 pub mod telemetry;
 pub mod telemetry_types;
 
+
 pub use grpc_interface::google as google_proto;
 pub use grpc_interface::kos as kos_proto;
 
@@ -20,10 +21,11 @@ use hal::inference_service_server::InferenceServiceServer;
 use hal::led_matrix_service_server::LedMatrixServiceServer;
 use hal::process_manager_service_server::ProcessManagerServiceServer;
 use hal::sound_service_server::SoundServiceServer;
+use hal::speech_service_server::SpeechServiceServer;
 use services::OperationsServiceImpl;
 use services::{
     ActuatorServiceImpl, IMUServiceImpl, InferenceServiceImpl, LEDMatrixServiceImpl,
-    ProcessManagerServiceImpl, SoundServiceImpl,
+    ProcessManagerServiceImpl, SoundServiceImpl, SpeechServiceImpl,
 };
 use std::fmt::Debug;
 use std::future::Future;
@@ -66,6 +68,12 @@ impl Debug for SoundServiceImpl {
     }
 }
 
+impl Debug for SpeechServiceImpl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "SpeechServiceImpl")
+    }
+}
+
 #[derive(Debug)]
 pub enum ServiceEnum {
     Actuator(ActuatorServiceServer<ActuatorServiceImpl>),
@@ -74,6 +82,7 @@ pub enum ServiceEnum {
     Inference(InferenceServiceServer<InferenceServiceImpl>),
     LEDMatrix(LedMatrixServiceServer<LEDMatrixServiceImpl>),
     Sound(SoundServiceServer<SoundServiceImpl>),
+    Speech(SpeechServiceServer<SpeechServiceImpl>),
 }
 
 #[async_trait]

@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package kos.speech;
+
+import "google/protobuf/empty.proto";
+import "kos/common.proto";
+
+option go_package = "kos/speech;speech";
+option java_package = "com.kos.speech";
+option csharp_namespace = "KOS.Speech";
+
+// The SpeechService provides methods to transcribe or synthesize speech
+service SpeechService {
+    // Transcribes speech to text
+    rpc Transcribe(TranscribeRequest) returns (TranscribeResponse);
+
+    // Synthesizes speech from text
+    rpc Synthesize(SynthesizeRequest) returns (SynthesizeResponse);
+}
+
+message TranscribeRequest {
+    string audio_data = 1;
+}
+
+message TranscribeResponse {
+    string text = 1;
+    kos.common.Error error = 2;
+}
+
+message SynthesizeRequest {
+    string text = 1;
+}
+
+message SynthesizeResponse {
+    string output_file = 1;
+    kos.common.Error error = 2;
+}
