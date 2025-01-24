@@ -6,6 +6,7 @@ mod led_matrix;
 mod operations;
 mod process_manager;
 mod sound;
+mod speech;
 
 pub use actuator::*;
 pub use imu::*;
@@ -15,3 +16,4 @@ pub use led_matrix::*;
 pub use operations::*;
 pub use process_manager::*;
 pub use sound::*;
+pub use speech::*;
