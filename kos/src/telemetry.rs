@@ -23,6 +23,9 @@ pub struct Telemetry {
 
 lazy_static! {
     static ref TELEMETRY: Arc<Mutex<Option<Telemetry>>> = Arc::new(Mutex::new(None));
+    static ref TELEMETRY_ENABLED: bool = std::env::var("ENABLE_TELEMETRY")
+        .map(|v| v.to_lowercase() != "false")
+        .unwrap_or(true);
 }
 
 #[derive(Serialize)]
@@ -63,6 +66,9 @@ impl Telemetry {
     }
 
     pub async fn get() -> Option<Telemetry> {
+        if !*TELEMETRY_ENABLED {
+            return None;
+        }
         TELEMETRY.lock().await.clone()
     }
 
