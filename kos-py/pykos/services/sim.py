@@ -5,14 +5,20 @@ from typing import NotRequired, TypedDict, Unpack
 import grpc
 from google.protobuf.empty_pb2 import Empty
 
-from kos_protos import common_pb2, sim_pb2, sim_pb2_grpc
+from kos_protos import common_pb2, sim_pb2_grpc
+from kos_protos.sim_pb2 import (
+    DefaultPosition,
+    GetParametersResponse,
+    ResetRequest,
+    SetParametersRequest,
+    SetPausedRequest,
+    SimulationParameters,
+    StepRequest,
+)
 
 
-class DefaultPosition(TypedDict):
-    """TypedDict containing initial simulation state.
-
-    A dictionary type specifying the initial joint positions for
-    resetting the simulation to a known state.
+class DefaultPositionInput(TypedDict):
+    """Initial simulation state.
 
     Fields:
         qpos: List of joint positions in simulation units
@@ -21,64 +27,61 @@ class DefaultPosition(TypedDict):
     qpos: list[float]
 
 
-class ResetRequest(TypedDict):
-    """TypedDict containing simulation reset parameters.
-
-    A dictionary type specifying how the simulation should be reset,
-    including optional initial state and randomization settings.
+class ResetParams(TypedDict):
+    """Simulation reset parameters.
 
     Fields:
         initial_state: Optional DefaultPosition to set initial joint positions
         randomize: Optional flag to add randomization during reset
     """
 
-    initial_state: NotRequired[DefaultPosition]
+    initial_state: NotRequired[DefaultPositionInput]
     randomize: NotRequired[bool]
 
 
-class StepRequest(TypedDict):
-    """Request parameters for stepping simulation."""
+class StepParams(TypedDict):
+    """Parameters for stepping simulation.
+
+    Fields:
+        num_steps: Number of simulation steps to take
+        step_size: Optional duration of each step in seconds
+    """
 
     num_steps: int
     step_size: NotRequired[float]
 
 
-class SimulationParameters(TypedDict):
-    """Parameters for configuring simulation."""
+class SimulationParams(TypedDict):
+    """Parameters for configuring simulation.
+
+    Fields:
+        time_scale: Optional simulation time scale factor
+        gravity: Optional gravitational acceleration in m/s²
+        initial_state: Optional default joint positions
+    """
 
     time_scale: NotRequired[float]
     gravity: NotRequired[float]
-    initial_state: NotRequired[DefaultPosition]
-
-
-class ActionResponse(TypedDict):
-    """Response indicating success/failure of an action."""
-
-    success: bool
-    error: NotRequired[common_pb2.Error | None]
-
-
-class GetParametersResponse(TypedDict):
-    """Response containing current simulation parameters."""
-
-    time_scale: float
-    gravity: float
-    initial_state: DefaultPosition
-    error: NotRequired[common_pb2.Error | None]
+    initial_state: NotRequired[DefaultPositionInput]
 
 
 class SimServiceClient:
+    """Client for the simulation service.
+
+    This client provides methods to control and configure the physics simulation,
+    including resetting, stepping, pausing, and parameter adjustment.
+    """
+
     def __init__(self, channel: grpc.Channel) -> None:
+        """Initialize the simulation service client.
+
+        Args:
+            channel: gRPC channel for communication with the service
+        """
         self.stub = sim_pb2_grpc.SimulationServiceStub(channel)
 
-    def reset(self, **kwargs: Unpack[ResetRequest]) -> ActionResponse:
-        """Reset the simulation to its initial state.
-
-        Example:
-            >>> reset(
-            ...     initial_state={"qpos": [0.0, 0.0, 0.0]},
-            ...     randomize=True
-            ... )
+    def reset(self, **kwargs: Unpack[ResetParams]) -> common_pb2.ActionResponse:
+        """Reset the simulation to a known state.
 
         Args:
             **kwargs: Reset parameters that may include:
@@ -86,94 +89,72 @@ class SimServiceClient:
                      randomize: Whether to randomize the initial state
 
         Returns:
-            ActionResponse is a dictionary where 'success' indicates if the reset operation
-            was successful, and 'error' contains any error information if the reset failed.
+            ActionResponse indicating if the reset was successful
         """
         initial_state = None
         if "initial_state" in kwargs:
             pos = kwargs["initial_state"]
-            initial_state = sim_pb2.DefaultPosition(qpos=pos["qpos"])
+            initial_state = DefaultPosition(qpos=pos["qpos"])
 
-        request = sim_pb2.ResetRequest(initial_state=initial_state, randomize=kwargs.get("randomize"))
+        request = ResetRequest(initial_state=initial_state, randomize=kwargs.get("randomize"))
         return self.stub.Reset(request)
 
-    def set_paused(self, paused: bool) -> ActionResponse:
+    def set_paused(self, paused: bool) -> common_pb2.ActionResponse:
         """Pause or unpause the simulation.
-
-        Example:
-            >>> set_paused(True)  # Pause simulation
-            >>> set_paused(False)  # Resume simulation
 
         Args:
             paused: True to pause, False to unpause
 
         Returns:
-            ActionResponse is a dictionary where 'success' indicates if the pause state
-            was set successfully, and 'error' contains any error information if the operation failed.
+            ActionResponse indicating if the pause state was set successfully
         """
-        request = sim_pb2.SetPausedRequest(paused=paused)
+        request = SetPausedRequest(paused=paused)
         return self.stub.SetPaused(request)
 
-    def step(self, num_steps: int, step_size: float | None = None) -> ActionResponse:
-        """Step the simulation forward.
-
-        Example:
-            >>> step(num_steps=100, step_size=0.001)  # Step forward 100 times with 1ms steps
-            >>> step(num_steps=50)  # Step forward 50 times with default step size
+    def step(self, num_steps: int, step_size: float | None = None) -> common_pb2.ActionResponse:
+        """Step the simulation forward by a specified number of steps.
 
         Args:
             num_steps: Number of simulation steps to take
-            step_size: Optional time per step in seconds
+            step_size: Optional duration of each step in seconds
 
         Returns:
-            ActionResponse is a dictionary where 'success' indicates if the stepping operation
-            was successful, and 'error' contains any error information if the stepping failed.
+            ActionResponse indicating if the stepping was successful
         """
-        request = sim_pb2.StepRequest(num_steps=num_steps, step_size=step_size)
+        request = StepRequest(num_steps=num_steps, step_size=step_size)
         return self.stub.Step(request)
 
-    def set_parameters(self, **kwargs: Unpack[SimulationParameters]) -> ActionResponse:
+    def set_parameters(self, **kwargs: Unpack[SimulationParams]) -> common_pb2.ActionResponse:
         """Set simulation parameters.
-
-        Example:
-            >>> set_parameters(
-            ...     time_scale=1.0,
-            ...     gravity=9.81,
-            ...     initial_state={"qpos": [0.0, 0.0, 0.0]}
-            ... )
 
         Args:
             **kwargs: Parameters that may include:
-                     time_scale: Simulation time scale
-                     gravity: Gravity constant
-                     initial_state: Default position state
+                     time_scale: Simulation time scale factor
+                     gravity: Gravitational acceleration in m/s²
+                     initial_state: Default joint positions
 
         Returns:
-            ActionResponse is a dictionary where 'success' indicates if the parameters were
-            set successfully, and 'error' contains any error information if the operation failed.
+            ActionResponse indicating if the parameters were set successfully
         """
         initial_state = None
         if "initial_state" in kwargs:
             pos = kwargs["initial_state"]
-            initial_state = sim_pb2.DefaultPosition(qpos=pos["qpos"])
+            initial_state = DefaultPosition(qpos=pos["qpos"])
 
-        params = sim_pb2.SimulationParameters(
-            time_scale=kwargs.get("time_scale"), gravity=kwargs.get("gravity"), initial_state=initial_state
+        params = SimulationParameters(
+            time_scale=kwargs.get("time_scale"),
+            gravity=kwargs.get("gravity"),
+            initial_state=initial_state,
         )
-        request = sim_pb2.SetParametersRequest(parameters=params)
+        request = SetParametersRequest(parameters=params)
         return self.stub.SetParameters(request)
 
     def get_parameters(self) -> GetParametersResponse:
         """Get current simulation parameters.
 
-        Example:
-            >>> get_parameters()
-
         Returns:
-            GetParametersResponse is a dictionary where:
-            - 'time_scale' contains the current simulation time scaling factor
-            - 'gravity' contains the current gravity constant value
-            - 'initial_state' contains the default position state as a DefaultPosition dictionary
-            - 'error' contains any error information if the query failed
+            GetParametersResponse containing:
+            - parameters: Current simulation parameters
+            - error: Optional error information
         """
         return self.stub.GetParameters(Empty())

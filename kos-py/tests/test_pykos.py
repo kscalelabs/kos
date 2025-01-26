@@ -4,7 +4,8 @@ import grpc
 import pytest
 
 import pykos
-from pykos.services.actuator import ActionResult, GetActuatorsStateResponse
+from kos_protos.common_pb2 import ActionResponse
+from pykos.services.actuator import GetActuatorsStateResponse
 from pykos.services.imu import IMUValuesResponse
 from pykos.services.process_manager import KClipStartResponse, KClipStopResponse
 
@@ -19,7 +20,7 @@ def test_pykos() -> None:
     client = pykos.KOS("127.0.0.1")
 
     # Tests configuring the actuator.
-    actuator_response: ActionResult = client.actuator.configure_actuator(actuator_id=1)
+    actuator_response: ActionResponse = client.actuator.configure_actuator(actuator_id=1)
     assert actuator_response["success"]
 
     # Tests getting the actuator state.

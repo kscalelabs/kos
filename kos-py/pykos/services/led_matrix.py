@@ -5,7 +5,12 @@ from typing import NotRequired, TypedDict, Unpack
 import grpc
 from google.protobuf.empty_pb2 import Empty
 
-from kos_protos import common_pb2, led_matrix_pb2, led_matrix_pb2_grpc
+from kos_protos import common_pb2, led_matrix_pb2_grpc
+from kos_protos.led_matrix_pb2 import (
+    GetMatrixInfoResponse,
+    WriteBufferRequest,
+    WriteColorBufferRequest,
+)
 
 
 class MatrixInfo(TypedDict):
@@ -34,7 +39,7 @@ class MatrixInfo(TypedDict):
 class ImageData(TypedDict):
     """Image data to be written to the LED matrix.
 
-    Args:
+    Fields:
         buffer: Raw image data bytes
         width: Image width in pixels
         height: Image height in pixels
@@ -57,51 +62,51 @@ class ActionResponse(TypedDict):
 
 
 class LEDMatrixServiceClient:
-    """Client for the LEDMatrixService.
+    """Client for the LED matrix service.
 
-    This service allows controlling an LED matrix display.
+    This client provides methods to interact with an LED matrix display,
+    including querying its capabilities and writing image data to it.
     """
 
     def __init__(self, channel: grpc.Channel) -> None:
         """Initialize the LED matrix service client.
 
         Args:
-            channel: gRPC channel to use for communication.
+            channel: gRPC channel for communication with the service
         """
         self.stub = led_matrix_pb2_grpc.LEDMatrixServiceStub(channel)
 
-    def get_matrix_info(self) -> MatrixInfo:
-        """Get information about the LED matrix including dimensions and capabilities.
+    def get_matrix_info(self) -> GetMatrixInfoResponse:
+        """Get information about the LED matrix display.
 
         Returns:
-            MatrixInfo is a dictionary containing LED matrix configuration where:
-            - 'width' contains the number of LEDs in horizontal dimension
-            - 'height' contains the number of LEDs in vertical dimension
-            - 'brightness_levels' contains the number of supported brightness levels
-            - 'color_capable' indicates whether the matrix supports color
-            - 'bits_per_pixel' contains the number of bits used per pixel
-            - 'error' contains any error information if the query failed
+            GetMatrixInfoResponse containing:
+            - width: Width in pixels
+            - height: Height in pixels
+            - brightness_levels: Number of brightness levels supported
+            - color_capable: Whether the matrix supports color
+            - bits_per_pixel: Number of bits used to represent each pixel
+            - error: Optional error information
         """
         return self.stub.GetMatrixInfo(Empty())
 
-    def write_buffer(self, buffer: bytes) -> ActionResponse:
-        """Write binary on/off states to the LED matrix.
+    def write_buffer(self, buffer: bytes) -> common_pb2.ActionResponse:
+        """Write raw buffer data to the LED matrix.
 
-        The buffer should be width * height / 8 bytes long, where each bit
-        represents one LED's on/off state.
+        This method is for writing pre-formatted data that matches the matrix's
+        native format. For writing color images, use write_color_buffer instead.
 
         Args:
-            buffer: Binary buffer containing LED states
+            buffer: Raw buffer data bytes in the matrix's native format
 
         Returns:
-            ActionResponse is a dictionary where 'success' indicates if the write operation
-            was successful, and 'error' contains any error information if the operation failed.
+            ActionResponse indicating if the write was successful
         """
-        request = led_matrix_pb2.WriteBufferRequest(buffer=buffer)
+        request = WriteBufferRequest(buffer=buffer)
         return self.stub.WriteBuffer(request)
 
-    def write_color_buffer(self, **kwargs: Unpack[ImageData]) -> ActionResponse:
-        """Write image data to the LED matrix.
+    def write_color_buffer(self, **kwargs: Unpack[ImageData]) -> common_pb2.ActionResponse:
+        """Write a color image buffer to the LED matrix.
 
         Args:
             **kwargs: Image data containing:
@@ -112,8 +117,7 @@ class LEDMatrixServiceClient:
                      brightness: Global brightness level (0-255)
 
         Returns:
-            ActionResponse is a dictionary where 'success' indicates if the write operation
-            was successful, and 'error' contains any error information if the operation failed.
+            ActionResponse indicating if the write was successful
         """
-        request = led_matrix_pb2.WriteColorBufferRequest(**kwargs)
+        request = WriteColorBufferRequest(**kwargs)
         return self.stub.WriteColorBuffer(request)
