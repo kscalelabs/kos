@@ -1,0 +1,56 @@
+name: Build Docs
+
+on:
+  push:
+    branches:
+      - master 
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+
+      - name: Install pdoc
+        run: |
+          pip install pdoc
+
+      - name: Generate docs
+        run: |
+          pdoc pykos --output-dir docs
+
+      - name: Convert HTML to Markdown
+        run: |
+          pip install html2text
+          for f in docs/**/*.html; do
+            html2text "$f" > "${f%.html}.md"
+            rm "$f"
+          done
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install ReadMe CLI
+        run: |
+          npm install --global @readme/cli
+
+      - name: Publish docs to ReadMe
+        env:
+          README_API_KEY: ${{ secrets.README_API_KEY }}
+        run: |
+          rdme docs docs --version=1.0
+
+      - name: Archive docs
+        uses: actions/upload-artifact@v3
+        with:
+          name: pdoc-docs
+          path: docs

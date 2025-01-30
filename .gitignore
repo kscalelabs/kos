@@ -35,3 +35,6 @@ out*/
 # Dev
 *.patch
 robstridev2/
+
+# System
+.DS_Store
