@@ -11,6 +11,7 @@ from google.protobuf.empty_pb2 import Empty
 
 from kos_protos import common_pb2, imu_pb2, imu_pb2_grpc
 from kos_protos.imu_pb2 import CalibrateIMUMetadata
+from pykos.services import AsyncClientBase
 
 
 class ZeroIMURequest(TypedDict):
@@ -52,8 +53,11 @@ def _duration_from_seconds(seconds: float) -> Duration:
     return duration
 
 
-class IMUServiceClient:
+class IMUServiceClient(AsyncClientBase):
+    """Client for the IMUService."""
+
     def __init__(self, channel: grpc.aio.Channel) -> None:
+        super().__init__()
         self.stub = imu_pb2_grpc.IMUServiceStub(channel)
         self.operations_stub = operations_pb2_grpc.OperationsStub(channel)
 

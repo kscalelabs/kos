@@ -6,6 +6,7 @@ import grpc
 import grpc.aio
 
 from kos_protos import common_pb2, inference_pb2, inference_pb2_grpc
+from pykos.services import AsyncClientBase
 
 
 class ModelMetadata(TypedDict):
@@ -83,7 +84,7 @@ class GetModelsInfoResponse(TypedDict):
     error: NotRequired[common_pb2.Error | None]
 
 
-class InferenceServiceClient:
+class InferenceServiceClient(AsyncClientBase):
     """Client for the InferenceService.
 
     This service allows uploading models and running inference on them.
@@ -95,6 +96,8 @@ class InferenceServiceClient:
         Args:
             channel: gRPC channel to use for communication.
         """
+        super().__init__()
+
         self.stub = inference_pb2_grpc.InferenceServiceStub(channel)
 
     async def upload_model(

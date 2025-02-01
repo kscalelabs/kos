@@ -7,6 +7,7 @@ import grpc.aio
 from google.protobuf.empty_pb2 import Empty
 
 from kos_protos import common_pb2, sim_pb2, sim_pb2_grpc
+from pykos.services import AsyncClientBase
 
 
 class DefaultPosition(TypedDict):
@@ -29,8 +30,12 @@ class SimulationParameters(TypedDict):
     initial_state: NotRequired[DefaultPosition]
 
 
-class SimServiceClient:
+class SimServiceClient(AsyncClientBase):
+    """Client for the SimulationService."""
+
     def __init__(self, channel: grpc.aio.Channel) -> None:
+        super().__init__()
+
         self.stub = sim_pb2_grpc.SimulationServiceStub(channel)
 
     async def reset(self, **kwargs: Unpack[ResetRequest]) -> common_pb2.ActionResponse:
