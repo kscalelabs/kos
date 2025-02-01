@@ -1,9 +1,12 @@
 """KOS client."""
 
+import asyncio
+import warnings
 from typing import Any
 
 import grpc
 import grpc.aio
+import nest_asyncio
 
 from pykos.services.actuator import ActuatorServiceClient
 from pykos.services.imu import IMUServiceClient
@@ -26,6 +29,7 @@ class KOS:
     """
 
     def __init__(self, ip: str = "localhost", port: int = 50051) -> None:
+        self.is_open = False
         self.ip = ip
         self.port = port
         self._channel: grpc.aio.Channel | None = None
@@ -40,47 +44,64 @@ class KOS:
     @property
     def imu(self) -> IMUServiceClient:
         if self._imu is None:
-            raise RuntimeError("IMU client not initialized! Must call __aenter__() first.")
+            self.connect()
+        if self._imu is None:
+            raise RuntimeError("IMU client not initialized! Must call `connect()` manually.")
         return self._imu
 
     @property
     def actuator(self) -> ActuatorServiceClient:
         if self._actuator is None:
-            raise RuntimeError("Actuator client not initialized! Must call __aenter__() first.")
+            self.connect()
+        if self._actuator is None:
+            raise RuntimeError("Actuator client not initialized! Must call `connect()` manually.")
         return self._actuator
 
     @property
     def led_matrix(self) -> LEDMatrixServiceClient:
         if self._led_matrix is None:
-            raise RuntimeError("LED Matrix client not initialized! Must call __aenter__() first.")
+            self.connect()
+        if self._led_matrix is None:
+            raise RuntimeError("LED Matrix client not initialized! Must call `connect()` manually.")
         return self._led_matrix
 
     @property
     def sound(self) -> SoundServiceClient:
         if self._sound is None:
-            raise RuntimeError("Sound client not initialized! Must call __aenter__() first.")
+            self.connect()
+        if self._sound is None:
+            raise RuntimeError("Sound client not initialized! Must call `connect()` manually.")
         return self._sound
 
     @property
     def process_manager(self) -> ProcessManagerServiceClient:
         if self._process_manager is None:
-            raise RuntimeError("Process Manager client not initialized! Must call __aenter__() first.")
+            self.connect()
+        if self._process_manager is None:
+            raise RuntimeError("Process Manager client not initialized! Must call `connect()` manually.")
         return self._process_manager
 
     @property
     def inference(self) -> InferenceServiceClient:
         if self._inference is None:
-            raise RuntimeError("Inference client not initialized! Must call __aenter__() first.")
+            self.connect()
+        if self._inference is None:
+            raise RuntimeError("Inference client not initialized! Must call `connect()` manually.")
         return self._inference
 
     @property
     def sim(self) -> SimServiceClient:
         if self._sim is None:
-            raise RuntimeError("Sim client not initialized! Must call __aenter__() first.")
+            self.connect()
+        if self._sim is None:
+            raise RuntimeError("Sim client not initialized! Must call `connect()` manually.")
         return self._sim
 
-    async def connect(self) -> None:
+    def connect(self) -> None:
         """Connect to the gRPC server and initialize service clients."""
+        # Patch asyncio to allow running async code in a synchronous context.
+        nest_asyncio.apply()
+
         self._channel = grpc.aio.insecure_channel(f"{self.ip}:{self.port}")
         self._imu = IMUServiceClient(self._channel)
         self._actuator = ActuatorServiceClient(self._channel)
@@ -95,9 +116,24 @@ class KOS:
         if self._channel is not None:
             await self._channel.close()
 
+    def __enter__(self) -> "KOS":
+        self.connect()
+        self.is_open = True
+        return self
+
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:  # noqa: ANN401
+        asyncio.run(self.close())
+        self.is_open = False
+
     async def __aenter__(self) -> "KOS":
-        await self.connect()
+        self.connect()
+        self.is_open = True
         return self
 
     async def __aexit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:  # noqa: ANN401
         await self.close()
+        self.is_open = False
+
+    def __del__(self) -> None:
+        if self.is_open:
+            warnings.warn("KOS client was not closed before deletion. This may cause resource leaks.")

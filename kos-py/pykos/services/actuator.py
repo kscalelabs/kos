@@ -9,6 +9,7 @@ from google.protobuf.any_pb2 import Any as AnyPb2
 
 from kos_protos import actuator_pb2, actuator_pb2_grpc, common_pb2
 from kos_protos.actuator_pb2 import CalibrateActuatorMetadata
+from pykos.services import AsyncClientBase
 
 
 class ActuatorCommand(TypedDict):
@@ -61,8 +62,11 @@ class CalibrationMetadata:
         return self.__str__()
 
 
-class ActuatorServiceClient:
+class ActuatorServiceClient(AsyncClientBase):
+    """Client for the ActuatorService."""
+
     def __init__(self, channel: grpc.aio.Channel) -> None:
+        super().__init__()
         self.stub = actuator_pb2_grpc.ActuatorServiceStub(channel)
         self.operations_stub = operations_pb2_grpc.OperationsStub(channel)
 
@@ -73,6 +77,7 @@ class ActuatorServiceClient:
         return metadata
 
     async def get_calibration_status(self, actuator_id: int) -> str | None:
+        """Get the calibration status of an actuator."""
         response = await self.operations_stub.GetOperation(
             operations_pb2.GetOperationRequest(name=f"operations/calibrate_actuator/{actuator_id}")
         )

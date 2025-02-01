@@ -7,6 +7,7 @@ import grpc.aio
 from google.protobuf.empty_pb2 import Empty
 
 from kos_protos import common_pb2, led_matrix_pb2, led_matrix_pb2_grpc
+from pykos.services import AsyncClientBase
 
 
 class MatrixInfo(TypedDict):
@@ -47,7 +48,7 @@ class ImageData(TypedDict):
     brightness: int
 
 
-class LEDMatrixServiceClient:
+class LEDMatrixServiceClient(AsyncClientBase):
     """Client for the LEDMatrixService.
 
     This service allows controlling an LED matrix display.
@@ -59,6 +60,8 @@ class LEDMatrixServiceClient:
         Args:
             channel: gRPC channel to use for communication.
         """
+        super().__init__()
+
         self.stub = led_matrix_pb2_grpc.LEDMatrixServiceStub(channel)
 
     async def get_matrix_info(self) -> MatrixInfo:

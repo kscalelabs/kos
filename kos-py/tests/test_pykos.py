@@ -18,29 +18,39 @@ async def test_pykos() -> None:
         pytest.skip("No active gRPC server at 127.0.0.1:50051")
 
     # Tests configuring the actuator.
-    async with pykos.KOS("127.0.0.1") as client:
-        actuator_response = await client.actuator.configure_actuator(actuator_id=1)
-        assert actuator_response.success
+    # with pykos.KOS("127.0.0.1") as client:
+    client = pykos.KOS("127.0.0.1")
+    client.connect()
 
-        # Tests getting the actuator state.
-        actuator_state = await client.actuator.get_actuators_state(actuator_ids=[1])
-        assert actuator_state.states[0].actuator_id == 1
+    actuator_response = await client.actuator.configure_actuator(actuator_id=1)
+    assert actuator_response.success
 
-        # Tests the IMU endpoints.
-        imu_response = await client.imu.get_imu_values()
-        assert imu_response.accel_x is not None
-        await client.imu.get_imu_advanced_values()
-        await client.imu.get_euler_angles()
-        await client.imu.get_quaternion()
-        await client.imu.calibrate()
-        zero_response = await client.imu.zero(duration=1.0, max_retries=1, max_angular_error=1.0)
-        assert zero_response.success
+    # The async client methods have sync versions that can be used from the
+    # client which are generated automatically. It is still generally a better
+    # idea to use the async versions instead, but the sync versions are used
+    # here to simplify testing and running from the command line.
+    actuator_response_sync = client.actuator.configure_actuator_sync(actuator_id=1)  # type: ignore[attr-defined]
+    assert actuator_response_sync == actuator_response
 
-        # Tests the K-Clip endpoints.
-        start_kclip_response = await client.process_manager.start_kclip(action="start")
-        assert start_kclip_response.clip_uuid is not None
-        stop_kclip_response = await client.process_manager.stop_kclip()
-        assert stop_kclip_response.clip_uuid is not None
+    # Tests getting the actuator state.
+    actuator_state = await client.actuator.get_actuators_state(actuator_ids=[1])
+    assert actuator_state.states[0].actuator_id == 1
+
+    # Tests the IMU endpoints.
+    imu_response = await client.imu.get_imu_values()
+    assert imu_response.accel_x is not None
+    await client.imu.get_imu_advanced_values()
+    await client.imu.get_euler_angles()
+    await client.imu.get_quaternion()
+    await client.imu.calibrate()
+    zero_response = await client.imu.zero(duration=1.0, max_retries=1, max_angular_error=1.0)
+    assert zero_response.success
+
+    # Tests the K-Clip endpoints.
+    start_kclip_response = await client.process_manager.start_kclip(action="start")
+    assert start_kclip_response.clip_uuid is not None
+    stop_kclip_response = await client.process_manager.stop_kclip()
+    assert stop_kclip_response.clip_uuid is not None
 
 
 def _is_server_running(address: str) -> bool:

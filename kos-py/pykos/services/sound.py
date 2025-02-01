@@ -7,6 +7,7 @@ import grpc.aio
 from google.protobuf.empty_pb2 import Empty
 
 from kos_protos import common_pb2, sound_pb2, sound_pb2_grpc
+from pykos.services import AsyncClientBase
 
 
 class AudioCapability(TypedDict):
@@ -53,7 +54,7 @@ class AudioConfig(TypedDict):
     channels: int
 
 
-class SoundServiceClient:
+class SoundServiceClient(AsyncClientBase):
     """Client for the SoundService.
 
     This service allows playing audio through speakers and recording from microphones.
@@ -65,6 +66,8 @@ class SoundServiceClient:
         Args:
             channel: gRPC channel to use for communication.
         """
+        super().__init__()
+
         self.stub = sound_pb2_grpc.SoundServiceStub(channel)
 
     async def get_audio_info(self) -> AudioInfo:

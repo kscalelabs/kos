@@ -5,10 +5,15 @@ from google.protobuf.empty_pb2 import Empty
 
 from kos_protos import process_manager_pb2, process_manager_pb2_grpc
 from kos_protos.process_manager_pb2 import KClipStartRequest
+from pykos.services import AsyncClientBase
 
 
-class ProcessManagerServiceClient:
+class ProcessManagerServiceClient(AsyncClientBase):
+    """Client for the ProcessManagerService."""
+
     def __init__(self, channel: grpc.aio.Channel) -> None:
+        super().__init__()
+
         self.stub = process_manager_pb2_grpc.ProcessManagerServiceStub(channel)
 
     async def start_kclip(self, action: str) -> process_manager_pb2.KClipStartResponse:
