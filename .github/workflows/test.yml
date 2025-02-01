@@ -45,7 +45,7 @@ jobs:
       - name: Install package
         working-directory: ./kos-py
         run: |
-          pip install --upgrade --upgrade-strategy eager --extra-index-url https://download.pytorch.org/whl/cpu -e '.[dev]'
+          pip install --upgrade --upgrade-strategy eager --extra-index-url https://download.pytorch.org/whl/cpu -e '.[dev,webrtc]'
 
       - name: Run static checks
         working-directory: ./kos-py
