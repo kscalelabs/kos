@@ -4,12 +4,12 @@ import asyncio
 from abc import ABC
 from functools import wraps
 from inspect import getmembers, iscoroutinefunction
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Coroutine, TypeVar
 
 T = TypeVar("T")
 
 
-def add_sync_version(async_func: Callable[..., T]) -> Callable[..., T]:
+def add_sync_version(async_func: Callable[..., Coroutine[Any, Any, T]]) -> Callable[..., T]:  # noqa: ANN401
     """Create a synchronous version of an async function."""
 
     @wraps(async_func)

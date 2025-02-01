@@ -25,7 +25,11 @@ async def test_pykos() -> None:
     actuator_response = await client.actuator.configure_actuator(actuator_id=1)
     assert actuator_response.success
 
-    actuator_response_sync = client.actuator.configure_actuator_sync(actuator_id=1)
+    # The async client methods have sync versions that can be used from the
+    # client which are generated automatically. It is still generally a better
+    # idea to use the async versions instead, but the sync versions are used
+    # here to simplify testing and running from the command line.
+    actuator_response_sync = client.actuator.configure_actuator_sync(actuator_id=1)  # type: ignore[attr-defined]
     assert actuator_response_sync == actuator_response
 
     # Tests getting the actuator state.

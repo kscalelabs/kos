@@ -44,43 +44,57 @@ class KOS:
     @property
     def imu(self) -> IMUServiceClient:
         if self._imu is None:
-            raise RuntimeError("IMU client not initialized! Must call `connect()` first.")
+            self.connect()
+        if self._imu is None:
+            raise RuntimeError("IMU client not initialized! Must call `connect()` manually.")
         return self._imu
 
     @property
     def actuator(self) -> ActuatorServiceClient:
         if self._actuator is None:
-            raise RuntimeError("Actuator client not initialized! Must call `connect()` first.")
+            self.connect()
+        if self._actuator is None:
+            raise RuntimeError("Actuator client not initialized! Must call `connect()` manually.")
         return self._actuator
 
     @property
     def led_matrix(self) -> LEDMatrixServiceClient:
         if self._led_matrix is None:
-            raise RuntimeError("LED Matrix client not initialized! Must call `connect()` first.")
+            self.connect()
+        if self._led_matrix is None:
+            raise RuntimeError("LED Matrix client not initialized! Must call `connect()` manually.")
         return self._led_matrix
 
     @property
     def sound(self) -> SoundServiceClient:
         if self._sound is None:
-            raise RuntimeError("Sound client not initialized! Must call `connect()` first.")
+            self.connect()
+        if self._sound is None:
+            raise RuntimeError("Sound client not initialized! Must call `connect()` manually.")
         return self._sound
 
     @property
     def process_manager(self) -> ProcessManagerServiceClient:
         if self._process_manager is None:
-            raise RuntimeError("Process Manager client not initialized! Must call `connect()` first.")
+            self.connect()
+        if self._process_manager is None:
+            raise RuntimeError("Process Manager client not initialized! Must call `connect()` manually.")
         return self._process_manager
 
     @property
     def inference(self) -> InferenceServiceClient:
         if self._inference is None:
-            raise RuntimeError("Inference client not initialized! Must call `connect()` first.")
+            self.connect()
+        if self._inference is None:
+            raise RuntimeError("Inference client not initialized! Must call `connect()` manually.")
         return self._inference
 
     @property
     def sim(self) -> SimServiceClient:
         if self._sim is None:
-            raise RuntimeError("Sim client not initialized! Must call `connect()` first.")
+            self.connect()
+        if self._sim is None:
+            raise RuntimeError("Sim client not initialized! Must call `connect()` manually.")
         return self._sim
 
     def connect(self) -> None:

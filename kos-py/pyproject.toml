@@ -34,13 +34,14 @@ exclude = ["kos/.*\\.py$"]
 [[tool.mypy.overrides]]
 
 module = [
-    "setuptools",
-    "setuptools_rust",
-    "grpc",
-    "grpc.*",
     "google.*",
-    "kos.*",
+    "grpc.*",
+    "grpc",
     "kos_protos.*",
+    "kos.*",
+    "nest_asyncio.*",
+    "setuptools_rust",
+    "setuptools",
     "version",
 ]
 
