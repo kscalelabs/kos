@@ -113,7 +113,7 @@ class ActuatorServiceClient:
             ...     kp=1.0,
             ...     kd=0.1,
             ...     ki=0.01,
-            ...     acceleratoin=2230,
+            ...     acceleration=2230,
             ...     max_torque=100.0,
             ...     protective_torque=None,
             ...     protection_time=None,
