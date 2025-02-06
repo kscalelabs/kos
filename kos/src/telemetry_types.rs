@@ -43,6 +43,7 @@ pub struct ActuatorState {
     pub temperature: Option<f64>,
     pub voltage: Option<f32>,
     pub current: Option<f32>,
+    pub faults: Option<Vec<String>>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -102,6 +103,7 @@ impl From<&ActuatorStateResponse> for ActuatorState {
             temperature: resp.temperature,
             voltage: resp.voltage,
             current: resp.current,
+            faults: Some(resp.faults.clone()),
         }
     }
 }
