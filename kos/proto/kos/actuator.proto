@@ -54,6 +54,7 @@ message ConfigureActuatorRequest {
     optional double kp = 2;                // Proportional gain
     optional double kd = 3;                // Derivative gain
     optional double ki = 4;                // Integral gain
+    optional double acceleration = 2230;   // Acceleration deg/sec^2
     optional double max_torque = 5;        // Max torque (%)
     optional double protective_torque = 6; // Protective torque (%)
     optional float protection_time = 7;    // Protection time in seconds

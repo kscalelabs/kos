@@ -22,6 +22,7 @@ class ConfigureActuatorRequest(TypedDict):
     kp: NotRequired[float]
     kd: NotRequired[float]
     ki: NotRequired[float]
+    acceleration: NotRequired[float]
     max_torque: NotRequired[float]
     protective_torque: NotRequired[float]
     protection_time: NotRequired[float]
@@ -112,6 +113,7 @@ class ActuatorServiceClient:
             ...     kp=1.0,
             ...     kd=0.1,
             ...     ki=0.01,
+            ...     acceleratoin=2230,
             ...     max_torque=100.0,
             ...     protective_torque=None,
             ...     protection_time=None,
