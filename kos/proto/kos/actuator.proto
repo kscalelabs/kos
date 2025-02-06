@@ -54,13 +54,13 @@ message ConfigureActuatorRequest {
     optional double kp = 2;                // Proportional gain
     optional double kd = 3;                // Derivative gain
     optional double ki = 4;                // Integral gain
-    optional double acceleration = 2230;   // Acceleration deg/sec^2
     optional double max_torque = 5;        // Max torque (%)
     optional double protective_torque = 6; // Protective torque (%)
     optional float protection_time = 7;    // Protection time in seconds
     optional bool torque_enabled = 8;      // Torque enabled flag
     optional uint32 new_actuator_id = 9;   // New actuator ID
     optional bool zero_position = 10;      // Instant zero position
+    optional double acceleration = 11;     // Acceleration deg/sec^2
 }
 
 // Request message for CalibrateActuator.
