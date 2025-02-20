@@ -126,7 +126,6 @@ class SimServiceClient(AsyncClientBase):
         >>> client.set_parameters(
         ...     time_scale=1.0,
         ...     gravity=9.81,
-        ...     initial_state={"qpos": [0.0, 0.0, 0.0]}
         ... )
 
         Args:
@@ -138,13 +137,9 @@ class SimServiceClient(AsyncClientBase):
         Returns:
             ActionResponse indicating success/failure
         """
-        initial_state = None
-        if "initial_state" in kwargs:
-            pos = kwargs["initial_state"]
-            initial_state = sim_pb2.DefaultPosition(qpos=pos["qpos"])
-
         params = sim_pb2.SimulationParameters(
-            time_scale=kwargs.get("time_scale"), gravity=kwargs.get("gravity"), initial_state=initial_state
+            time_scale=kwargs.get("time_scale"),
+            gravity=kwargs.get("gravity"),
         )
         request = sim_pb2.SetParametersRequest(parameters=params)
         return await self.stub.SetParameters(request)
