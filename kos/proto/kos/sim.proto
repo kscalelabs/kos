@@ -27,29 +27,41 @@ service SimulationService {
     rpc GetParameters(google.protobuf.Empty) returns (GetParametersResponse);
 }
 
-// Default position for the simulation (initial state)
-message DefaultPosition {
-    repeated float qpos = 1;
+message StartingPosition {
+    float x = 1;
+    float y = 2;
+    float z = 3;
 }
 
-// Request to reset the simulation to initial state
+message StartingQuaternion {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+    float w = 4;
+}
+
+message JointValue {
+    string name = 1;
+    optional float pos = 2;
+    optional float vel = 3;
+}
+
+message JointValues {
+    repeated JointValue values = 1;
+}
+
 message ResetRequest {
-    // If provided, reset to this specific state, otherwise use default
-    optional DefaultPosition initial_state = 1;
-    // If true, randomize the initial state within pre-set bounds
-    optional bool randomize = 2;
+    optional StartingPosition pos = 1;
+    optional StartingQuaternion quat = 2;
+    optional JointValues joints = 3;
 }
 
-// Request to pause or resume the simulation
 message SetPausedRequest {
     bool paused = 1;
 }
 
-// Request to step the simulation forward
 message StepRequest {
-    // Number of simulation steps to take
     uint32 num_steps = 1;
-    // Time per step in seconds
     optional float step_size = 2;
 }
 
@@ -62,12 +74,7 @@ message GetParametersResponse {
     kos.common.Error error = 2;  // Error details if any
 }
 
-// Controllable parameters for the simulation
 message SimulationParameters {
-    // Time scale for the simulation
     optional float time_scale = 1;
-    // Strength of gravity for the simulation
     optional float gravity = 2;
-    // Initial state for the simulation
-    optional DefaultPosition initial_state = 3;
 }
