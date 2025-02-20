@@ -10,13 +10,29 @@ from kos_protos import common_pb2, sim_pb2, sim_pb2_grpc
 from pykos.services import AsyncClientBase
 
 
-class DefaultPosition(TypedDict):
-    qpos: list[float]
+class StartingPosition(TypedDict):
+    x: float
+    y: float
+    z: float
+
+
+class StartingQuaternion(TypedDict):
+    x: float
+    y: float
+    z: float
+    w: float
+
+
+class JointPosition(TypedDict):
+    name: str
+    pos: NotRequired[float]
+    vel: NotRequired[float]
 
 
 class ResetRequest(TypedDict):
-    initial_state: NotRequired[DefaultPosition]
-    randomize: NotRequired[bool]
+    pos: NotRequired[StartingPosition]
+    quat: NotRequired[StartingQuaternion]
+    joints: NotRequired[list[JointPosition]]
 
 
 class StepRequest(TypedDict):
@@ -27,7 +43,6 @@ class StepRequest(TypedDict):
 class SimulationParameters(TypedDict):
     time_scale: NotRequired[float]
     gravity: NotRequired[float]
-    initial_state: NotRequired[DefaultPosition]
 
 
 class SimServiceClient(AsyncClientBase):
@@ -55,12 +70,28 @@ class SimServiceClient(AsyncClientBase):
         Returns:
             ActionResponse indicating success/failure
         """
-        initial_state = None
-        if "initial_state" in kwargs:
-            pos = kwargs["initial_state"]
-            initial_state = sim_pb2.DefaultPosition(qpos=pos["qpos"])
+        pos = None
+        if (pos_dict := kwargs.get("pos")) is not None:
+            pos = sim_pb2.StartingPosition(
+                x=pos_dict["x"],
+                y=pos_dict["y"],
+                z=pos_dict["z"],
+            )
 
-        request = sim_pb2.ResetRequest(initial_state=initial_state, randomize=kwargs.get("randomize"))
+        quat = None
+        if (quat_dict := kwargs.get("quat")) is not None:
+            quat = sim_pb2.StartingQuaternion(
+                x=quat_dict["x"],
+                y=quat_dict["y"],
+                z=quat_dict["z"],
+                w=quat_dict["w"],
+            )
+
+        joints_values = None
+        if (joints_dict := kwargs.get("joints")) is not None:
+            joints_values = sim_pb2.JointValues(values=[sim_pb2.JointValue(**joint) for joint in joints_dict])
+
+        request = sim_pb2.ResetRequest(pos=pos, quat=quat, joints=joints_values)
         return await self.stub.Reset(request)
 
     async def set_paused(self, paused: bool) -> common_pb2.ActionResponse:
@@ -95,7 +126,6 @@ class SimServiceClient(AsyncClientBase):
         >>> client.set_parameters(
         ...     time_scale=1.0,
         ...     gravity=9.81,
-        ...     initial_state={"qpos": [0.0, 0.0, 0.0]}
         ... )
 
         Args:
@@ -107,13 +137,9 @@ class SimServiceClient(AsyncClientBase):
         Returns:
             ActionResponse indicating success/failure
         """
-        initial_state = None
-        if "initial_state" in kwargs:
-            pos = kwargs["initial_state"]
-            initial_state = sim_pb2.DefaultPosition(qpos=pos["qpos"])
-
         params = sim_pb2.SimulationParameters(
-            time_scale=kwargs.get("time_scale"), gravity=kwargs.get("gravity"), initial_state=initial_state
+            time_scale=kwargs.get("time_scale"),
+            gravity=kwargs.get("gravity"),
         )
         request = sim_pb2.SetParametersRequest(parameters=params)
         return await self.stub.SetParameters(request)
