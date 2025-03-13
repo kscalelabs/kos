@@ -127,7 +127,7 @@ class ActuatorServiceClient(AsyncClientBase):
             ...     protection_time=None,
             ...     torque_enabled=True,
             ...     new_actuator_id=None,
-            ...     zero_position=True
+            ...     zero_position=True,
             ... )
 
             >>> configure_actuator(
@@ -368,4 +368,10 @@ class ActuatorServiceClient(AsyncClientBase):
                 },
             ],
             num_seconds=move_back_seconds,
+        )
+
+        # Finally, configure the new location as the actuator zero.
+        await self.configure_actuator(
+            actuator_id=actuator_id,
+            zero_position=True,
         )
