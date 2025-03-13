@@ -8,6 +8,7 @@ import grpc
 import grpc.aio
 from google.longrunning import operations_pb2, operations_pb2_grpc
 from google.protobuf.any_pb2 import Any as AnyPb2
+
 from kos_protos import actuator_pb2, actuator_pb2_grpc, common_pb2
 from kos_protos.actuator_pb2 import CalibrateActuatorMetadata
 from pykos.services import AsyncClientBase
@@ -291,6 +292,8 @@ class ActuatorServiceClient(AsyncClientBase):
             actuator_id: The ID of the actuator to zero.
             zero_position: The position to move the actuator back by after
                 reaching the endstop.
+            configure_actuator: Configuration parameters to set on the actuator
+                before zeroing.
             target_velocity: The velocity to move the actuator at.
             commands_per_second: How many commands to send per second.
             move_back_seconds: How long to move the actuator back by after
