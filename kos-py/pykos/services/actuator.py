@@ -1,5 +1,7 @@
 """Actuator service client."""
 
+import asyncio
+import time
 from typing import NotRequired, TypedDict, Unpack
 
 import grpc
@@ -17,6 +19,11 @@ class ActuatorCommand(TypedDict):
     position: NotRequired[float]
     velocity: NotRequired[float]
     torque: NotRequired[float]
+
+
+class ActuatorPosition(TypedDict):
+    actuator_id: int
+    position: float
 
 
 class ConfigureActuatorRequest(TypedDict):
@@ -121,7 +128,7 @@ class ActuatorServiceClient(AsyncClientBase):
             ...     protection_time=None,
             ...     torque_enabled=True,
             ...     new_actuator_id=None,
-            ...     zero_position=True
+            ...     zero_position=True,
             ... )
 
             >>> configure_actuator(
@@ -160,3 +167,214 @@ class ActuatorServiceClient(AsyncClientBase):
         """
         request = actuator_pb2.GetActuatorsStateRequest(actuator_ids=actuator_ids or [])
         return await self.stub.GetActuatorsState(request)
+
+    async def move_to_position(
+        self,
+        positions: list[ActuatorPosition],
+        num_seconds: float,
+        configure_actuators: list[ConfigureActuatorRequest] | None = None,
+        commands_per_second: int = 10,
+        torque_enabled: bool | None = None,
+    ) -> None:
+        """Helper function for moving actuators to a target position.
+
+        This first reads the current position of the actuators, then moves them
+        to the target positions at a rate of `commands_per_second` commands per
+        second.
+
+        We can additionally use this command to safely configure the actuator
+        PD parameters after setting the target position to the current position.
+
+        Args:
+            positions: The actuator target positions.
+            num_seconds: How long to take the actuators to move to the target
+                positions.
+            configure_actuators: List of dictionaries containing actuator
+                configuration parameters.
+            commands_per_second: How many commands to send per second.
+            torque_enabled: Whether to enable torque for the actuators.
+        """
+        actuator_ids = [p["actuator_id"] for p in positions]
+        states = await self.get_actuators_state(actuator_ids)
+        start_positions = {state.actuator_id: state.position for state in states.states}
+        target_positions = {p["actuator_id"]: p["position"] for p in positions}
+
+        if set(start_positions.keys()) != set(target_positions.keys()):
+            raise ValueError("All actuator IDs must be present in both start and target positions")
+
+        # Sets the target position to the current position for all actuators.
+        await self.command_actuators(
+            [
+                {
+                    "actuator_id": id,
+                    "position": start_positions[id],
+                    "velocity": 0.0,
+                    "torque": 0.0,
+                }
+                for id in actuator_ids
+            ]
+        )
+
+        # Computes target velocities for each actuator, in rad/s.
+        velocities = {id: (target_positions[id] - start_positions[id]) / num_seconds for id in actuator_ids}
+
+        # Optionally configure the actuators after setting the target position.
+        if configure_actuators is not None:
+            for configure_actuator in configure_actuators:
+                if torque_enabled is not None:
+                    configure_actuator["torque_enabled"] = torque_enabled
+                await self.configure_actuator(**configure_actuator)
+        elif torque_enabled is not None:
+            for actuator_id in actuator_ids:
+                await self.configure_actuator(
+                    actuator_id=actuator_id,
+                    torque_enabled=torque_enabled,
+                )
+
+        # Calculate the number of commands to send.
+        num_commands = int(num_seconds * commands_per_second)
+
+        # Send the commands.
+        current_time = time.time()
+        for i in range(num_commands):
+            await self.command_actuators(
+                [
+                    {
+                        "actuator_id": id,
+                        "position": start_positions[id]
+                        + (target_positions[id] - start_positions[id]) * (i / num_commands),
+                        "velocity": velocities[id],
+                    }
+                    for id in actuator_ids
+                ]
+            )
+
+            # Sleep until the next command is due.
+            next_time = current_time + (1 / commands_per_second)
+            if current_time < next_time:
+                await asyncio.sleep(next_time - current_time)
+            current_time = next_time
+
+        # Finally, set the velocity to 0 for all actuators.
+        await self.command_actuators(
+            [
+                {
+                    "actuator_id": id,
+                    "position": target_positions[id],
+                    "velocity": 0.0,
+                }
+                for id in actuator_ids
+            ]
+        )
+
+    async def zero_actuators(
+        self,
+        actuator_id: int,
+        zero_position: float,
+        configure_actuator: ConfigureActuatorRequest | None = None,
+        target_velocity: float = 0.25,
+        commands_per_second: int = 10,
+        move_back_seconds: float = 3.0,
+    ) -> None:
+        """Helper method for zeroing an actuator.
+
+        This function works to zero the actuator against an endstop, by moving
+        the actuator until it reaches that endstop, then moving it back a small
+        amount.
+
+        We can choose which endstop to zero against by setting the sign of
+        `zero_position`. If it is positive, then we rotate counterclockwise
+        until we reach an endstop, then back by this amount. If it is negative,
+        then we rotate clockwise until we reach an endstop, then back by this
+        amount.
+
+        Args:
+            actuator_id: The ID of the actuator to zero.
+            zero_position: The position to move the actuator back by after
+                reaching the endstop.
+            configure_actuator: Configuration parameters to set on the actuator
+                before zeroing.
+            target_velocity: The velocity to move the actuator at.
+            commands_per_second: How many commands to send per second.
+            move_back_seconds: How long to move the actuator back by after
+                reaching the endstop.
+        """
+        start_state = await self.get_actuators_state([actuator_id])
+        current_position = start_state.states[0].position
+
+        # Sets the target position to the current position for all actuators.
+        await self.command_actuators(
+            [
+                {
+                    "actuator_id": actuator_id,
+                    "position": current_position,
+                    "velocity": 0.0,
+                    "torque": 0.0,
+                }
+            ]
+        )
+
+        if configure_actuator is not None:
+            configure_actuator["torque_enabled"] = True
+            await self.configure_actuator(**configure_actuator)
+        else:
+            await self.configure_actuator(actuator_id=actuator_id, torque_enabled=True)
+
+        if target_velocity <= 0:
+            raise ValueError("target_velocity must be positive")
+
+        # Calculates the position delta.
+        delta = target_velocity / commands_per_second
+
+        # Ensure the target velocity is oriented correctly.
+        if zero_position > 0:
+            target_velocity = -target_velocity
+            delta = -delta
+        elif zero_position == 0:
+            raise ValueError("zero_position must be non-zero")
+
+        current_time = time.time()
+        while True:
+            current_state = await self.get_actuators_state([actuator_id])
+            current_read_position = current_state.states[0].position
+
+            # If we are not able to reach the target position, it means we are
+            # hitting against the endstop, so we should break.
+            if abs(current_read_position - current_position) >= abs(delta / 2):
+                break
+
+            # Adds the delta to the current position.
+            current_position = current_position + delta
+
+            await self.command_actuators(
+                [
+                    {
+                        "actuator_id": actuator_id,
+                        "position": current_position,
+                        "velocity": target_velocity,
+                    }
+                ]
+            )
+
+            # Sleep until the next command is due.
+            next_time = current_time + (1 / commands_per_second)
+            if current_time < next_time:
+                await asyncio.sleep(next_time - current_time)
+            current_time = next_time
+
+        # Move back by the zero position.
+        await self.move_to_position(
+            positions=[
+                {
+                    "actuator_id": actuator_id,
+                    "position": current_position - zero_position,
+                },
+            ],
+            num_seconds=move_back_seconds,
+        )
+
+        # Finally, configure the new location as the actuator zero.
+        await self.configure_actuator(
+            actuator_id=actuator_id,
+            zero_position=True,
+        )
