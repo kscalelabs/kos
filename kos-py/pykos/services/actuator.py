@@ -1,6 +1,7 @@
 """Actuator service client."""
 
 import asyncio
+import math
 import time
 from typing import NotRequired, TypedDict, Unpack
 
@@ -270,7 +271,7 @@ class ActuatorServiceClient(AsyncClientBase):
     async def zero_actuators(
         self,
         actuator_id: int,
-        zero_position: float,
+        endstop_position: float,
         configure_actuator: ConfigureActuatorRequest | None = None,
         target_velocity: float = 0.25,
         commands_per_second: int = 10,
@@ -283,10 +284,13 @@ class ActuatorServiceClient(AsyncClientBase):
         amount.
 
         We can choose which endstop to zero against by setting the sign of
-        `zero_position`. If it is positive, then we rotate counterclockwise
-        until we reach an endstop, then back by this amount. If it is negative,
-        then we rotate clockwise until we reach an endstop, then back by this
-        amount.
+        `zero_position`. If it is positive, then we want to rotate clockwise until we reach
+        the positive endstop. Then, we will move back by `zero_position` by subtracting
+        it from the current position.
+
+        If it is negative, then we want to rotate counterclockwise until we reach
+        the negative endstop. Then, we will move back by `zero_position` by subtracting
+        it from the current position.
 
         Args:
             actuator_id: The ID of the actuator to zero.
@@ -327,11 +331,12 @@ class ActuatorServiceClient(AsyncClientBase):
         delta = target_velocity / commands_per_second
 
         # Ensure the target velocity is oriented correctly.
-        if zero_position > 0:
-            target_velocity = -target_velocity
-            delta = -delta
-        elif zero_position == 0:
-            raise ValueError("zero_position must be non-zero")
+        if endstop_position > 0:
+            target_velocity = abs(target_velocity)
+        elif endstop_position < 0:
+            target_velocity = -1 * abs(target_velocity)
+        
+        delta = math.copysign(delta, target_velocity)
 
         current_time = time.time()
         while True:
@@ -367,7 +372,7 @@ class ActuatorServiceClient(AsyncClientBase):
             positions=[
                 {
                     "actuator_id": actuator_id,
-                    "position": current_position - zero_position,
+                    "position": current_position - endstop_position,
                 },
             ],
             num_seconds=move_back_seconds,
