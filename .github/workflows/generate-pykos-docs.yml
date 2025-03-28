@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - verdakode-patch-1
     paths:
       - 'kos-py/pykos/**'
   workflow_dispatch:
