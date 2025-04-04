@@ -9,6 +9,9 @@ from google.protobuf.empty_pb2 import Empty
 from kos_protos import common_pb2, sim_pb2, sim_pb2_grpc
 from pykos.services import AsyncClientBase
 
+MarkerType = Literal["sphere", "box", "capsule", "cylinder", "arrow"]
+TargetType = Literal["geom", "body"]
+
 
 class StartingPosition(TypedDict):
     x: float
@@ -54,9 +57,9 @@ class MarkerRGBA(TypedDict):
 
 class Marker(TypedDict):
     name: str
-    marker_type: Literal["sphere", "box", "capsule", "cylinder", "arrow"]
+    marker_type: MarkerType
     target_name: str
-    target_type: Literal["geom", "body"]
+    target_type: TargetType
     scale: list[float]
     offset: NotRequired[list[float]]
     color: NotRequired[MarkerRGBA]
@@ -65,7 +68,7 @@ class Marker(TypedDict):
 
 
 class UpdateMarkerOptions(TypedDict):
-    marker_type: NotRequired[Literal["sphere", "box", "capsule", "cylinder", "arrow"]]
+    marker_type: NotRequired[MarkerType]
     offset: NotRequired[list[float]]
     color: NotRequired[MarkerRGBA]
     scale: NotRequired[list[float]]
