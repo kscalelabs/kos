@@ -84,12 +84,25 @@ class SimServiceClient(AsyncClientBase):
     async def add_marker(self, **kwargs: Unpack[Marker]) -> common_pb2.ActionResponse:
         """Add a marker to the simulation.
 
+        Example:
+            >>> client.add_marker(
+            ...     name="marker_name",
+            ...     marker_type="sphere",
+            ...     target_name="BASE_BODY",
+            ...     target_type="body",
+            ...     scale=[1.0, 1.0, 1.0],
+            ...     offset=[0.0, 0.0, 0.0],
+            ...     color={"r": 1.0, "g": 0.0, "b": 0.0, "a": 1.0},
+            ...     label=True,
+            ...     track_rotation=True,
+            ... )
+
         Args:
             **kwargs: Marker parameters
             name: Name of the marker
-            type: Type of marker
-            track_name: Name of the track to attach the marker to
-            track_type: Type of track to attach the marker to
+            marker_type: Type of marker
+            target_name: Name of the target to attach the marker to
+            target_type: Type of target to attach the marker to
             scale: Scale of the marker
             offset: (optional) Offset of the marker
             color: (optional) Color of the marker
@@ -127,14 +140,24 @@ class SimServiceClient(AsyncClientBase):
     async def update_marker(self, name: str, **kwargs: Unpack[UpdateMarkerRequest]) -> common_pb2.ActionResponse:
         """Update a marker in the simulation.
 
+        Example:
+            >>> client.update_marker(
+            ...     name="marker_name",
+            ...     marker_type="sphere",
+            ...     offset=[0.0, 0.0, 0.0],
+            ...     color={"r": 1.0, "g": 0.0, "b": 0.0, "a": 1.0},
+            ...     label=True,
+            ...     scale=[1.0, 1.0, 1.0],
+            ... )
+
         Args:
             name: Name of the marker to update
             **kwargs: Marker parameters
-            type: (optional) Type of marker
+            marker_type: (optional) Type of marker
             offset: (optional) Offset of the marker
-            color: (optional) Color of the marker
+            color: (optional) Color of the marker - dict with r, g, b, a
             label: (optional) Whether to show the marker label
-            track_rotation: (optional) Whether to track the marker rotation
+            scale: (optional) Scale of the marker
 
         Returns:
             ActionResponse indicating success/failure
@@ -173,6 +196,11 @@ class SimServiceClient(AsyncClientBase):
     async def remove_marker(self, name: str) -> common_pb2.ActionResponse:
         """Remove a marker from the simulation.
 
+        Example:
+            >>> client.remove_marker(
+            ...     name="marker_name",
+            ... )
+
         Args:
             name: Name of the marker to remove
 
@@ -184,6 +212,10 @@ class SimServiceClient(AsyncClientBase):
 
     async def get_markers(self) -> sim_pb2.GetMarkersResponse:
         """Get all markers in the simulation.
+
+        Example:
+            >>> markers = client.get_markers()
+            >>> print(markers)
 
         Returns:
             GetMarkersResponse containing all markers
