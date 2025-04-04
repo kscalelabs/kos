@@ -20,6 +20,18 @@ service SimulationService {
     // Steps the simulation forward by a specified amount.
     rpc Step(StepRequest) returns (kos.common.ActionResponse);
 
+    // Adds a marker to the simulation.
+    rpc AddMarker(Marker) returns (kos.common.ActionResponse);
+
+    // Updates a marker in the simulation.
+    rpc UpdateMarker(UpdateMarkerRequest) returns (kos.common.ActionResponse);
+
+    // Removes a marker from the simulation.
+    rpc RemoveMarker(RemoveMarkerRequest) returns (kos.common.ActionResponse);
+
+    // Gets all markers in the simulation.
+    rpc GetMarkers(google.protobuf.Empty) returns (GetMarkersResponse);
+
     // Sets various simulation parameters.
     rpc SetParameters(SetParametersRequest) returns (kos.common.ActionResponse);
 
@@ -63,6 +75,67 @@ message SetPausedRequest {
 message StepRequest {
     uint32 num_steps = 1;
     optional float step_size = 2;
+}
+
+message Marker {
+    enum MarkerType {
+        SPHERE = 0;
+        BOX = 1;
+        CAPSULE = 2;
+        CYLINDER = 3;
+        ARROW = 4;
+    }
+
+    enum TargetType {
+        GEOM = 0;
+        BODY = 1;
+    }
+
+    message RGBA {
+        float r = 1;
+        float g = 2;
+        float b = 3;
+        float a = 4;
+    }
+
+    message Offset {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+    }
+
+    message Scale {
+        repeated float scale = 1;
+    }
+
+    string name = 1;
+    MarkerType marker_type = 2;
+    string target_name = 3;
+    TargetType target_type = 4;
+    Scale scale = 5;
+    RGBA color = 6;
+    bool label = 7;
+    bool track_rotation = 8;
+    Offset offset = 9;
+}
+
+message UpdateMarkerRequest {
+
+
+    string name = 1;
+    optional Marker.MarkerType marker_type = 2;
+    optional Marker.Offset offset = 3;
+    optional Marker.RGBA color = 4;
+    optional Marker.Scale scale = 5;
+    optional bool label = 6;
+}
+
+message RemoveMarkerRequest {
+    string name = 1;
+}
+
+message GetMarkersResponse {
+    repeated Marker markers = 1;
 }
 
 message SetParametersRequest {
