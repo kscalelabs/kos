@@ -64,8 +64,7 @@ class Marker(TypedDict):
     track_rotation: NotRequired[bool]
 
 
-class UpdateMarkerRequest(TypedDict):
-    name: str
+class UpdateMarkerOptions(TypedDict):
     marker_type: NotRequired[Literal["sphere", "box", "capsule", "cylinder", "arrow"]]
     offset: NotRequired[list[float]]
     color: NotRequired[MarkerRGBA]
@@ -137,7 +136,7 @@ class SimServiceClient(AsyncClientBase):
 
         return await self.stub.AddMarker(request)
 
-    async def update_marker(self, name: str, **kwargs: Unpack[UpdateMarkerRequest]) -> common_pb2.ActionResponse:
+    async def update_marker(self, name: str, **kwargs: Unpack[UpdateMarkerOptions]) -> common_pb2.ActionResponse:
         """Update a marker in the simulation.
 
         Example:
