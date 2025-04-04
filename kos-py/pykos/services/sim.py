@@ -1,6 +1,5 @@
 """Sim service client."""
 
-from dataclasses import dataclass
 from typing import Literal, NotRequired, TypedDict, Unpack
 
 import grpc
@@ -46,8 +45,7 @@ class SimulationParameters(TypedDict):
     gravity: NotRequired[float]
 
 
-@dataclass
-class MarkerRGBA:
+class MarkerRGBA(TypedDict):
     r: float
     g: float
     b: float
@@ -108,7 +106,7 @@ class SimServiceClient(AsyncClientBase):
 
         if color_dataclass := kwargs.get("color"):
             color = sim_pb2.Marker.RGBA(
-                r=color_dataclass.r, g=color_dataclass.g, b=color_dataclass.b, a=color_dataclass.a
+                r=color_dataclass["r"], g=color_dataclass["g"], b=color_dataclass["b"], a=color_dataclass["a"]
             )
         else:
             color = sim_pb2.Marker.RGBA(r=1.0, g=0.0, b=0.0, a=1.0)
@@ -151,10 +149,8 @@ class SimServiceClient(AsyncClientBase):
         else:
             offset = None
 
-        if color_dataclass := kwargs.get("color"):
-            color = sim_pb2.Marker.RGBA(
-                r=color_dataclass.r, g=color_dataclass.g, b=color_dataclass.b, a=color_dataclass.a
-            )
+        if color_dict := kwargs.get("color"):
+            color = sim_pb2.Marker.RGBA(r=color_dict["r"], g=color_dict["g"], b=color_dict["b"], a=color_dict["a"])
         else:
             color = None
 
