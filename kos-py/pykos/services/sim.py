@@ -45,12 +45,14 @@ class SimulationParameters(TypedDict):
     time_scale: NotRequired[float]
     gravity: NotRequired[float]
 
+
 @dataclass
-class MarkerRGBA():
+class MarkerRGBA:
     r: float
     g: float
     b: float
     a: float
+
 
 class Marker(TypedDict):
     name: str
@@ -63,6 +65,7 @@ class Marker(TypedDict):
     label: NotRequired[bool]
     track_rotation: NotRequired[bool]
 
+
 class UpdateMarkerRequest(TypedDict):
     name: str
     marker_type: NotRequired[Literal["sphere", "box", "capsule", "cylinder", "arrow"]]
@@ -70,6 +73,7 @@ class UpdateMarkerRequest(TypedDict):
     color: NotRequired[MarkerRGBA]
     scale: NotRequired[list[float]]
     label: NotRequired[bool]
+
 
 class SimServiceClient(AsyncClientBase):
     """Client for the SimulationService."""
@@ -103,7 +107,9 @@ class SimServiceClient(AsyncClientBase):
             offset = sim_pb2.Marker.Offset(x=0.0, y=0.0, z=0.0)
 
         if color_dataclass := kwargs.get("color"):
-            color = sim_pb2.Marker.RGBA(r=color_dataclass.r, g=color_dataclass.g, b=color_dataclass.b, a=color_dataclass.a)
+            color = sim_pb2.Marker.RGBA(
+                r=color_dataclass.r, g=color_dataclass.g, b=color_dataclass.b, a=color_dataclass.a
+            )
         else:
             color = sim_pb2.Marker.RGBA(r=1.0, g=0.0, b=0.0, a=1.0)
         request = sim_pb2.Marker(
@@ -146,7 +152,9 @@ class SimServiceClient(AsyncClientBase):
             offset = None
 
         if color_dataclass := kwargs.get("color"):
-            color = sim_pb2.Marker.RGBA(r=color_dataclass.r, g=color_dataclass.g, b=color_dataclass.b, a=color_dataclass.a)
+            color = sim_pb2.Marker.RGBA(
+                r=color_dataclass.r, g=color_dataclass.g, b=color_dataclass.b, a=color_dataclass.a
+            )
         else:
             color = None
 
