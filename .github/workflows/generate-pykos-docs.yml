@@ -1,0 +1,64 @@
+name: Generate PyKOS Documentation
+on:
+  push:
+    branches:
+      - master
+      - verdakode-patch-1
+    paths:
+      - 'kos-py/pykos/**'
+  workflow_dispatch:
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd kos-py
+          pip install -e .
+          pip install pdoc black
+      - name: Generate documentation
+        run: |
+          cd kos-py
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          export PDOC_ALLOW_EXEC=1
+          pdoc --output-dir ./docs pykos
+        env:
+          PDOC_ALLOW_EXEC: 1
+      - name: Setup GitHub CLI
+        run: |
+          gh auth setup-git
+          gh auth status
+        env:
+          GH_TOKEN: ${{ secrets.API_DOCS_TOKEN }}
+      - name: Checkout api-docs repository
+        uses: actions/checkout@v4
+        with:
+          repository: kscalelabs/api-docs
+          path: api-docs
+          token: ${{ secrets.API_DOCS_TOKEN }}
+      - name: Copy documentation to api-docs
+        run: |
+          mkdir -p api-docs/pykos
+          cp -r kos-py/docs/pykos/* api-docs/pykos/
+      - name: Push directly to master branch
+        run: |
+          cd api-docs
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          # Add and commit changes
+          git add .
+          git commit -m "Update PyKOS documentation from ${{ github.sha }}" || { echo "No changes to commit"; exit 0; }
+          # Push to the repository with token authentication
+          git remote set-url origin "https://x-access-token:${{ secrets.API_DOCS_TOKEN }}@github.com/kscalelabs/api-docs.git"
+          git push origin master
+        env:
+          GH_TOKEN: ${{ secrets.API_DOCS_TOKEN }}
