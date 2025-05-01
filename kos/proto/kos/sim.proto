@@ -37,6 +37,9 @@ service SimulationService {
 
     // Gets the current simulation parameters.
     rpc GetParameters(google.protobuf.Empty) returns (GetParametersResponse);
+
+    // Gets the ground truth observation.
+    rpc GetGroundTruthObservation(google.protobuf.Empty) returns (GetGroundTruthObservationResponse);
 }
 
 message StartingPosition {
@@ -120,8 +123,6 @@ message Marker {
 }
 
 message UpdateMarkerRequest {
-
-
     string name = 1;
     optional Marker.MarkerType marker_type = 2;
     optional Marker.Offset offset = 3;
@@ -144,10 +145,16 @@ message SetParametersRequest {
 
 message GetParametersResponse {
     SimulationParameters parameters = 1;
-    kos.common.Error error = 2;  // Error details if any
+    kos.common.Error error = 2;
 }
 
 message SimulationParameters {
     optional float time_scale = 1;
     optional float gravity = 2;
+}
+
+message GetGroundTruthObservationResponse {
+    repeated float base_angular_velocity = 1;
+    repeated float base_linear_velocity = 2;
+    kos.common.Error error = 3;
 }
