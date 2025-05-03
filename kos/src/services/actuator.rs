@@ -116,13 +116,13 @@ impl ActuatorService for ActuatorServiceImpl {
         request: Request<ParameterDumpRequest>,
     ) -> Result<Response<ParameterDumpResponse>, Status> {
         let ids = request.into_inner().actuator_ids;
-    
+
         let results = self
             .actuator
             .get_parameters(ids)
             .await
             .map_err(|e| Status::internal(format!("Failed to dump parameters: {:?}", e)))?;
-    
+
         let entries = results
             .into_iter()
             .map(|(actuator_id, parameters)| ParameterDumpEntry {
@@ -130,7 +130,7 @@ impl ActuatorService for ActuatorServiceImpl {
                 parameters: Some(parameters),
             })
             .collect();
-    
+
         Ok(Response::new(ParameterDumpResponse { entries }))
     }
 }

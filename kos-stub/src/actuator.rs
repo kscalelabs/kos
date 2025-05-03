@@ -9,13 +9,13 @@ use kos::{
     },
     kos_proto::{actuator::*, common::ActionResult},
 };
+use prost_types::{Struct, Value};
 use std::sync::mpsc::{channel, Sender};
 use std::sync::Arc;
 use std::thread;
 use tokio::runtime::Runtime;
 use tokio::time::Duration;
 use tracing::debug;
-use prost_types::{Struct, Value};
 pub struct StubActuator {
     operations: Arc<OperationsServiceImpl>,
     calibration_tx: Sender<u32>,
@@ -129,10 +129,7 @@ impl Actuator for StubActuator {
         }])
     }
 
-    async fn get_parameters(
-        &self,
-        actuator_ids: Vec<u32>,
-    ) -> Result<Vec<(u32, Struct)>> {
+    async fn get_parameters(&self, actuator_ids: Vec<u32>) -> Result<Vec<(u32, Struct)>> {
         let dummy_struct = Struct {
             fields: vec![
                 ("model".to_string(), Value::from("stub")),
