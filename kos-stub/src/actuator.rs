@@ -15,7 +15,7 @@ use std::thread;
 use tokio::runtime::Runtime;
 use tokio::time::Duration;
 use tracing::debug;
-
+use prost_types::{Struct, Value};
 pub struct StubActuator {
     operations: Arc<OperationsServiceImpl>,
     calibration_tx: Sender<u32>,
@@ -127,5 +127,27 @@ impl Actuator for StubActuator {
             current: Some(0.0),
             faults: vec![],
         }])
+    }
+
+    async fn get_parameters(
+        &self,
+        actuator_ids: Vec<u32>,
+    ) -> Result<Vec<(u32, Struct)>> {
+        let dummy_struct = Struct {
+            fields: vec![
+                ("model".to_string(), Value::from("stub")),
+                ("firmware_version".to_string(), Value::from("0.0.1")),
+                ("max_torque".to_string(), Value::from(0.5)),
+            ]
+            .into_iter()
+            .collect(),
+        };
+
+        let results = actuator_ids
+            .into_iter()
+            .map(|id| (id, dummy_struct.clone()))
+            .collect();
+
+        Ok(results)
     }
 }
