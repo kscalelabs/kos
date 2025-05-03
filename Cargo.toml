@@ -14,7 +14,7 @@ authors = [
     "Jingxiang Mo <jx@kscale.dev>",
     "Pawel Budzianowski <pawel@kscale.dev>",
     "Wesley Maa <wesley@kscale.dev>",
-    "Scott Carlson <scott@kscale.dev",
+    "Scott Carlson <scott@kscale.dev>",
 ]
 edition = "2021"
 license = "MIT"
