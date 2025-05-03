@@ -14,3 +14,4 @@ eyre = "0.6"
 uuid = { version = "1", features = ["v4"] }
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
+prost-types = "0.13.5"
