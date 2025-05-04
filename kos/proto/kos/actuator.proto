@@ -4,6 +4,7 @@ package kos.actuator;
 
 import "google/protobuf/empty.proto";
 import "google/longrunning/operations.proto";
+import "google/protobuf/struct.proto";
 import "kos/common.proto";
 
 option go_package = "kos/actuator;actuator";
@@ -28,6 +29,9 @@ service ActuatorService {
 
     // Retrieves the state of multiple actuators.
     rpc GetActuatorsState(GetActuatorsStateRequest) returns (GetActuatorsStateResponse);
+
+    // Retrieves all available parameters for specified actuators.
+    rpc ParameterDump(ParameterDumpRequest) returns (ParameterDumpResponse);
 }
 
 // Message representing a command to an actuator.
@@ -103,4 +107,17 @@ message ActuatorStateResponse {
     optional float voltage = 7;      // Voltage in volts
     optional float current = 8;      // Current in amperes
     repeated string faults = 9;      // Faults
+}
+
+message ParameterDumpRequest {
+    repeated uint32 actuator_ids = 1; // Actuators to query
+}
+
+message ParameterDumpResponse {
+    repeated ParameterDumpEntry entries = 1; // One entry per actuator
+}
+
+message ParameterDumpEntry {
+    uint32 actuator_id = 1;                  // Actuator ID
+    google.protobuf.Struct parameters = 2;   // Generic parameter dump (key-value map)
 }

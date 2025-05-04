@@ -378,3 +378,18 @@ class ActuatorServiceClient(AsyncClientBase):
             actuator_id=actuator_id,
             zero_position=True,
         )
+
+    async def parameter_dump(
+        self,
+        actuator_ids: list[int],
+    ) -> actuator_pb2.ParameterDumpResponse:
+        """Fetch parameters for specified actuators.
+
+        Args:
+            actuator_ids: List of actuator IDs to query.
+
+        Returns:
+            A ParameterDumpResponse containing parameter maps for each actuator.
+        """
+        request = actuator_pb2.ParameterDumpRequest(actuator_ids=actuator_ids)
+        return await self.stub.ParameterDump(request)

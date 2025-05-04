@@ -25,6 +25,10 @@ pub trait Actuator: Send + Sync {
         &self,
         actuator_ids: Vec<u32>,
     ) -> Result<Vec<ActuatorStateResponse>>;
+    async fn get_parameters(
+        &self,
+        actuator_ids: Vec<u32>,
+    ) -> Result<Vec<(u32, prost_types::Struct)>>;
 }
 
 #[async_trait]

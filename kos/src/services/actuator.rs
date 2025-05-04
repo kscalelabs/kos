@@ -7,7 +7,7 @@ use crate::telemetry::Telemetry;
 use crate::telemetry_types::{ActuatorCommand, ActuatorState};
 use std::sync::Arc;
 use tonic::{Request, Response, Status};
-use tracing::trace;
+use tracing::{trace, warn};
 
 pub struct ActuatorServiceImpl {
     actuator: Arc<dyn Actuator>,
@@ -49,7 +49,7 @@ impl ActuatorService for ActuatorServiceImpl {
                 .publish("actuator/command", &telemetry_commands)
                 .await
             {
-                tracing::warn!("Failed to publish telemetry: {}", e);
+                warn!("Failed to publish telemetry: {}", e);
             }
         }
 
@@ -99,7 +99,7 @@ impl ActuatorService for ActuatorServiceImpl {
         let telemetry = Telemetry::get().await;
         if let Some(telemetry) = telemetry {
             if let Err(e) = telemetry.publish("actuator/state", &telemetry_states).await {
-                tracing::warn!("Failed to publish telemetry: {}", e);
+                warn!("Failed to publish telemetry: {}", e);
             }
         }
 
@@ -109,5 +109,28 @@ impl ActuatorService for ActuatorServiceImpl {
             states
         );
         Ok(Response::new(GetActuatorsStateResponse { states }))
+    }
+
+    async fn parameter_dump(
+        &self,
+        request: Request<ParameterDumpRequest>,
+    ) -> Result<Response<ParameterDumpResponse>, Status> {
+        let ids = request.into_inner().actuator_ids;
+
+        let results = self
+            .actuator
+            .get_parameters(ids)
+            .await
+            .map_err(|e| Status::internal(format!("Failed to dump parameters: {:?}", e)))?;
+
+        let entries = results
+            .into_iter()
+            .map(|(actuator_id, parameters)| ParameterDumpEntry {
+                actuator_id,
+                parameters: Some(parameters),
+            })
+            .collect();
+
+        Ok(Response::new(ParameterDumpResponse { entries }))
     }
 }
