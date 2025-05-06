@@ -9,6 +9,7 @@ use kos::{
     },
     kos_proto::common::ActionResponse,
 };
+use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -111,5 +112,9 @@ impl IMU for StubIMU {
             z: 0.0,
             error: None,
         })
+    }
+
+    async fn get_calibration_state(&self) -> Result<HashMap<String, i32>> {
+        Ok(HashMap::new())
     }
 }

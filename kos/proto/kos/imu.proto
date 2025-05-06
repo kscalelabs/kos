@@ -35,6 +35,8 @@ service IMUService {
 
     // Retrieves quaternion from the IMU.
     rpc GetQuaternion(google.protobuf.Empty) returns (QuaternionResponse);
+
+    rpc GetCalibrationState(GetCalibrationStateRequest) returns (GetCalibrationStateResponse);
 }
 
 // Response message containing IMU values.
@@ -105,4 +107,13 @@ message IMUAdvancedValuesResponse {
     optional double temp = 7; // Temperature in degrees Celsius
         
     kos.common.Error error = 8; // Error details if any
+}
+
+message GetCalibrationStateRequest {}
+
+// Response message for calibration state (generic / device agnostic)
+message GetCalibrationStateResponse {
+    // General-purpose key-value map for calibration state
+    map<string, int32> state = 1;
+    kos.common.Error error = 2;
 }
