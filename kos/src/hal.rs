@@ -46,6 +46,7 @@ pub trait IMU: Send + Sync {
     ) -> Result<ActionResponse>;
     async fn get_euler(&self) -> Result<EulerAnglesResponse>;
     async fn get_quaternion(&self) -> Result<QuaternionResponse>;
+    async fn get_calibration_state(&self) -> Result<std::collections::HashMap<String, i32>>;
 }
 
 #[async_trait]

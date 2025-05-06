@@ -128,3 +128,7 @@ class IMUServiceClient(AsyncClientBase):
             CalibrationMetadata: Metadata about the calibration operation.
         """
         return await self.stub.Calibrate(Empty())
+
+    async def get_calibration_state(self) -> imu_pb2.GetCalibrationStateResponse:
+        """Get the calibration state of the IMU."""
+        return await self.stub.GetCalibrationState(imu_pb2.GetCalibrationStateRequest())

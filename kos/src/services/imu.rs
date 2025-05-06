@@ -146,4 +146,19 @@ impl ImuService for IMUServiceImpl {
 
         Ok(Response::new(quaternion))
     }
+
+    async fn get_calibration_state(
+        &self,
+        _request: Request<GetCalibrationStateRequest>,
+    ) -> Result<Response<GetCalibrationStateResponse>, Status> {
+        let state =
+            self.imu.get_calibration_state().await.map_err(|e| {
+                Status::internal(format!("Failed to get calibration state, {:?}", e))
+            })?;
+
+        Ok(Response::new(GetCalibrationStateResponse {
+            state,
+            error: None,
+        }))
+    }
 }
