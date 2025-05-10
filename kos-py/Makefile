@@ -59,7 +59,7 @@ generate-proto:
 # ------------------------ #
 
 install-dev:
-	@pip install --verbose -e '.[dev]'
+	@pip install --verbose -e '.[dev,webrtc]'
 .PHONY: install-dev
 
 # ------------------------ #
