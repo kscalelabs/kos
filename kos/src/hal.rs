@@ -2,8 +2,8 @@ pub use crate::grpc_interface::google::longrunning::*;
 pub use crate::grpc_interface::kos;
 pub use crate::grpc_interface::kos::common::ActionResponse;
 pub use crate::kos_proto::{
-    actuator::*, common::ActionResult, imu::*, inference::*, led_matrix::*, process_manager::*,
-    sound::*,
+    actuator::*, common::ActionResult, imu::*, inference::*, led_matrix::*, policy::*,
+    process_manager::*, sound::*,
 };
 use async_trait::async_trait;
 use bytes::Bytes;
@@ -53,6 +53,19 @@ pub trait IMU: Send + Sync {
 pub trait ProcessManager: Send + Sync {
     async fn start_kclip(&self, action: String) -> Result<KClipStartResponse>;
     async fn stop_kclip(&self) -> Result<KClipStopResponse>;
+}
+
+#[async_trait]
+pub trait Policy: Send + Sync {
+    async fn start_policy(
+        &self,
+        action: String,
+        action_scale: f32,
+        episode_length: i32,
+        dry_run: bool,
+    ) -> Result<StartPolicyResponse>;
+    async fn stop_policy(&self) -> Result<StopPolicyResponse>;
+    async fn get_state(&self) -> Result<GetStateResponse>;
 }
 
 #[async_trait]

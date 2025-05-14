@@ -15,6 +15,7 @@ from pykos.services.led_matrix import LEDMatrixServiceClient
 from pykos.services.process_manager import ProcessManagerServiceClient
 from pykos.services.sim import SimServiceClient
 from pykos.services.sound import SoundServiceClient
+from pykos.services.policy import PolicyServiceClient
 
 
 class KOS:
@@ -40,6 +41,7 @@ class KOS:
         self._process_manager: ProcessManagerServiceClient | None = None
         self._inference: InferenceServiceClient | None = None
         self._sim: SimServiceClient | None = None
+        self._policy: PolicyServiceClient | None = None
 
     @property
     def imu(self) -> IMUServiceClient:
@@ -82,6 +84,14 @@ class KOS:
         return self._process_manager
 
     @property
+    def policy(self) -> PolicyServiceClient:
+        if self._policy is None:
+            self.connect()
+        if self._policy is None:
+            raise RuntimeError("Policy client not initialized! Must call `connect()` manually.")
+        return self._policy
+
+    @property
     def inference(self) -> InferenceServiceClient:
         if self._inference is None:
             self.connect()
@@ -108,6 +118,7 @@ class KOS:
         self._led_matrix = LEDMatrixServiceClient(self._channel)
         self._sound = SoundServiceClient(self._channel)
         self._process_manager = ProcessManagerServiceClient(self._channel)
+        self._policy = PolicyServiceClient(self._channel) 
         self._inference = InferenceServiceClient(self._channel)
         self._sim = SimServiceClient(self._channel)
 

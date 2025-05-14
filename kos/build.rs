@@ -16,6 +16,7 @@ fn main() {
         "kos/sim.proto",
         "kos/inference.proto",
         "kos/process_manager.proto",
+        "kos/policy.proto",
         "kos/system.proto",
         "kos/led_matrix.proto",
         "kos/sound.proto",

@@ -40,6 +40,7 @@ fn add_service_to_router(
         ServiceEnum::Inference(svc) => router.add_service(svc),
         ServiceEnum::LEDMatrix(svc) => router.add_service(svc),
         ServiceEnum::Sound(svc) => router.add_service(svc),
+        ServiceEnum::Policy(svc) => router.add_service(svc),
     }
 }
 
