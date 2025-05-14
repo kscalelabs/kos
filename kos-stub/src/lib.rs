@@ -1,16 +1,22 @@
 mod actuator;
 mod imu;
+mod policy;
 mod process_manager;
 use crate::actuator::StubActuator;
 use crate::imu::StubIMU;
+use crate::policy::StubPolicy;
 use crate::process_manager::StubProcessManager;
 use async_trait::async_trait;
 use kos::hal::Operation;
 use kos::kos_proto::actuator::actuator_service_server::ActuatorServiceServer;
 use kos::kos_proto::imu::imu_service_server::ImuServiceServer;
+use kos::kos_proto::policy::policy_service_server::PolicyServiceServer;
 use kos::kos_proto::process_manager::process_manager_service_server::ProcessManagerServiceServer;
-use kos::services::{ActuatorServiceImpl, IMUServiceImpl, ProcessManagerServiceImpl};
+use kos::services::{
+    ActuatorServiceImpl, IMUServiceImpl, PolicyServiceImpl, ProcessManagerServiceImpl,
+};
 use kos::{services::OperationsServiceImpl, Platform, ServiceEnum};
+
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -52,6 +58,7 @@ impl Platform for StubPlatform {
             let actuator = StubActuator::new(operations_service.clone());
             let imu = StubIMU::new(operations_service.clone());
             let process_manager = StubProcessManager::new();
+            let policy = StubPolicy::new();
 
             Ok(vec![
                 ServiceEnum::Actuator(ActuatorServiceServer::new(ActuatorServiceImpl::new(
@@ -61,6 +68,10 @@ impl Platform for StubPlatform {
                     ProcessManagerServiceImpl::new(Arc::new(process_manager)),
                 )),
                 ServiceEnum::Imu(ImuServiceServer::new(IMUServiceImpl::new(Arc::new(imu)))),
+                ServiceEnum::Policy(PolicyServiceServer::new(
+                    // Add this block
+                    PolicyServiceImpl::new(Arc::new(policy)),
+                )),
             ])
         })
     }

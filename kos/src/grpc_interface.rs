@@ -19,6 +19,10 @@ pub mod kos {
         tonic::include_proto!("kos/kos.processmanager");
     }
 
+    pub mod policy {
+        tonic::include_proto!("kos/kos.policy");
+    }
+
     pub mod system {
         tonic::include_proto!("kos/kos.system");
     }

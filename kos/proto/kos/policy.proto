@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package kos.policy;
+
+import "google/protobuf/empty.proto";
+import "kos/common.proto";
+
+option go_package = "kos/policy;policy";
+option java_package = "com.kos.policy";
+option csharp_namespace = "KOS.Policy";
+
+// The PolicyService manages policy execution.
+service PolicyService {
+    // Starts policy execution.
+    rpc StartPolicy(StartPolicyRequest) returns (StartPolicyResponse);
+
+    // Stops policy execution.
+    rpc StopPolicy(google.protobuf.Empty) returns (StopPolicyResponse);
+
+    // Gets the current policy state.
+    rpc GetState(google.protobuf.Empty) returns (GetStateResponse);
+}
+
+message StartPolicyRequest {
+    string action = 1;
+    float action_scale = 2;
+    int32 episode_length = 3;
+    bool dry_run = 4;
+}
+
+message StartPolicyResponse {
+    optional string policy_uuid = 1;
+    kos.common.Error error = 2;
+}
+
+message StopPolicyResponse {
+    optional string policy_uuid = 1;
+    kos.common.Error error = 2;
+}
+
+message GetStateResponse {
+    map<string, string> state = 1;
+    kos.common.Error error = 2;
+}
