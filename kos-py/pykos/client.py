@@ -12,10 +12,10 @@ from pykos.services.actuator import ActuatorServiceClient
 from pykos.services.imu import IMUServiceClient
 from pykos.services.inference import InferenceServiceClient
 from pykos.services.led_matrix import LEDMatrixServiceClient
+from pykos.services.policy import PolicyServiceClient
 from pykos.services.process_manager import ProcessManagerServiceClient
 from pykos.services.sim import SimServiceClient
 from pykos.services.sound import SoundServiceClient
-from pykos.services.policy import PolicyServiceClient
 
 
 class KOS:
@@ -118,7 +118,7 @@ class KOS:
         self._led_matrix = LEDMatrixServiceClient(self._channel)
         self._sound = SoundServiceClient(self._channel)
         self._process_manager = ProcessManagerServiceClient(self._channel)
-        self._policy = PolicyServiceClient(self._channel) 
+        self._policy = PolicyServiceClient(self._channel)
         self._inference = InferenceServiceClient(self._channel)
         self._sim = SimServiceClient(self._channel)
 
