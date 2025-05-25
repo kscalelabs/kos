@@ -43,7 +43,7 @@ pub struct ActuatorState {
     pub temperature: Option<f64>,
     pub voltage: Option<f32>,
     pub current: Option<f32>,
-    pub torque_enabled: bool,
+    pub torque_enabled: Option<bool>,
     pub min_position: Option<f64>,
     pub max_position: Option<f64>,
     pub kp: Option<f64>,
