@@ -107,7 +107,7 @@ message ActuatorStateResponse {
     optional float voltage = 7;             // Voltage in volts
     optional float current = 8;             // Current in amperes
     repeated string faults = 9;             // Faults
-    bool torque_enabled = 10;                // Torque Enabled
+    optional bool torque_enabled = 10;      // Torque Enabled
     optional double min_position = 11;      // Minimum position limit in degrees
     optional double max_position = 12;      // Maximum position limit in degrees
     optional double kp = 13;                // Proportional gain
