@@ -43,6 +43,13 @@ pub struct ActuatorState {
     pub temperature: Option<f64>,
     pub voltage: Option<f32>,
     pub current: Option<f32>,
+    pub torque_enabled: bool,
+    pub min_position: Option<f64>,
+    pub max_position: Option<f64>,
+    pub kp: Option<f64>,
+    pub kd: Option<f64>,
+    pub ki: Option<f64>,
+    pub max_torque: Option<f64>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -102,6 +109,13 @@ impl From<&ActuatorStateResponse> for ActuatorState {
             temperature: resp.temperature,
             voltage: resp.voltage,
             current: resp.current,
+            torque_enabled: resp.torque_enabled,
+            min_position: resp.min_position,
+            max_position: resp.max_position,
+            kp: resp.kp,
+            kd: resp.kd,
+            ki: resp.ki,
+            max_torque: resp.max_torque,
         }
     }
 }
