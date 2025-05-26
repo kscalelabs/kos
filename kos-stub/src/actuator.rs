@@ -126,6 +126,13 @@ impl Actuator for StubActuator {
             voltage: Some(0.0),
             current: Some(0.0),
             faults: vec![],
+            torque_enabled: Some(true),
+            min_position: Some(-180.0),
+            max_position: Some(180.0),
+            kp: Some(1.0),
+            kd: Some(0.1),
+            ki: Some(0.01),
+            max_torque: Some(5.0),
         }])
     }
 

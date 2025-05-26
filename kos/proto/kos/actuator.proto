@@ -98,15 +98,22 @@ message GetActuatorsStateResponse {
 
 // State information for a single actuator.
 message ActuatorStateResponse {
-    uint32 actuator_id = 1;          // Actuator ID
-    bool online = 2;                 // Online status
-    optional double position = 3;    // Position in degrees
-    optional double velocity = 4;    // Velocity in degrees/second
-    optional double torque = 5;      // Torque in Nm
-    optional double temperature = 6; // Temperature in Celsius
-    optional float voltage = 7;      // Voltage in volts
-    optional float current = 8;      // Current in amperes
-    repeated string faults = 9;      // Faults
+    uint32 actuator_id = 1;                 // Actuator ID
+    bool online = 2;                        // Online status
+    optional double position = 3;           // Position in degrees
+    optional double velocity = 4;           // Velocity in degrees/second
+    optional double torque = 5;             // Torque in Nm
+    optional double temperature = 6;        // Temperature in Celsius
+    optional float voltage = 7;             // Voltage in volts
+    optional float current = 8;             // Current in amperes
+    repeated string faults = 9;             // Faults
+    optional bool torque_enabled = 10;      // Torque Enabled
+    optional double min_position = 11;      // Minimum position limit in degrees
+    optional double max_position = 12;      // Maximum position limit in degrees
+    optional double kp = 13;                // Proportional gain
+    optional double kd = 14;                // Derivative gain
+    optional double ki = 15;                // Integral gain
+    optional double max_torque = 16;        // Maximum torque limit in Nm
 }
 
 message ParameterDumpRequest {
