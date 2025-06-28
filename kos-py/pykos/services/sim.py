@@ -322,3 +322,11 @@ class SimServiceClient(AsyncClientBase):
             GetParametersResponse containing current parameters and any error
         """
         return await self.stub.GetParameters(Empty())
+
+    async def get_ground_truth_observation(self) -> sim_pb2.GetGroundTruthObservationResponse:
+        """Get the ground truth observation.
+
+        Returns:
+            GetGroundTruthObservationResponse containing the ground truth observation
+        """
+        return await self.stub.GetGroundTruthObservation(Empty())
